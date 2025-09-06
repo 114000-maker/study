@@ -1,0 +1,86 @@
+# 請模仿classdojo製作一個學生上課表現加扣分的網頁 
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>學生表現紀錄系統</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button {
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+    h1 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>學生表現紀錄</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>學生</th>
+        <th>分數</th>
+        <th>+專心</th>
+        <th>-講話</th>
+      </tr>
+    </thead>
+    <tbody id="studentTable">
+      <!-- 學生資料會動態插入 -->
+    </tbody>
+  </table>
+
+  <script>
+    const students = ['小明', '小美', '小華'];
+    const studentTable = document.getElementById('studentTable');
+
+    // 初始化分數（從 localStorage 或預設值）
+    let scores = JSON.parse(localStorage.getItem('studentScores')) || {};
+    students.forEach(name => {
+      if (!(name in scores)) {
+        scores[name] = 0;
+      }
+    });
+
+    function updateTable() {
+      studentTable.innerHTML = '';
+      students.forEach(name => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${name}</td>
+          <td id="score-${name}">${scores[name]}</td>
+          <td><button onclick="changeScore('${name}', 1)">+1</button></td>
+          <td><button onclick="changeScore('${name}', -1)">-1</button></td>
+        `;
+        studentTable.appendChild(row);
+      });
+    }
+
+    function changeScore(name, delta) {
+      scores[name] += delta;
+      document.getElementById(`score-${name}`).textContent = scores[name];
+      localStorage.setItem('studentScores', JSON.stringify(scores));
+    }
+
+    updateTable();
+  </script>
+</body>
+</html>
