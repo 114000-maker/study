@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Line 貼圖製造機</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FFF0F5; /* Soft Pink Background */
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .control-panel {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 16px; /* Larger radius */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        .results-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            min-height: 300px;
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+            border-radius: 12px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .selectable-label {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid #f3f4f6; /* gray-100 */
+            border-radius: 12px;
+            padding: 0.75rem;
+        }
+        input[type="checkbox"]:checked + .selectable-label,
+        input[type="radio"]:checked + .selectable-label {
+            background-color: #FCE7F3; /* pink-100 */
+            border-color: #DB2777; /* pink-600 */
+            color: #be185d; /* pink-700 */
+            transform: scale(1.05);
+            font-weight: 500;
+        }
+        .result-item {
+            position: relative;
+            border-radius: 12px; /* Softer corners */
+            background: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" x="0" y="0" fill="%23f3f4f6"></rect><rect width="10" height="10" x="10" y="10" fill="%23f3f4f6"></rect></svg>');
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 370 / 320; /* Maintain aspect ratio for the container */
+        }
+         .result-item img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .result-item .download-btn {
+            position: absolute;
+            top: 0.5rem; /* 8px */
+            right: 0.5rem; /* 8px */
+            width: 2.5rem; /* 40px */
+            height: 2.5rem; /* 40px */
+            border-radius: 9999px; /* circle */
+            background-color: #DB2777; /* pink-600 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 10;
+        }
+        .result-item .download-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .preview-image-container {
+            position: relative;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            border-radius: 9999px;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-bold text-pink-900">AI Line 貼圖製造機</h1>
+            <p class="text-lg text-pink-800/70 mt-2">上傳 1-3 張照片合成，生成完美去背的趣味貼圖！</p>
+        </header>
+
+        <main class="grid lg:grid-cols-3 gap-8">
+            <!-- Left Panel: Controls -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="control-panel">
+                    <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">1. 新增照片 (最多3張)</h2>
+                    <input type="file" id="imageLoader" accept="image/*" multiple class="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2.5 file:px-5
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-pink-50 file:text-pink-700
+                        hover:file:bg-pink-100 cursor-pointer disabled:opacity-50
+                    "/>
+                    <div id="uploadPreviewContainer" class="mt-4 p-2 bg-gray-50 rounded-lg hidden">
+                        <div id="uploadPreview" class="grid grid-cols-3 gap-3 text-center">
+                            <!-- Preview images will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Magic Panel -->
+                <div class="control-panel">
+                    <h2 class="text-xl font-bold mb-4 border-b pb-2 flex items-center text-gray-700">
+                        <svg class="w-6 h-6 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.36l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        2. AI 魔法設定
+                    </h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">選擇風格</label>
+                            <div id="styleSelector" class="grid grid-cols-2 gap-3">
+                                <input type="radio" name="style" id="style_original" value="original" class="hidden" checked>
+                                <label for="style_original" class="selectable-label text-center">維持原圖</label>
+                                
+                                <input type="radio" name="style" id="style_anime" value="anime" class="hidden">
+                                <label for="style_anime" class="selectable-label text-center">動漫</label>
+
+                                <input type="radio" name="style" id="style_3d" value="3d_render" class="hidden">
+                                <label for="style_3d" class="selectable-label text-center">3D渲染</label>
+
+                                <input type="radio" name="style" id="style_ink" value="ink_wash" class="hidden">
+                                <label for="style_ink" class="selectable-label text-center">水墨畫</label>
+
+                                <input type="radio" name="style" id="style_disney" value="disney" class="hidden">
+                                <label for="style_disney" class="selectable-label text-center">迪士尼</label>
+
+                                <input type="radio" name="style" id="style_pixel" value="pixel_art" class="hidden">
+                                <label for="style_pixel" class="selectable-label text-center">像素藝術</label>
+
+                                <input type="radio" name="style" id="style_cyberpunk" value="cyberpunk" class="hidden">
+                                <label for="style_cyberpunk" class="selectable-label text-center">賽博龐克</label>
+                                
+                                <input type="radio" name="style" id="style_photorealistic" value="photorealistic" class="hidden">
+                                <label for="style_photorealistic" class="selectable-label text-center">逼真影像</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">選擇情緒 / 動作 (可複選)</label>
+                            <div id="emotionActionSelector" class="grid grid-cols-2 gap-3">
+                                <input type="checkbox" name="emotion" value="happy face, laughing" id="emotion_happy" class="hidden" checked>
+                                <label for="emotion_happy" class="selectable-label text-center">開心大笑</label>
+                                
+                                <input type="checkbox" name="emotion" value="crying with tears" id="emotion_sad" class="hidden">
+                                <label for="emotion_sad" class="selectable-label text-center">傷心哭泣</label>
+                                
+                                <input type="checkbox" name="emotion" value="angry face, shouting" id="emotion_angry" class="hidden">
+                                <label for="emotion_angry" class="selectable-label text-center">生氣大喊</label>
+                                
+                                <input type="checkbox" name="emotion" value="surprised face with open mouth" id="emotion_surprised" class="hidden">
+                                <label for="emotion_surprised" class="selectable-label text-center">驚訝錯愕</label>
+                                
+                                <input type="checkbox" name="emotion" value="thumbs-up and smiling" id="emotion_thumb" class="hidden">
+                                <label for="emotion_thumb" class="selectable-label text-center">比讚微笑</label>
+                                
+                                <input type="checkbox" name="emotion" value="waving hand" id="emotion_wave" class="hidden">
+                                <label for="emotion_wave" class="selectable-label text-center">揮手致意</label>
+                                
+                                <input type="checkbox" name="emotion" value="thinking with finger on chin" id="emotion_think" class="hidden">
+                                <label for="emotion_think" class="selectable-label text-center">托腮思考</label>
+                                
+                                <input type="checkbox" name="emotion" value="sleeping with zzz" id="emotion_sleep" class="hidden">
+                                <label for="emotion_sleep" class="selectable-label text-center">呼呼大睡</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">自訂情緒 / 動作 (選填)</label>
+                            <div id="customEmotionContainer" class="grid grid-cols-2 gap-3">
+                                <!-- Input 1 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_1" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_1" placeholder="例如：加油！" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 2 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_2" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_2" placeholder="例如：OK" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 3 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_3" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_3" placeholder="例如：感謝" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 4 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_4" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_4" placeholder="例如：辛苦了" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 5 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_5" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_5" placeholder="自訂文字 5" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 6 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_6" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_6" placeholder="自訂文字 6" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 7 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_7" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_7" placeholder="自訂文字 7" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                                <!-- Input 8 -->
+                                <div class="relative flex items-center p-1 bg-gray-50 rounded-lg border">
+                                    <input type="checkbox" id="custom_emotion_check_8" name="custom_emotion" class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-600 flex-shrink-0 ml-1">
+                                    <input type="text" id="custom_emotion_text_8" placeholder="自訂文字 8" class="w-full bg-transparent border-0 focus:ring-0 text-sm ml-2">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="addTextCheckbox" name="add-text" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-600" checked>
+                                </div>
+                                <div class="ml-3 text-sm leading-6">
+                                    <label for="addTextCheckbox" class="font-medium text-gray-700">加上文字</label>
+                                    <p class="text-gray-500 text-xs">AI 將自動生成對應情緒的文字</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h2 id="generateTitle" class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">3. 開始生成</h2>
+                     <button id="generateBtn" class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-4 text-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M11.954 1.205a.75.75 0 01.525 1.326l-3.202 3.202a.75.75 0 01-1.06 0L4.99 2.53a.75.75 0 01.526-1.326H11.954zM6.99 5.252a.75.75 0 00-1.06 0L2.725 8.457a.75.75 0 00.526 1.326H6.99V5.252zM12.96 5.252a.75.75 0 011.06 0l3.205 3.205a.75.75 0 01-.526 1.326H12.96V5.252zM6.99 11.213a.75.75 0 00-1.06 0l-3.205 3.206a.75.75 0 00.526 1.326h6.438a.75.75 0 000-1.5H7.521l2.224-2.224a.75.75 0 00-1.06-1.06L6.99 11.213zM16.182 14.42a.75.75 0 011.06 1.06l-3.205 3.205a.75.75 0 01-1.06 0l-3.205-3.205a.75.75 0 111.06-1.06l2.675 2.675 2.675-2.675z"></path></svg>
+                        開始 AI 生成
+                    </button>
+                    <p id="aiErrorMsg" class="text-sm text-red-500 mt-2 h-5 text-center"></p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Results -->
+            <div class="lg:col-span-2 results-container flex flex-col">
+                 <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">生成結果</h2>
+                 <div id="resultsGallery" class="flex-grow grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div id="placeholder" class="col-span-full flex items-center justify-center text-gray-400 h-full">
+                        <p>完成設定後，點擊生成按鈕開始創作！</p>
+                    </div>
+                 </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-8 pb-4">
+            <p class="text-sm text-pink-800/60">作者: Kang-miao Cheng</p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="text-center">
+            <svg class="animate-spin h-12 w-12 text-pink-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p id="loadingText" class="mt-4 text-lg font-semibold text-pink-800">AI 貼圖生成中...</p>
+            <p class="text-sm text-pink-700/70">請稍候，魔法正在發生！</p>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM element references
+        const imageLoader = document.getElementById('imageLoader');
+        const uploadPreviewContainer = document.getElementById('uploadPreviewContainer');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultsGallery = document.getElementById('resultsGallery');
+        const placeholder = document.getElementById('placeholder');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const aiErrorMsg = document.getElementById('aiErrorMsg');
+        const emotionCheckboxes = document.querySelectorAll('input[name="emotion"]');
+        const generateTitle = document.getElementById('generateTitle');
+
+        // State variables
+        let uploadedImages = []; // Array to hold { id, base64, mimeType }
+        
+        // --- English text for each emotion ---
+        const emotionTextMap = {
+            'happy face, laughing': ['LOL', 'So Happy!', 'XD', 'Yay!', 'Awesome!', 'LMAO'],
+            'crying with tears': ['So Sad', 'Whyyy', 'TT_TT', 'Heartbroken', 'Nooo', 'I cri'],
+            'angry face, shouting': ['Grrr', 'So Angry!', 'Mad!', 'Unacceptable!', 'Hmph!', 'Seriously?'],
+            'surprised face with open mouth': ['Whoa!', 'OMG', 'No Way!', 'Surprised!', 'Whaat?!', 'Mind Blown'],
+            'thumbs-up and smiling': ['Great!', 'Nice!', 'Awesome!', 'OK!', 'You Rock!', 'Cool!'],
+            'waving hand': ['Hi!', 'Hello!', 'Bye!', 'See Ya!', 'Hey!', 'Yo!'],
+            'thinking with finger on chin': ['Hmm...', 'Thinking...', 'Let me see...', 'Interesting...', 'I wonder...'],
+            'sleeping with zzz': ['Zzz', 'Good Night', 'So Sleepy', 'Nap Time', 'Dreaming...']
+        };
+
+        function showLoader(text = 'AI 貼圖生成中...') {
+            loadingText.textContent = text;
+            loadingOverlay.classList.remove('hidden');
+        }
+        function hideLoader() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        function updateGenerateButtonText() {
+            let checkedCount = document.querySelectorAll('input[name="emotion"]:checked').length;
+            
+            const customEmotionCheckboxes = document.querySelectorAll('input[name="custom_emotion"]');
+            customEmotionCheckboxes.forEach((checkbox, index) => {
+                const textInput = document.getElementById(`custom_emotion_text_${index + 1}`);
+                if (checkbox.checked && textInput.value.trim() !== '') {
+                    checkedCount++;
+                }
+            });
+
+            if (checkedCount > 0) {
+                generateTitle.textContent = `3. 開始生成 (${checkedCount}張)`;
+            } else {
+                generateTitle.textContent = '3. 開始生成';
+            }
+        }
+
+        emotionCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateGenerateButtonText);
+        });
+        updateGenerateButtonText();
+
+        const customEmotionInputs = document.querySelectorAll('input[name="custom_emotion"], input[id^="custom_emotion_text_"]');
+        customEmotionInputs.forEach(input => {
+            input.addEventListener('input', updateGenerateButtonText);
+            input.addEventListener('change', updateGenerateButtonText);
+        });
+
+        imageLoader.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            const remainingSlots = 3 - uploadedImages.length;
+            if (remainingSlots <= 0) {
+                aiErrorMsg.textContent = '最多只能上傳 3 張照片。';
+                return;
+            }
+
+            const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+            if (files.length > remainingSlots) {
+                aiErrorMsg.textContent = `已達上限，僅加入前 ${remainingSlots} 張照片。`;
+            } else {
+                aiErrorMsg.textContent = '';
+            }
+
+            if (filesToProcess.length > 0 && uploadedImages.length === 0) {
+                uploadPreviewContainer.classList.remove('hidden');
+            }
+
+            filesToProcess.forEach(file => {
+                const reader = new FileReader();
+                const imageId = `img-${Date.now()}-${Math.random()}`;
+
+                reader.onload = (event) => {
+                    const imgSrc = event.target.result;
+                    const base64 = imgSrc.split(',')[1];
+                    const mimeType = imgSrc.match(/data:(.*);base64/)[1];
+                    
+                    uploadedImages.push({ id: imageId, base64, mimeType });
+
+                    const previewContainer = document.createElement('div');
+                    previewContainer.className = 'preview-image-container';
+                    previewContainer.dataset.id = imageId;
+
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imgSrc;
+                    imgElement.className = 'w-full h-24 object-cover rounded-md border-2 border-pink-100';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.onclick = () => {
+                        uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+                        previewContainer.remove();
+                        if(uploadedImages.length === 0) {
+                            uploadPreviewContainer.classList.add('hidden');
+                        }
+                        imageLoader.disabled = false;
+                        aiErrorMsg.textContent = '';
+                    };
+
+                    previewContainer.appendChild(imgElement);
+                    previewContainer.appendChild(removeBtn);
+                    uploadPreview.appendChild(previewContainer);
+
+                    if (uploadedImages.length >= 3) {
+                        imageLoader.disabled = true;
+                        aiErrorMsg.textContent = '已達 3 張照片上限。';
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        });
+
+
+        generateBtn.addEventListener('click', async () => {
+            if (uploadedImages.length === 0) {
+                aiErrorMsg.textContent = '請至少上傳一張照片！';
+                return;
+            }
+            const selectedPredefinedEmotions = Array.from(document.querySelectorAll('input[name="emotion"]:checked')).map(cb => cb.value);
+
+            const selectedCustomEmotions = [];
+            const customEmotionCheckboxes = document.querySelectorAll('input[name="custom_emotion"]');
+            customEmotionCheckboxes.forEach((checkbox, index) => {
+                const textInput = document.getElementById(`custom_emotion_text_${index + 1}`);
+                if (checkbox.checked && textInput.value.trim() !== '') {
+                    selectedCustomEmotions.push(textInput.value.trim());
+                }
+            });
+
+            const allSelectedEmotions = [...selectedPredefinedEmotions, ...selectedCustomEmotions];
+
+            if (allSelectedEmotions.length === 0) {
+                aiErrorMsg.textContent = '請至少選擇或輸入一種有效的情緒！';
+                return;
+            }
+            aiErrorMsg.textContent = '';
+            
+            placeholder.classList.add('hidden');
+            resultsGallery.innerHTML = ''; 
+            
+            const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+            const styleTextMap = {
+                original: "in the original photographic style",
+                anime: "in an anime style",
+                '3d_render': "as a 3D render",
+                ink_wash: "in a Chinese ink wash painting style",
+                disney: "in a Disney animation style",
+                pixel_art: "as pixel art",
+                cyberpunk: "in a cyberpunk style",
+                photorealistic: "in a photorealistic style"
+            };
+            const count = allSelectedEmotions.length;
+            
+            for (let i = 0; i < count; i++) {
+                showLoader(`AI 貼圖生成中... (${i + 1} / ${count})`);
+                
+                const currentEmotion = allSelectedEmotions[i];
+                const shouldAddText = document.getElementById('addTextCheckbox').checked;
+                let textInstruction = `5.  **Do Not Add Text**: It is crucial that you do not add any text, letters, or words to the image. The sticker should contain only the characters.`;
+                let finalOutputDescription = `The final result is JUST the subjects on a **perfectly transparent background**.`;
+
+                if (shouldAddText) {
+                    let randomText = '';
+                    if (emotionTextMap[currentEmotion]) {
+                        const possibleTexts = emotionTextMap[currentEmotion];
+                        randomText = possibleTexts[Math.floor(Math.random() * possibleTexts.length)];
+                    } else {
+                        randomText = currentEmotion;
+                    }
+                    textInstruction = `5.  **Add Dynamic Text**: Place the English text "${randomText}" onto the sticker. Ensure the text is stylish, readable, and has an outline.`;
+                    finalOutputDescription = `The final result is the subjects and text on a **perfectly transparent background**.`;
+                }
+
+                let prompt = `
+                **Primary Goal: The output image must have a solid, bright, pure green screen background (chroma key green, hex code #00FF00). The entire background must be this specific green color. This is for programmatic background removal.**
+
+                **Mandatory Quality Requirement: Generate the image at an ultra-high resolution, aiming for 2048x2048 pixels. This is a strict requirement to ensure maximum detail and sharpness.**
+
+                Your task is to create a sticker suitable for LINE. The final exported sticker from the code will be exactly 370px width and 320px height.
+
+                Follow these steps precisely:
+                1.  **Isolate Subjects**: From all uploaded images, extract only the main subjects (people, pets, etc.).
+                2.  **Create a Scene**: Arrange the isolated subjects onto a **solid #00FF00 green screen background**. Make them interact in a fun way. If only one subject, use it.
+                3.  **Apply Artistic Style**: Redraw the entire new scene in this style: ${styleTextMap[selectedStyle]}.
+                4.  **Express Emotion**: Adjust the subjects' poses and facial expressions to match this emotion: "${currentEmotion}".
+                ${textInstruction}
+                6.  **Final Output**: The final result is the subjects and text on the **solid green screen background**.
+                `;
+                
+                try {
+                    const generatedImageBase64 = await callGeminiAPI(prompt, uploadedImages);
+                    if (generatedImageBase64) {
+                        const resizedImageUrl = await processAndResizeImage(generatedImageBase64, 370, 320, 1000 * 1024); // 1000 KB limit
+                        displayGeneratedImage(resizedImageUrl);
+                    } else {
+                         throw new Error("API did not return image data.");
+                    }
+                } catch (error) {
+                    console.error(`Error generating image ${i+1}:`, error);
+                    let errorText = `生成第 ${i+1} 張圖片時失敗，請稍後再試。`;
+                    if (error.message && error.message.includes('401')) {
+                        errorText = `生成失敗：API 授權錯誤 (401)。此模型可能需要專用金鑰。`;
+                    }
+                    aiErrorMsg.textContent = errorText;
+                    break;
+                }
+            }
+            hideLoader();
+        });
+        
+        async function callGeminiAPI(prompt, images) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+            
+            const parts = [{ text: prompt }];
+            images.forEach(image => {
+                parts.push({
+                    inlineData: {
+                        mimeType: image.mimeType,
+                        data: image.base64
+                    }
+                });
+            });
+
+            const payload = {
+                contents: [{ parts: parts }],
+                generationConfig: { responseModalities: ['IMAGE'] },
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                console.error("API Response Error:", await response.text());
+                throw new Error(`API 請求失敗，狀態碼: ${response.status}`);
+            }
+            const result = await response.json();
+            return result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+        }
+
+        function getBase64SizeInBytes(base64) {
+            return (base64.length * (3 / 4)) - (base64.endsWith('==') ? 2 : (base64.endsWith('=') ? 1 : 0));
+        }
+
+        function processAndResizeImage(base64Data, targetWidth, targetHeight, maxSizeInBytes) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+                    const ctx = canvas.getContext('2d');
+                    
+                    const originalWidth = img.width;
+                    const originalHeight = img.height;
+
+                    const widthRatio = targetWidth / originalWidth;
+                    const heightRatio = targetHeight / originalHeight;
+                    let ratio = Math.min(widthRatio, heightRatio);
+
+                    let drawWidth = originalWidth * ratio;
+                    let drawHeight = originalHeight * ratio;
+                    
+                    let currentBase64;
+                    let currentSize;
+
+                    // This loop finds the maximum possible resolution that fits under the file size limit.
+                    while (true) {
+                        // We start with a clear canvas for each iteration.
+                        ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+                        const x = (targetWidth - drawWidth) / 2;
+                        const y = (targetHeight - drawHeight) / 2;
+                        
+                        // Draw the source image onto the canvas at the current calculated size.
+                        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+
+                        // --- Chroma Keying (Green Screen Removal) ---
+                        const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+                        const data = imageData.data;
+                        const tolerance = 200; 
+                        for (let i = 0; i < data.length; i += 4) {
+                            const r = data[i];
+                            const g = data[i + 1];
+                            const b = data[i + 2];
+                            
+                            // Calculate the Euclidean distance from pure green (#00FF00)
+                            const distance = Math.sqrt(Math.pow(r - 0, 2) + Math.pow(g - 255, 2) + Math.pow(b - 0, 2));
+
+                            if (distance < tolerance) {
+                                data[i + 3] = 0; // Make pixel transparent
+                            }
+                        }
+                        ctx.putImageData(imageData, 0, 0);
+                        // --- End Chroma Keying ---
+
+                        currentBase64 = canvas.toDataURL('image/png');
+                        currentSize = getBase64SizeInBytes(currentBase64);
+
+                        if (currentSize <= maxSizeInBytes || drawWidth < 50) {
+                            break;
+                        }
+
+                        // Reduce size slightly for the next check
+                        drawWidth *= 0.95;
+                        drawHeight *= 0.95;
+                    }
+                    
+                    resolve(currentBase64);
+                };
+                img.onerror = (err) => reject(err);
+                img.src = `data:image/png;base64,${base64Data}`; 
+            });
+        }
+
+
+        function displayGeneratedImage(resizedImageUrl) {
+            const item = document.createElement('div');
+            item.className = 'result-item';
+            
+            const img = document.createElement('img');
+            img.src = resizedImageUrl;
+            img.alt = 'Generated Sticker';
+
+            const btn = document.createElement('a');
+            btn.href = resizedImageUrl;
+            btn.download = `sticker-${Date.now()}.png`;
+            btn.className = 'download-btn';
+            btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>`;
+            
+            item.appendChild(img);
+            item.appendChild(btn);
+            resultsGallery.appendChild(item);
+        }
+    </script>
+</body>
+</html>
+
