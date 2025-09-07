@@ -1,0 +1,1246 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韋哥科技教室工具探索小瑪莉程式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8e8f5, #e8f4f8, #f0f8e8, #fff0e8);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            color: #5a5a5a;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ff9eb5;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 158, 181, 0.4);
+            box-shadow: 0 0 50px rgba(255, 158, 181, 0.3);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .theme-selector {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid rgba(255, 158, 181, 0.3);
+            box-shadow: 0 0 20px rgba(255, 158, 181, 0.2);
+            z-index: 100;
+            max-width: 400px;
+            margin: 0 auto 30px auto;
+        }
+
+        .theme-title {
+            font-size: 0.9rem;
+            color: #5a5a5a;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .theme-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-btn.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .theme-btn.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .theme-macaron {
+            background: linear-gradient(45deg, #ff9eb5, #a8e6cf, #ffd3a5);
+        }
+
+        .theme-ocean {
+            background: linear-gradient(45deg, #4facfe, #00f2fe, #43e97b);
+        }
+
+        .theme-sunset {
+            background: linear-gradient(45deg, #fa709a, #fee140, #ff6b6b);
+        }
+
+        .theme-forest {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf, #7b68ee);
+        }
+
+        .theme-galaxy {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff9eb5, #a8e6cf, #ffd3a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 158, 181, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8a8a8a;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 158, 181, 0.3);
+            box-shadow: 0 0 30px rgba(255, 158, 181, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #ff9eb5;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255, 158, 181, 0.4);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #5a5a5a;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #ff9eb5;
+            box-shadow: 0 0 15px rgba(255, 158, 181, 0.4);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff9eb5, #a8e6cf);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 158, 181, 0.5);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .items-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .items-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .items-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .items-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff9eb5, #a8e6cf);
+            border-radius: 4px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 158, 181, 0.15);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 158, 181, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .item:hover {
+            background: rgba(255, 158, 181, 0.25);
+            transform: translateX(5px);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #5a5a5a;
+        }
+
+        .item-probability {
+            font-size: 0.9rem;
+            color: #ff9eb5;
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ffb3ba, #ff8a95);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 179, 186, 0.6);
+        }
+
+        .lottery-area {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(168, 230, 207, 0.3);
+            box-shadow: 0 0 30px rgba(168, 230, 207, 0.2);
+        }
+
+        .lottery-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 3px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            border: 2px solid rgba(168, 230, 207, 0.4);
+        }
+
+        .center-block {
+            grid-column: 2 / 5;
+            grid-row: 2 / 6;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 248, 255, 0.8));
+            border: 2px dashed rgba(168, 230, 207, 0.6);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8a8a8a;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .center-block:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.9));
+            border-color: rgba(168, 230, 207, 0.8);
+            transform: scale(1.02);
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(255, 211, 165, 0.3), rgba(168, 230, 207, 0.3));
+            border: 1px solid rgba(255, 158, 181, 0.4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #5a5a5a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 158, 181, 0.4);
+            background: linear-gradient(135deg, rgba(255, 211, 165, 0.5), rgba(168, 230, 207, 0.5));
+        }
+
+        .grid-cell.highlight {
+            background: linear-gradient(135deg, #ff9eb5, #a8e6cf);
+            color: #ffffff;
+            animation: pulse 0.5s ease;
+            box-shadow: 0 0 20px rgba(255, 158, 181, 0.8);
+        }
+
+        .grid-cell.winner {
+            background: linear-gradient(135deg, #ffb3ba, #ffd3a5);
+            color: #5a5a5a;
+            animation: winnerPulse 1s infinite;
+            box-shadow: 0 0 30px rgba(255, 179, 186, 0.8);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes winnerPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 68, 68, 0.8); }
+            50% { transform: scale(1.15); box-shadow: 0 0 50px rgba(255, 68, 68, 1); }
+        }
+
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-content {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9));
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #ffa500;
+            box-shadow: 0 0 50px rgba(255, 165, 0, 0.5);
+            animation: modalAppear 0.5s ease;
+        }
+
+        @keyframes modalAppear {
+            0% { transform: scale(0.5) rotate(180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .result-title {
+            font-size: 2.5rem;
+            color: #ffa500;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            font-size: 2rem;
+            color: #ffffff;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(45deg, rgba(255, 165, 0, 0.2), rgba(255, 140, 0, 0.2));
+            border-radius: 15px;
+            border: 1px solid rgba(255, 165, 0, 0.5);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffa500;
+            animation: confettiFall 3s linear infinite;
+            z-index: 999;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .grid-container {
+                gap: 2px;
+            }
+            
+            .grid-cell {
+                font-size: 0.7rem;
+            }
+            
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .theme-selector {
+                margin: 20px auto;
+                max-width: 300px;
+            }
+            
+            .theme-buttons {
+                gap: 6px;
+            }
+            
+            .theme-btn {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-bg" id="starsBackground"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🔧 元件與工具探索機</h1>
+            <p class="subtitle">請根據你抽到的元件或工具，回答以下兩點其中之一：<br>1.正確的使用或操作方式<br>2.使用過程中應注意事項</p>
+        </div>
+        
+        <div class="theme-selector">
+            <div class="theme-title">🎨 選擇色系</div>
+            <div class="theme-buttons">
+                <button class="theme-btn theme-macaron active" onclick="changeTheme('macaron')" title="馬卡龍色系"></button>
+                <button class="theme-btn theme-ocean" onclick="changeTheme('ocean')" title="海洋色系"></button>
+                <button class="theme-btn theme-sunset" onclick="changeTheme('sunset')" title="夕陽色系"></button>
+                <button class="theme-btn theme-forest" onclick="changeTheme('forest')" title="森林色系"></button>
+                <button class="theme-btn theme-galaxy" onclick="changeTheme('galaxy')" title="星河色系"></button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="control-panel">
+                <h2 class="section-title">📝 元件與工具管理功能</h2>
+                
+                <div class="input-group">
+                    <input type="text" id="itemName" class="input-field" placeholder="輸入元件名稱" maxlength="20">
+                    <input type="number" id="itemProbability" class="input-field" placeholder="機率%" min="1" max="100" value="10">
+                    <button class="btn" onclick="addItem()">新增</button>
+                </div>
+                
+                <div id="errorMessage" class="error-message"></div>
+                
+                <div class="items-list" id="itemsList"></div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="fillGrid()" style="flex: 1;">🔧 填充元件</button>
+                    <button class="btn" onclick="resetGrid()" style="flex: 1;">🔄 重置網格</button>
+                </div>
+            </div>
+            
+            <div class="lottery-area">
+                <h2 class="section-title">🔍 題目探索</h2>
+                
+                <div class="lottery-controls">
+                    <button class="btn" id="startLotteryBtn" onclick="startLottery()">🔍 開始探索</button>
+                    <button class="btn" onclick="stopLottery()">⏹️ 停止探索</button>
+                </div>
+                
+                <div class="grid-container" id="gridContainer">
+                    <div class="center-block">
+                        韋哥科技教室
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <h2 class="result-title">🔧 探索到工具！</h2>
+            <div class="result-item" id="resultItem"></div>
+            <button class="btn" onclick="closeResult()">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        // 全域變數
+        let items = [];
+        let isLotteryRunning = false;
+        let currentHighlight = 0;
+        let lotteryInterval;
+        let lotterySpeed = 100;
+        let remainingSteps = 0;
+        let borderPath = [];
+        let animationPath = [];
+        let currentTheme = 'macaron';
+
+        // 主題配色方案
+        const themes = {
+            macaron: {
+                background: 'linear-gradient(135deg, #f8e8f5, #e8f4f8, #f0f8e8, #fff0e8)',
+                starColor: '#ff9eb5',
+                containerBg: 'rgba(255, 255, 255, 0.7)',
+                containerBorder: 'rgba(255, 158, 181, 0.4)',
+                containerShadow: 'rgba(255, 158, 181, 0.3)',
+                titleGradient: 'linear-gradient(45deg, #ff9eb5, #a8e6cf, #ffd3a5)',
+                textColor: '#5a5a5a',
+                sectionTitle: '#ff9eb5',
+                btnGradient: 'linear-gradient(45deg, #ff9eb5, #a8e6cf)',
+                inputBorder: 'rgba(255, 158, 181, 0.4)',
+                inputFocus: '#ff9eb5',
+                itemBg: 'rgba(255, 158, 181, 0.15)',
+                itemHover: 'rgba(255, 158, 181, 0.25)',
+                gridBg: 'linear-gradient(135deg, rgba(255, 211, 165, 0.3), rgba(168, 230, 207, 0.3))',
+                gridHover: 'linear-gradient(135deg, rgba(255, 211, 165, 0.5), rgba(168, 230, 207, 0.5))',
+                highlight: 'linear-gradient(135deg, #ff9eb5, #a8e6cf)',
+                winner: 'linear-gradient(135deg, #ffb3ba, #ffd3a5)'
+            },
+            ocean: {
+                background: 'linear-gradient(135deg, #e3f2fd, #e0f7fa, #e8f5e8, #fff3e0)',
+                starColor: '#4facfe',
+                containerBg: 'rgba(255, 255, 255, 0.7)',
+                containerBorder: 'rgba(79, 172, 254, 0.4)',
+                containerShadow: 'rgba(79, 172, 254, 0.3)',
+                titleGradient: 'linear-gradient(45deg, #4facfe, #00f2fe, #43e97b)',
+                textColor: '#2c5282',
+                sectionTitle: '#4facfe',
+                btnGradient: 'linear-gradient(45deg, #4facfe, #00f2fe)',
+                inputBorder: 'rgba(79, 172, 254, 0.4)',
+                inputFocus: '#4facfe',
+                itemBg: 'rgba(79, 172, 254, 0.15)',
+                itemHover: 'rgba(79, 172, 254, 0.25)',
+                gridBg: 'linear-gradient(135deg, rgba(0, 242, 254, 0.3), rgba(67, 233, 123, 0.3))',
+                gridHover: 'linear-gradient(135deg, rgba(0, 242, 254, 0.5), rgba(67, 233, 123, 0.5))',
+                highlight: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                winner: 'linear-gradient(135deg, #43e97b, #38f9d7)'
+            },
+            sunset: {
+                background: 'linear-gradient(135deg, #ffeaa7, #fab1a0, #fd79a8, #fdcb6e)',
+                starColor: '#fa709a',
+                containerBg: 'rgba(255, 255, 255, 0.7)',
+                containerBorder: 'rgba(250, 112, 154, 0.4)',
+                containerShadow: 'rgba(250, 112, 154, 0.3)',
+                titleGradient: 'linear-gradient(45deg, #fa709a, #fee140, #ff6b6b)',
+                textColor: '#8b4513',
+                sectionTitle: '#fa709a',
+                btnGradient: 'linear-gradient(45deg, #fa709a, #fee140)',
+                inputBorder: 'rgba(250, 112, 154, 0.4)',
+                inputFocus: '#fa709a',
+                itemBg: 'rgba(250, 112, 154, 0.15)',
+                itemHover: 'rgba(250, 112, 154, 0.25)',
+                gridBg: 'linear-gradient(135deg, rgba(254, 225, 64, 0.3), rgba(255, 107, 107, 0.3))',
+                gridHover: 'linear-gradient(135deg, rgba(254, 225, 64, 0.5), rgba(255, 107, 107, 0.5))',
+                highlight: 'linear-gradient(135deg, #fa709a, #fee140)',
+                winner: 'linear-gradient(135deg, #ff6b6b, #ffa726)'
+            },
+            forest: {
+                background: 'linear-gradient(135deg, #d4edda, #c3e6cb, #b8daff, #f8d7da)',
+                starColor: '#56ab2f',
+                containerBg: 'rgba(255, 255, 255, 0.7)',
+                containerBorder: 'rgba(86, 171, 47, 0.4)',
+                containerShadow: 'rgba(86, 171, 47, 0.3)',
+                titleGradient: 'linear-gradient(45deg, #56ab2f, #a8e6cf, #7b68ee)',
+                textColor: '#2d5016',
+                sectionTitle: '#56ab2f',
+                btnGradient: 'linear-gradient(45deg, #56ab2f, #a8e6cf)',
+                inputBorder: 'rgba(86, 171, 47, 0.4)',
+                inputFocus: '#56ab2f',
+                itemBg: 'rgba(86, 171, 47, 0.15)',
+                itemHover: 'rgba(86, 171, 47, 0.25)',
+                gridBg: 'linear-gradient(135deg, rgba(168, 230, 207, 0.3), rgba(123, 104, 238, 0.3))',
+                gridHover: 'linear-gradient(135deg, rgba(168, 230, 207, 0.5), rgba(123, 104, 238, 0.5))',
+                highlight: 'linear-gradient(135deg, #56ab2f, #a8e6cf)',
+                winner: 'linear-gradient(135deg, #7b68ee, #9c88ff)'
+            },
+            galaxy: {
+                background: 'linear-gradient(135deg, #e8eaf6, #f3e5f5, #e1f5fe, #fce4ec)',
+                starColor: '#667eea',
+                containerBg: 'rgba(255, 255, 255, 0.7)',
+                containerBorder: 'rgba(102, 126, 234, 0.4)',
+                containerShadow: 'rgba(102, 126, 234, 0.3)',
+                titleGradient: 'linear-gradient(45deg, #667eea, #764ba2, #f093fb)',
+                textColor: '#4a148c',
+                sectionTitle: '#667eea',
+                btnGradient: 'linear-gradient(45deg, #667eea, #764ba2)',
+                inputBorder: 'rgba(102, 126, 234, 0.4)',
+                inputFocus: '#667eea',
+                itemBg: 'rgba(102, 126, 234, 0.15)',
+                itemHover: 'rgba(102, 126, 234, 0.25)',
+                gridBg: 'linear-gradient(135deg, rgba(118, 75, 162, 0.3), rgba(240, 147, 251, 0.3))',
+                gridHover: 'linear-gradient(135deg, rgba(118, 75, 162, 0.5), rgba(240, 147, 251, 0.5))',
+                highlight: 'linear-gradient(135deg, #667eea, #764ba2)',
+                winner: 'linear-gradient(135deg, #f093fb, #f5576c)'
+            }
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            initializeGrid();
+            loadDefaultItems();
+            setupEventListeners();
+        });
+
+        // 創建星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('starsBackground');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 設置事件監聽器
+        function setupEventListeners() {
+            document.getElementById('itemName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addItem();
+                }
+            });
+            
+            document.getElementById('itemProbability').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addItem();
+                }
+            });
+        }
+
+        // 載入預設品項
+        function loadDefaultItems() {
+            const defaultItems = [
+                { name: '螺絲起子', probability: 15 },
+                { name: '電阻器', probability: 20 },
+                { name: '扳手', probability: 15 },
+                { name: 'LED燈', probability: 20 },
+                { name: '電線', probability: 30 }
+            ];
+            
+            defaultItems.forEach(item => {
+                items.push(item);
+            });
+            
+            updateItemsList();
+            fillGrid();
+        }
+
+        // 初始化網格
+        function initializeGrid() {
+            const container = document.getElementById('gridContainer');
+            // 保留中央區塊，只清除其他格子
+            const centerBlock = container.querySelector('.center-block');
+            container.innerHTML = '';
+            
+            // 創建所有外圍格子的索引
+            const outerCells = [];
+            
+            // 創建5x6網格，填滿所有外圍格子
+            for (let i = 0; i < 30; i++) {
+                const row = Math.floor(i / 5);
+                const col = i % 5;
+                
+                // 跳過中央3x4區域 (行1-3, 列1-4)
+                if (row >= 1 && row <= 4 && col >= 1 && col <= 3) {
+                    continue;
+                }
+                
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.dataset.index = i;
+                cell.style.gridColumn = col + 1;
+                cell.style.gridRow = row + 1;
+                container.appendChild(cell);
+                outerCells.push(i);
+            }
+            
+            // 重新添加中央區塊
+            if (centerBlock) {
+                container.appendChild(centerBlock);
+            } else {
+                const newCenterBlock = document.createElement('div');
+                newCenterBlock.className = 'center-block';
+                newCenterBlock.innerHTML = '韋哥科技教室';
+                container.appendChild(newCenterBlock);
+            }
+            
+            // 計算所有外圍格子的路徑（順時針）
+            borderPath = [];
+            
+            // 上邊（左到右）
+            for (let i = 0; i < 5; i++) {
+                borderPath.push(i);
+            }
+            
+            // 右邊（上到下，排除上右角落）
+            for (let i = 1; i < 6; i++) {
+                borderPath.push(4 + i * 5);
+            }
+            
+            // 下邊（右到左，排除下右角落）
+            for (let i = 3; i >= 0; i--) {
+                borderPath.push(25 + i);
+            }
+            
+            // 左邊（下到上，排除角落）
+            for (let i = 4; i > 0; i--) {
+                borderPath.push(i * 5);
+            }
+            
+            // 將所有外圍格子都加入路徑（用於填充）
+            borderPath = outerCells;
+            
+            // 創建動畫路徑（順時針邊框）
+            animationPath = [];
+            
+            // 上邊（左到右）
+            for (let i = 0; i < 5; i++) {
+                animationPath.push(i);
+            }
+            
+            // 右邊（上到下，排除上右角落）
+            for (let i = 1; i < 6; i++) {
+                animationPath.push(4 + i * 5);
+            }
+            
+            // 下邊（右到左，排除下右角落）
+            for (let i = 3; i >= 0; i--) {
+                animationPath.push(25 + i);
+            }
+            
+            // 左邊（下到上，排除角落）
+            for (let i = 4; i > 0; i--) {
+                animationPath.push(i * 5);
+            }
+        }
+
+        // 新增品項
+        function addItem() {
+            const nameInput = document.getElementById('itemName');
+            const probabilityInput = document.getElementById('itemProbability');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            const name = nameInput.value.trim();
+            const probability = parseInt(probabilityInput.value);
+            
+            errorDiv.textContent = '';
+            
+            if (!name) {
+                showError('請輸入元件名稱');
+                return;
+            }
+            
+            if (!probability || probability < 1 || probability > 100) {
+                showError('機率必須在1-100之間');
+                return;
+            }
+            
+            if (items.some(item => item.name === name)) {
+                showError('元件名稱已存在');
+                return;
+            }
+            
+            items.push({ name, probability });
+            nameInput.value = '';
+            probabilityInput.value = '10';
+            
+            updateItemsList();
+            nameInput.focus();
+        }
+
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            setTimeout(() => {
+                errorDiv.textContent = '';
+            }, 3000);
+        }
+
+        // 更新品項列表
+        function updateItemsList() {
+            const container = document.getElementById('itemsList');
+            container.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-probability">機率: ${item.probability}%</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem(${index})">刪除</button>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // 刪除品項
+        function deleteItem(index) {
+            items.splice(index, 1);
+            updateItemsList();
+        }
+
+        // 根據機率分配獎品
+        function distributeItems() {
+            if (items.length === 0) return [];
+            
+            const totalCells = borderPath.length;
+            const distribution = [];
+            
+            // 計算每個品項應該分配的格子數
+            items.forEach(item => {
+                const count = Math.round((item.probability / 100) * totalCells);
+                for (let i = 0; i < count; i++) {
+                    distribution.push(item.name);
+                }
+            });
+            
+            // 如果分配的格子數不足，用最高機率的品項填充
+            while (distribution.length < totalCells) {
+                const maxProbItem = items.reduce((max, item) => 
+                    item.probability > max.probability ? item : max
+                );
+                distribution.push(maxProbItem.name);
+            }
+            
+            // 如果分配的格子數過多，隨機移除
+            while (distribution.length > totalCells) {
+                const randomIndex = Math.floor(Math.random() * distribution.length);
+                distribution.splice(randomIndex, 1);
+            }
+            
+            // 隨機打亂
+            for (let i = distribution.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [distribution[i], distribution[j]] = [distribution[j], distribution[i]];
+            }
+            
+            return distribution;
+        }
+
+        // 填充網格
+        function fillGrid() {
+            if (items.length === 0) {
+                showError('請先新增元件');
+                return;
+            }
+            
+            const cells = document.querySelectorAll('.grid-cell');
+            const distribution = distributeItems();
+            
+            // 清空所有格子
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('highlight', 'winner');
+            });
+            
+            // 填充所有外圍格子
+            borderPath.forEach((cellIndex, i) => {
+                const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+                if (cell && i < distribution.length) {
+                    cell.textContent = distribution[i];
+                }
+            });
+        }
+
+        // 重置網格
+        function resetGrid() {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('highlight', 'winner');
+            });
+            currentHighlight = 0;
+        }
+
+        // 開始抽獎
+        function startLottery() {
+            if (isLotteryRunning) return;
+            
+            const borderCells = borderPath.map(index => 
+                document.querySelector(`[data-index="${index}"]`)
+            ).filter(cell => cell && cell.textContent.trim() !== '');
+            
+            if (borderCells.length === 0) {
+                showError('請先填充元件到網格中');
+                return;
+            }
+            
+            isLotteryRunning = true;
+            document.getElementById('startLotteryBtn').disabled = true;
+            
+            // 清除之前的高亮
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('highlight', 'winner');
+            });
+            
+            currentHighlight = 0;
+            lotterySpeed = 50;
+            remainingSteps = Math.floor(Math.random() * 20) + 30; // 30-50步
+            
+            lotteryInterval = setInterval(animateLottery, lotterySpeed);
+        }
+
+        // 抽獎動畫
+        function animateLottery() {
+            // 移除之前的高亮
+            const prevCell = document.querySelector(`[data-index="${animationPath[currentHighlight]}"]`);
+            if (prevCell) {
+                prevCell.classList.remove('highlight');
+            }
+            
+            // 移動到下一個位置
+            currentHighlight = (currentHighlight + 1) % animationPath.length;
+            
+            // 高亮當前格子
+            const currentCell = document.querySelector(`[data-index="${animationPath[currentHighlight]}"]`);
+            if (currentCell && currentCell.textContent.trim() !== '') {
+                currentCell.classList.add('highlight');
+            }
+            
+            remainingSteps--;
+            
+            // 減速效果
+            if (remainingSteps < 10) {
+                lotterySpeed += 20;
+                clearInterval(lotteryInterval);
+                lotteryInterval = setInterval(animateLottery, lotterySpeed);
+            }
+            
+            // 停止抽獎
+            if (remainingSteps <= 0) {
+                stopLottery();
+            }
+        }
+
+        // 停止抽獎
+        function stopLottery() {
+            if (!isLotteryRunning) return;
+            
+            clearInterval(lotteryInterval);
+            isLotteryRunning = false;
+            document.getElementById('startLotteryBtn').disabled = false;
+            
+            // 找到最終中獎格子
+            const winnerCell = document.querySelector(`[data-index="${animationPath[currentHighlight]}"]`);
+            if (winnerCell && winnerCell.textContent.trim() !== '') {
+                winnerCell.classList.remove('highlight');
+                winnerCell.classList.add('winner');
+                
+                // 顯示結果
+                showResult(winnerCell.textContent.trim());
+                
+                // 播放五彩紙屑動畫
+                createConfetti();
+            }
+        }
+
+        // 顯示中獎結果
+        function showResult(prize) {
+            document.getElementById('resultItem').textContent = prize;
+            document.getElementById('resultModal').style.display = 'flex';
+        }
+
+        // 關閉結果視窗
+        function closeResult() {
+            document.getElementById('resultModal').style.display = 'none';
+            
+            // 清除中獎高亮
+            setTimeout(() => {
+                document.querySelectorAll('.grid-cell').forEach(cell => {
+                    cell.classList.remove('winner');
+                });
+            }, 500);
+        }
+
+        // 創建五彩紙屑動畫
+        function createConfetti() {
+            const themeColors = {
+                macaron: ['#ff9eb5', '#a8e6cf', '#ffd3a5', '#ffb3ba', '#c7ceea'],
+                ocean: ['#4facfe', '#00f2fe', '#43e97b', '#38f9d7', '#4dd0e1'],
+                sunset: ['#fa709a', '#fee140', '#ff6b6b', '#ffa726', '#ffcc02'],
+                forest: ['#56ab2f', '#a8e6cf', '#7b68ee', '#9c88ff', '#81c784'],
+                galaxy: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#ba68c8']
+            };
+            
+            const colors = themeColors[currentTheme];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // 切換主題
+        function changeTheme(themeName) {
+            currentTheme = themeName;
+            const theme = themes[themeName];
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.theme-${themeName}`).classList.add('active');
+            
+            // 更新背景
+            document.body.style.background = theme.background;
+            document.body.style.backgroundSize = '400% 400%';
+            
+            // 更新星星顏色
+            document.querySelectorAll('.star').forEach(star => {
+                star.style.background = theme.starColor;
+            });
+            
+            // 更新容器樣式
+            const container = document.querySelector('.container');
+            container.style.background = theme.containerBg;
+            container.style.borderColor = theme.containerBorder;
+            container.style.boxShadow = `0 0 50px ${theme.containerShadow}`;
+            
+            // 更新標題
+            const title = document.querySelector('.title');
+            title.style.background = theme.titleGradient;
+            title.style.webkitBackgroundClip = 'text';
+            title.style.backgroundClip = 'text';
+            
+            // 更新文字顏色
+            document.body.style.color = theme.textColor;
+            document.querySelectorAll('.subtitle').forEach(el => {
+                el.style.color = theme.textColor;
+            });
+            
+            // 更新區塊標題
+            document.querySelectorAll('.section-title').forEach(el => {
+                el.style.color = theme.sectionTitle;
+            });
+            
+            // 更新按鈕
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.background = theme.btnGradient;
+            });
+            
+            // 更新輸入框
+            document.querySelectorAll('.input-field').forEach(input => {
+                input.style.borderColor = theme.inputBorder;
+            });
+            
+            // 更新品項列表
+            document.querySelectorAll('.item').forEach(item => {
+                item.style.background = theme.itemBg;
+            });
+            
+            // 更新網格
+            updateGridTheme(theme);
+            
+            // 更新面板背景
+            document.querySelectorAll('.control-panel, .lottery-area').forEach(panel => {
+                panel.style.background = theme.containerBg;
+                panel.style.borderColor = theme.containerBorder;
+                panel.style.boxShadow = `0 0 30px ${theme.containerShadow}`;
+            });
+        }
+
+        // 更新網格主題
+        function updateGridTheme(theme) {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .grid-cell {
+                    background: ${theme.gridBg} !important;
+                    color: ${theme.textColor} !important;
+                }
+                .grid-cell:hover {
+                    background: ${theme.gridHover} !important;
+                }
+                .grid-cell.highlight {
+                    background: ${theme.highlight} !important;
+                    color: #ffffff !important;
+                }
+                .grid-cell.winner {
+                    background: ${theme.winner} !important;
+                    color: ${theme.textColor} !important;
+                }
+                .center-block {
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 248, 255, 0.8)) !important;
+                    border-color: ${theme.containerBorder} !important;
+                    color: ${theme.textColor} !important;
+                }
+                .center-block:hover {
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.9)) !important;
+                    border-color: ${theme.sectionTitle} !important;
+                }
+                .item:hover {
+                    background: ${theme.itemHover} !important;
+                }
+                .input-field:focus {
+                    border-color: ${theme.inputFocus} !important;
+                    box-shadow: 0 0 15px ${theme.inputBorder} !important;
+                }
+                .item-probability {
+                    color: ${theme.sectionTitle} !important;
+                }
+                .item-name {
+                    color: ${theme.textColor} !important;
+                }
+            `;
+            
+            // 移除舊的主題樣式
+            const oldStyle = document.getElementById('theme-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+            
+            style.id = 'theme-style';
+            document.head.appendChild(style);
+        }
+    </script>
+</body>
+</html>
