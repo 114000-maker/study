@@ -1,0 +1,1887 @@
+<!-- https://codepen.io/01-Scratchinai -->
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>房地產仲介與代書自動化應用 (AI家教版)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding-top: 80px; /* 為固定按鈕留出空間 */
+  }
+  .toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f0f2f5;
+    padding: 15px 0;
+    text-align: center;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  #summaryBtn {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  #summaryBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    padding-bottom: 40px; /* [修復] 新增底部間距，避免最後一排卡片被裁切 */
+  }
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 300px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+  /* 簡化結構，移除 .card-content */
+  .card h2 {
+    color: #333;
+    font-size: 1.2em;
+    margin-top: 0;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+  }
+  .card p {
+    color: #555;
+    font-size: 0.9em;
+    line-height: 1.6;
+    flex-grow: 1; /* 讓 p 標籤填滿多餘空間 */
+  }
+  .card pre {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.85em;
+  }
+
+  .ai-tutor-btn {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #ff9800; /* 橘色 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+  }
+  .ai-tutor-btn:hover {
+      background-color: #f57c00;
+  }
+
+  /* Modal (彈出視窗) 樣式 */
+  .modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 25px 30px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: fadeIn 0.5s;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  .close-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .close-btn:hover,
+  .close-btn:focus {
+    color: black;
+    text-decoration: none;
+  }
+  #summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  #summaryTable th, #summaryTable td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  #summaryTable th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  #summaryTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  #summaryTable tr:hover {
+    background-color: #ddd;
+  }
+  
+  /* 全螢幕卡片 Modal */
+  #fullscreenCardModal .modal-content {
+    max-width: 600px; /* 調整全螢幕卡片的寬度 */
+    padding-bottom: 80px; /* 為按鈕留出空間 */
+  }
+  #cardSummaryBtn {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  #cardSummaryBtn:hover {
+    background-color: #218838;
+    transform: translateX(-50%) translateY(-1px);
+  }
+
+  /* AI 家教 Modal */
+  #aiTutorModal .modal-content {
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* 限制AI家教視窗最大高度 */
+  }
+  #aiChatHistory {
+    margin-top: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 20px;
+    min-height: 200px;
+    flex-grow: 1; /* 讓聊天記錄區塊自動佔滿可用空間 */
+    overflow-y: auto; /* 啟用滾動條 */
+    line-height: 1.7;
+    font-family: 'Segoe UI', sans-serif;
+    color: #343a40;
+    margin-bottom: 15px; /* 與輸入框的間距 */
+    border: 1px solid #e0e0e0;
+  }
+
+  /* Chat message styling */
+  .user-message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #e6f7ff;
+    border-radius: 8px;
+    text-align: right;
+    color: #0056b3;
+    word-break: break-word;
+  }
+  .ai-message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    text-align: left;
+    color: #343a40;
+    word-break: break-word;
+  }
+  .ai-message h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #007bff;
+      border-bottom: 1px solid #cce5ff;
+      padding-bottom: 5px;
+  }
+  .error-message {
+      color: #dc3545;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      word-break: break-word;
+  }
+
+  /* 讀取中動畫 */
+  .loader-container {
+      text-align: center;
+      margin: 20px auto;
+  }
+  .loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #ff9800;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* User input area for AI Tutor */
+  #userQuestion {
+    width: calc(100% - 22px); /* Adjust for padding and border */
+    min-height: 60px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    font-size: 0.9em;
+  }
+  #sendQuestionBtn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+  }
+  #sendQuestionBtn:hover {
+    background-color: #0056b3;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- 按鈕工具列 -->
+  <div class="toolbar">
+    <button id="summaryBtn" onclick="showSummary()">顯示總表</button>
+  </div>
+
+  <!-- 卡片容器 -->
+  <div class="card-container">
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>1. 網站表單自動處理</h2>
+        <p>當潛在客戶在公司網站上填寫「預約看房」或「房屋估價」表單時，n8n 自動將資料寫入 Google Sheets、CRM 系統，並透過 LINE Notify 或 Slack 通知指定業務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>2. Facebook 名單型廣告整合</h2>
+        <p>當有人在 Facebook 提交名單型廣告後，n8n 自動抓取該潛在客戶的聯絡資訊，新增到電子報系統 (如 Mailchimp)，並在 CRM 中建立新的潛在客戶檔案。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>3. 社群媒體監控</h2>
+        <p>設定關鍵字 (例如「尋找 [地區] 三房」)，n8n 自動監控 PTT、Dcard 或特定社團的貼文，一旦發現符合條件的內容，就發送通知給開發團隊。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>4. 自動發布物件資訊</h2>
+        <p>在 Google Sheets 中管理物件資料，當一個新物件的狀態標記為「可發布」時，n8n 自動將物件的圖文資訊格式化，並發布到公司的 Facebook 粉絲專頁、LINE 官方帳號。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>5. 競爭對手物件監控</h2>
+        <p>定時 (例如每天早上 9 點) 爬取 591 或其他房產網站上，指定區域內的新增物件，並將摘要資訊彙整成報告，發送到業務團隊的 Email。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>6. 內容行銷自動化</h2>
+        <p>當公司部落格 (WordPress) 發布一篇新文章 (例如「買房注意事項」) 後，n8n 自動將文章連結分享到多個社群平台。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>7. 潛在客戶自動評分</h2>
+        <p>根據客戶填寫的表單內容 (例如預算、地區、需求房型)，n8n 自動進行評分，高分客戶優先指派給資深業務，並在 Trello 或 Asana 中建立任務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>8. LINE 官方帳號關鍵字回覆</h2>
+        <p>客戶在 LINE 官方帳號輸入特定關鍵字 (例如「最新物件」、「買房流程」)，n8n 觸發預設好的回覆，提供相關資訊或文件。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>9. Google Maps 商家評論通知</h2>
+        <p>當公司收到新的 Google Maps 評論時，n8n 自動將評論內容和星級發送到內部通訊群組，以便團隊能即時回應。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>10. 自動化 Email Drip Campaign</h2>
+        <p>新客戶加入郵件列表後，n8n 自動觸發一系列預設好的 Email，例如第一天發送歡迎信，第三天發送服務介紹，第七天發送精選物件。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>11. 預約看房行程同步</h2>
+        <p>當業務在 Google Calendar 安排一個「帶看」行程並邀請客戶後，n8n 自動在 CRM 中記錄這次的活動。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>12. 看房前自動提醒</h2>
+        <p>在預定看房時間的前 24 小時與前 1 小時，n8n 自動透過 SMS 簡訊或 LINE 發送提醒給客戶，包含時間、地址和業務聯絡方式。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>13. 看房後意見追蹤</h2>
+        <p>看房行程結束後 3 小時，n8n 自動發送一封 Email 或訊息給客戶，詢問他們的看後感想，並附上一個簡單的回饋表單連結。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>14. 生日/紀念日自動祝福</h2>
+        <p>n8n 每天檢查 CRM 中的客戶生日，並自動發送客製化的生日祝福 Email 或 LINE 訊息，維繫長期關係。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>15. 客戶狀態自動更新</h2>
+        <p>當客戶回覆 Email 表示「暫不考慮」時，n8n 可以透過關鍵字識別，自動在 CRM 中將該客戶的狀態更新為「暫緩」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>16. 未聯繫客戶提醒</h2>
+        <p>n8n 定期掃描 CRM，找出超過 14 天未聯繫的潛在客戶，並在 Slack 中提醒負責的業務進行追蹤。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>17. 通話紀錄自動登錄</h2>
+        <p>(需搭配支援的網路電話系統) 當業務完成一通與客戶的通話後，n8n 自動將通話時間、長度和錄音連結記錄到 CRM 的客戶活動歷史中。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>18. 客戶文件收集提醒</h2>
+        <p>對於已進入流程的客戶，n8n 可根據 Trello 或 Google Sheets 中的 checklist，自動發送提醒給客戶：「您好，我們還需要您的身分證影本」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>19. 會議記錄自動整理</h2>
+        <p>使用語音轉文字工具 (如 aiko) 記錄會議內容，n8n 在會議結束後自動抓取文字稿，透過 AI (如 OpenAI) 進行摘要，並將摘要存檔至客戶的 Google Drive 資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>20. LINE 訊息整合 CRM</h2>
+        <p>將公司的 LINE 官方帳號與 n8n 串接，讓業務可以透過特定指令，直接在 LINE 中查詢或新增 CRM 的客戶資料，無需切換 APP。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>21. 新案件自動開案</h2>
+        <p>當收到新案件委託表單時，n8n 自動在專案管理工具 (如 Asana) 中建立一個新案件，並套用標準的「不動產買賣登記流程」任務範本。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>22. 標準化文件夾建立</h2>
+        <p>新案件成立後，n8n 自動在 Google Drive 或 Dropbox 中，以「[案號]_[客戶姓名]」為名建立主資料夾，並在其中生成「身分證明」、「契約文件」、「稅務文件」、「銀行文件」等標準子資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>23. 案件進度自動通知</h2>
+        <p>當代書在 Trello 或 Asana 中將案件卡片從「用印」拖到「完稅」階段時，n8n 自動發送一封進度更新 Email 或 LINE 訊息給買賣雙方及仲介。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>24. 關鍵時程自動提醒</h2>
+        <p>案件成立時，根據簽約日期，n8n 自動計算出「報稅截止日」、「過戶登記預計完成日」、「交屋日」等關鍵日期，並在 Google Calendar 中建立行事曆事件與提醒。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>25. 每日待辦事項彙報</h2>
+        <p>n8n 每天早上 8 點，自動彙整所有案件中「今天到期」的任務，並將清單發送到代書助理的 Slack 或 LINE。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>26. 謄本申請自動化</h2>
+        <p>(需搭配政府網站 API 或 RPA 工具) 當收到申請指令時，n8n 自動登入地政事務所網站，輸入地號/建號，申請電子謄本，並在下載完成後存入對應的案件資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>27. 稅額試算通知</h2>
+        <p>當契稅、增值稅等稅單核發下來，代書助理將金額填入 Google Sheets 後，n8n 自動產生一個包含費用明細的通知，發送給客戶請其準備款項。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>28. 銀行對保聯絡自動化</h2>
+        <p>當案件進度來到「銀行對保」階段，n8n 自動發送一封標準化的 Email 給銀行貸款專員，提供案件編號與客戶聯絡方式，請求安排對保事宜。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>29. 案件歸檔自動化</h2>
+        <p>當案件狀態更新為「已結案」時，n8n 自動將該案件在 Google Drive 的所有文件壓縮成一個 ZIP 檔，移動到「歸檔」資料夾，並更新案件總表的狀態。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>30. 客戶滿意度調查</h2>
+        <p>案件結案後一週，n8n 自動發送服務滿意度調查問卷給委託人，收集回饋以改善服務品質。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>31. 物件資料同步</h2>
+        <p>在一個主要的 Google Sheets 物件總表中更新資訊 (例如價格變更、狀態改為「已售出」)，n8n 自動將變動同步到公司網站的資料庫或其他行銷通路。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>32. 照片自動上浮水印</h2>
+        <p>當有新的物件照片上傳到指定的 Google Drive 資料夾時，n8n 自動為所有照片加上公司 Logo 的浮水印，並存放到「發布用」資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>33. 鑰匙管理系統</h2>
+        <p>透過一個簡單的表單來借用或歸還物件鑰匙，n8n 自動更新鑰匙狀態總表，並在有人借用鑰匙超過 3 天未歸還時發出提醒。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>34. 費用請款自動化</h2>
+        <p>員工透過表單提交費用申請 (例如交通費、廣告費) 並上傳收據照片，n8n 自動將申請記錄到會計用的 Google Sheets，並通知主管審批。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>35. 佣金計算自動化</h2>
+        <p>當一個案件結案並在系統中輸入成交金額後，n8n 根據預設的佣金規則，自動計算出仲介費、業務獎金、代書費等，並記錄到財務報表中。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>36. 每日業績戰報</h2>
+        <p>n8n 每天定時抓取 CRM 和成交記錄表的數據，自動生成當日的業績摘要（例如新增潛客數、帶看次數、成交金額），並發布到公司內部群組。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>37. 合約範本自動生成</h2>
+        <p>業務透過表單輸入買賣雙方、物件、價格等基本資訊，n8n 自動將這些資訊填入一個 Google Docs 的合約範本中，生成一份草稿合約。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>38. 輪值表自動提醒</h2>
+        <p>根據預先排好的輪值表 (Google Sheets)，n8n 每天自動提醒當天的值日生：「您好，今天輪到您負責辦公室開門與環境維護」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>39. 法規新聞監控</h2>
+        <p>n8n 定期監控內政部地政司或相關法規網站，若有新的函釋或法規更新，自動將標題和連結發送到法務或代書團隊的頻道。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>40. IT 系統監控</h2>
+        <p>n8n 定時檢查公司網站是否能正常訪問，如果出現錯誤或無法連線，立即透過 Telegram 或簡訊通知 IT 管理員。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>41. 交屋 checklist 自動發送</h2>
+        <p>在交屋日的前三天，n8n 自動發送一份「交屋注意事項 checklist」給買方，提醒他們需要檢查的項目。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>42. 感謝信與推薦請求</h2>
+        <p>交屋完成後，n8n 自動發送感謝信，並在信中附上一個連結，邀請客戶在 Google 商家或公司臉書上留下好評。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>43. 客戶資料歸檔</h2>
+        <p>將已成交的客戶從「活躍客戶」列表中移至「已成交客戶」列表，並為其打上標籤，方便未來進行再行銷。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>44. 年度房屋稅/地價稅提醒</h2>
+        <p>n8n 在每年房屋稅、地價稅開徵前，自動發送提醒訊息給所有已成交客戶，提醒他們記得繳納，這是一個貼心的小服務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>45. 「喬遷之喜」週年紀念</h2>
+        <p>在客戶交屋滿一年的時候，n8n 自動發送一封「Happy House Anniversary!」的祝賀郵件，強化客戶記憶。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>46. 行銷活動成效報告</h2>
+        <p>n8n 每週自動匯總來自 Facebook 廣告、Google Analytics 和 CRM 的數據，生成一份行銷管道成效報告，顯示每個管道帶來了多少潛在客戶及成交率。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>47. 業務績效儀表板數據彙整</h2>
+        <p>定時將各業務的帶看數、洽談中案件數、成交量等數據，從不同系統中抓取並整合到一個 Google Sheets，供 Google Data Studio 製作視覺化儀表板。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>48. 案件處理時長分析</h2>
+        <p>n8n 自動計算每個結案案件從「收件」到「交屋」所花費的天數，並進行統計分析，幫助管理者找出流程瓶頸。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>49. 客戶來源分析</h2>
+        <p>當案件成交時，n8n 自動根據 CRM 中記錄的客戶來源（例如：網路、老客戶介紹、路過客），生成客戶來源的圓餅圖，幫助公司了解哪個管道最有效。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>50. 每月財務摘要</h2>
+        <p>n8n 每月 1 號自動抓取上個月的總收入、總支出、佣金發放總額等數據，生成一份簡要的財務報告，發送給公司管理層。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+
+  </div>
+
+  <!-- 總表 Modal -->
+  <div id="summaryModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideSummary()">&times;</span>
+      <h2 style="text-align: center;">n8n 房地產仲介與代書自動化應用總表</h2>
+      <table id="summaryTable">
+        <thead>
+          <tr>
+            <th>編號</th>
+            <th>主題</th>
+            <th>簡介</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>網站表單自動處理</td><td>當潛在客戶在公司網站上填寫「預約看房」或「房屋估價」表單時，n8n 自動將資料寫入 Google Sheets、CRM 系統，並透過 LINE Notify 或 Slack 通知指定業務。</td></tr>
+            <tr><td>2</td><td>Facebook 名單型廣告整合</td><td>當有人在 Facebook 提交名單型廣告後，n8n 自動抓取該潛在客戶的聯絡資訊，新增到電子報系統 (如 Mailchimp)，並在 CRM 中建立新的潛在客戶檔案。</td></tr>
+            <tr><td>3</td><td>社群媒體監控</td><td>設定關鍵字 (例如「尋找 [地區] 三房」)，n8n 自動監控 PTT、Dcard 或特定社團的貼文，一旦發現符合條件的內容，就發送通知給開發團隊。</td></tr>
+            <tr><td>4</td><td>自動發布物件資訊</td><td>在 Google Sheets 中管理物件資料，當一個新物件的狀態標記為「可發布」時，n8n 自動將物件的圖文資訊格式化，並發布到公司的 Facebook 粉絲專頁、LINE 官方帳號。</td></tr>
+            <tr><td>5</td><td>競爭對手物件監控</td><td>定時 (例如每天早上 9 點) 爬取 591 或其他房產網站上，指定區域內的新增物件，並將摘要資訊彙整成報告，發送到業務團隊的 Email。</td></tr>
+            <tr><td>6</td><td>內容行銷自動化</td><td>當公司部落格 (WordPress) 發布一篇新文章 (例如「買房注意事項」) 後，n8n 自動將文章連結分享到多個社群平台。</td></tr>
+            <tr><td>7</td><td>潛在客戶自動評分</td><td>根據客戶填寫的表單內容 (例如預算、地區、需求房型)，n8n 自動進行評分，高分客戶優先指派給資深業務，並在 Trello 或 Asana 中建立任務。</td></tr>
+            <tr><td>8</td><td>LINE 官方帳號關鍵字回覆</td><td>客戶在 LINE 官方帳號輸入特定關鍵字 (例如「最新物件」、「買房流程」)，n8n 觸發預設好的回覆，提供相關資訊或文件。</td></tr>
+            <tr><td>9</td><td>Google Maps 商家評論通知</td><td>當公司收到新的 Google Maps 評論時，n8n 自動將評論內容和星級發送到內部通訊群組，以便團隊能即時回應。</td></tr>
+            <tr><td>10</td><td>自動化 Email Drip Campaign</td><td>新客戶加入郵件列表後，n8n 自動觸發一系列預設好的 Email，例如第一天發送歡迎信，第三天發送服務介紹，第七天發送精選物件。</td></tr>
+            <tr><td>11</td><td>預約看房行程同步</td><td>當業務在 Google Calendar 安排一個「帶看」行程並邀請客戶後，n8n 自動在 CRM 中記錄這次的活動。</td></tr>
+            <tr><td>12</td><td>看房前自動提醒</td><td>在預定看房時間的前 24 小時與前 1 小時，n8n 自動透過 SMS 簡訊或 LINE 發送提醒給客戶，包含時間、地址和業務聯絡方式。</td></tr>
+            <tr><td>13</td><td>看房後意見追蹤</td><td>看房行程結束後 3 小時，n8n 自動發送一封 Email 或訊息給客戶，詢問他們的看後感想，並附上一個簡單的回饋表單連結。</td></tr>
+            <tr><td>14</td><td>生日/紀念日自動祝福</td><td>n8n 每天檢查 CRM 中的客戶生日，並自動發送客製化的生日祝福 Email 或 LINE 訊息，維繫長期關係。</td></tr>
+            <tr><td>15</td><td>客戶狀態自動更新</td><td>當客戶回覆 Email 表示「暫不考慮」時，n8n 可以透過關鍵字識別，自動在 CRM 中將該客戶的狀態更新為「暫緩」。</td></tr>
+            <tr><td>16</td><td>未聯繫客戶提醒</td><td>n8n 定期掃描 CRM，找出超過 14 天未聯繫的潛在客戶，並在 Slack 中提醒負責的業務進行追蹤。</td></tr>
+            <tr><td>17</td><td>通話紀錄自動登錄</td><td>(需搭配支援的網路電話系統) 當業務完成一通與客戶的通話後，n8n 自動將通話時間、長度和錄音連結記錄到 CRM 的客戶活動歷史中。</td></tr>
+            <tr><td>18</td><td>客戶文件收集提醒</td><td>對於已進入流程的客戶，n8n 可根據 Trello 或 Google Sheets 中的 checklist，自動發送提醒給客戶：「您好，我們還需要您的身分證影本」。</td></tr>
+            <tr><td>19</td><td>會議記錄自動整理</td><td>使用語音轉文字工具 (如 aiko) 記錄會議內容，n8n 在會議結束後自動抓取文字稿，透過 AI (如 OpenAI) 進行摘要，並將摘要存檔至客戶的 Google Drive 資料夾。</td></tr>
+            <tr><td>20</td><td>LINE 訊息整合 CRM</td><td>將公司的 LINE 官方帳號與 n8n 串接，讓業務可以透過特定指令，直接在 LINE 中查詢或新增 CRM 的客戶資料，無需切換 APP。</td></tr>
+            <tr><td>21</td><td>新案件自動開案</td><td>當收到新案件委託表單時，n8n 自動在專案管理工具 (如 Asana) 中建立一個新案件，並套用標準的「不動產買賣登記流程」任務範本。</td></tr>
+            <tr><td>22</td><td>標準化文件夾建立</td><td>新案件成立後，n8n 自動在 Google Drive 或 Dropbox 中，以「[案號]_[客戶姓名]」為名建立主資料夾，並在其中生成「身分證明」、「契約文件」、「稅務文件」、「銀行文件」等標準子資料夾。</td></tr>
+            <tr><td>23</td><td>案件進度自動通知</td><td>當代書在 Trello 或 Asana 中將案件卡片從「用印」拖到「完稅」階段時，n8n 自動發送一封進度更新 Email 或 LINE 訊息給買賣雙方及仲介。</td></tr>
+            <tr><td>24</td><td>關鍵時程自動提醒</td><td>案件成立時，根據簽約日期，n8n 自動計算出「報稅截止日」、「過戶登記預計完成日」、「交屋日」等關鍵日期，並在 Google Calendar 中建立行事曆事件與提醒。</td></tr>
+            <tr><td>25</td><td>每日待辦事項彙報</td><td>n8n 每天早上 8 點，自動彙整所有案件中「今天到期」的任務，並將清單發送到代書助理的 Slack 或 LINE。</td></tr>
+            <tr><td>26</td><td>謄本申請自動化</td><td>(需搭配政府網站 API 或 RPA 工具) 當收到申請指令時，n8n 自動登入地政事務所網站，輸入地號/建號，申請電子謄本，並在下載完成後存入對應的案件資料夾。</td></tr>
+            <tr><td>27</td><td>稅額試算通知</td><td>當契稅、增值稅等稅單核發下來，代書助理將金額填入 Google Sheets 後，n8n 自動產生一個包含費用明細的通知，發送給客戶請其準備款項。</td></tr>
+            <tr><td>28</td><td>銀行對保聯絡自動化</td><td>當案件進度來到「銀行對保」階段，n8n 自動發送一封標準化的 Email 給銀行貸款專員，提供案件編號與客戶聯絡方式，請求安排對保事宜。</td></tr>
+            <tr><td>29</td><td>案件歸檔自動化</td><td>當案件狀態更新為「已結案」時，n8n 自動將該案件在 Google Drive 的所有文件壓縮成一個 ZIP 檔，移動到「歸檔」資料夾，並更新案件總表的狀態。</td></tr>
+            <tr><td>30</td><td>客戶滿意度調查</td><td>案件結案後一週，n8n 自動發送服務滿意度調查問卷給委託人，收集回饋以改善服務品質。</td></tr>
+            <tr><td>31</td><td>物件資料同步</td><td>在一個主要的 Google Sheets 物件總表中更新資訊 (例如價格變更、狀態改為「已售出」)，n8n 自動將變動同步到公司網站的資料庫或其他行銷通路。</td></tr>
+            <tr><td>32</td><td>照片自動上浮水印</td><td>當有新的物件照片上傳到指定的 Google Drive 資料夾時，n8n 自動為所有照片加上公司 Logo 的浮水印，並存放到「發布用」資料夾。</td></tr>
+            <tr><td>33</td><td>鑰匙管理系統</td><td>透過一個簡單的表單來借用或歸還物件鑰匙，n8n 自動更新鑰匙狀態總表，並在有人借用鑰匙超過 3 天未歸還時發出提醒。</td></tr>
+            <tr><td>34</td><td>費用請款自動化</td><td>員工透過表單提交費用申請 (例如交通費、廣告費) 並上傳收據照片，n8n 自動將申請記錄到會計用的 Google Sheets，並通知主管審批。</td></tr>
+            <tr><td>35</td><td>佣金計算自動化</td><td>當一個案件結案並在系統中輸入成交金額後，n8n 根據預設的佣金規則，自動計算出仲介費、業務獎金、代書費等，並記錄到財務報表中。</td></tr>
+            <tr><td>36</td><td>每日業績戰報</td><td>n8n 每天定時抓取 CRM 和成交記錄表的數據，自動生成當日的業績摘要（例如新增潛客數、帶看次數、成交金額），並發布到公司內部群組。</td></tr>
+            <tr><td>37</td><td>合約範本自動生成</td><td>業務透過表單輸入買賣雙方、物件、價格等基本資訊，n8n 自動將這些資訊填入一個 Google Docs 的合約範本中，生成一份草稿合約。</td></tr>
+            <tr><td>38</td><td>輪值表自動提醒</td><td>根據預先排好的輪值表 (Google Sheets)，n8n 每天自動提醒當天的值日生：「您好，今天輪到您負責辦公室開門與環境維護」。</td></tr>
+            <tr><td>39</td><td>法規新聞監控</td><td>n8n 定期監控內政部地政司或相關法規網站，若有新的函釋或法規更新，自動將標題和連結發送到法務或代書團隊的頻道。</td></tr>
+            <tr><td>40</td><td>IT 系統監控</td><td>n8n 定時檢查公司網站是否能正常訪問，如果出現錯誤或無法連線，立即透過 Telegram 或簡訊通知 IT 管理員。</td></tr>
+            <tr><td>41</td><td>交屋 checklist 自動發送</td><td>在交屋日的前三天，n8n 自動發送一份「交屋注意事項 checklist」給買方，提醒他們需要檢查的項目。</td></tr>
+            <tr><td>42</td><td>感謝信與推薦請求</td><td>交屋完成後，n8n 自動發送感謝信，並在信中附上一個連結，邀請客戶在 Google 商家或公司臉書上留下好評。</td></tr>
+            <tr><td>43</td><td>客戶資料歸檔</td><td>將已成交的客戶從「活躍客戶」列表中移至「已成交客戶」列表，並為其打上標籤，方便未來進行再行銷。</td></tr>
+            <tr><td>44</td><td>年度房屋稅/地價稅提醒</td><td>n8n 在每年房屋稅、地價稅開徵前，自動發送提醒訊息給所有已成交客戶，提醒他們記得繳納，這是一個貼心的小服務。</td></tr>
+            <tr><td>45</td><td>「喬遷之喜」週年紀念</td><td>在客戶交屋滿一年的時候，n8n 自動發送一封「Happy House Anniversary!」的祝賀郵件，強化客戶記憶。</td></tr>
+            <tr><td>46</td><td>行銷活動成效報告</td><td>n8n 每週自動匯總來自 Facebook 廣告、Google Analytics 和 CRM 的數據，生成一份行銷管道成效報告，顯示每個管道帶來了多少潛在客戶及成交率。</td></tr>
+            <tr><td>47</td><td>業務績效儀表板數據彙整</td><td>定時將各業務的帶看數、洽談中案件數、成交量等數據，從不同系統中抓取並整合到一個 Google Sheets，供 Google Data Studio 製作視覺化儀表板。</td></tr>
+            <tr><td>48</td><td>案件處理時長分析</td><td>n8n 自動計算每個結案案件從「收件」到「交屋」所花費的天數，並進行統計分析，幫助管理者找出流程瓶頸。</td></tr>
+            <tr><td>49</td><td>客戶來源分析</td><td>當案件成交時，n8n 自動根據 CRM 中記錄的客戶來源（例如：網路、老客戶介紹、路過客），生成客戶來源的圓餅圖，幫助公司了解哪個管道最有效。</td></tr>
+            <tr><td>50</td><td>每月財務摘要</td><td>n8n 每月 1 號自動抓取上個月的總收入、總支出、佣金發放總額等數據，生成一份簡要的財務報告，發送給公司管理層。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 全螢幕卡片 Modal -->
+  <div id="fullscreenCardModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="hideFullscreenCard()">&times;</span>
+        <div id="fullscreenCardContent">
+            <!-- 這裡會動態填入卡片內容 -->
+        </div>
+        <button id="cardSummaryBtn" onclick="showSummaryFromCard()">顯示總表</button>
+    </div>
+  </div>
+
+  <!-- AI 家教 Modal -->
+  <div id="aiTutorModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideAiTutorModal()">&times;</span>
+      <h2 id="aiTutorTitle">AI 自動化家教</h2>
+      <div id="aiChatHistory">
+        <!-- Chat messages will be appended here -->
+      </div>
+      <div style="margin-top: 15px;">
+        <textarea id="userQuestion" placeholder="請輸入您的問題..." ></textarea>
+        <button id="sendQuestionBtn" onclick="sendUserQuestion()">
+          傳送問題
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+// API 設定
+const apiKey = "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"; // 請替換成您的實際 API 金鑰
+const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+
+// 獲取 modal 元素
+var summaryModal = document.getElementById('summaryModal');
+var fullscreenModal = document.getElementById('fullscreenCardModal');
+var aiTutorModal = document.getElementById('aiTutorModal');
+
+// Global variable to store conversation history for the current session
+let currentConversation = [];
+let currentCardTitle = ""; // To store the title of the card being discussed
+
+// Function to render simple markdown bold (**) and headings (###) to HTML
+function renderMarkdown(text) {
+    // Convert ### Headings to <h3>, must be at the start of a line
+    text = text.replace(/^###\s*(.*)$/gm, '<h3>$1</h3>');
+    // Convert **bold** to <strong>bold</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Replace all remaining newlines with <br>
+    text = text.replace(/\n/g, '<br>');
+    return text;
+}
+
+// 顯示總表 modal
+function showSummary() {
+  summaryModal.style.display = 'block';
+}
+
+// 隱藏總表 modal
+function hideSummary() {
+  summaryModal.style.display = 'none';
+}
+
+// 顯示全螢幕卡片 modal
+function showCardFullscreen(cardElement) {
+    const fullscreenCardContent = document.getElementById('fullscreenCardContent');
+    // 複製除了按鈕以外的所有內容
+    let contentToCopy = '';
+    for(const child of cardElement.children){
+        if(!child.classList.contains('ai-tutor-btn')){
+            contentToCopy += child.outerHTML;
+        }
+    }
+    fullscreenCardContent.innerHTML = contentToCopy;
+    fullscreenModal.style.display = 'block';
+}
+
+
+// 隱藏全螢幕卡片 modal
+function hideFullscreenCard() {
+    fullscreenModal.style.display = 'none';
+}
+
+// 從全螢幕卡片中顯示總表
+function showSummaryFromCard() {
+    hideFullscreenCard(); 
+    showSummary();      
+}
+
+// 隱藏 AI 家教 modal
+function hideAiTutorModal() {
+    aiTutorModal.style.display = 'none';
+}
+
+// 呼叫 AI 家教 API 進行初始解釋
+async function getAITutorExplanation(event) {
+    event.stopPropagation(); // 阻止事件冒泡，避免觸發卡片的全螢幕點擊
+
+    const card = event.target.closest('.card');
+    currentCardTitle = card.querySelector('h2').textContent.split('. ')[1];
+    const aiChatHistoryEl = document.getElementById('aiChatHistory');
+    const aiTutorTitleEl = document.getElementById('aiTutorTitle');
+    const userQuestionEl = document.getElementById('userQuestion');
+    const sendQuestionBtn = document.getElementById('sendQuestionBtn');
+
+    aiTutorTitleEl.textContent = `AI 自動化家教: ${currentCardTitle}`;
+    aiChatHistoryEl.innerHTML = `<div class="loader-container" id="initialLoader"><div class="loader"></div><p style="text-align: center;">正在呼叫 AI 中，請稍候...</p></div>`;
+    aiTutorModal.style.display = 'block';
+
+    userQuestionEl.disabled = true;
+    sendQuestionBtn.disabled = true;
+    currentConversation = []; // Reset conversation for a new card
+
+    const initialPrompt = `你是一個 n8n 自動化工作流程的專家。請用台灣職場人士聽得懂的方式，簡短但清楚地解釋一下'${currentCardTitle}'這個自動化應用。請包含以下三點：\n1. 這是什麼：用簡單的比喻或定義說明。\n2. 為什麼重要：在房地產仲介或代書事務所中，它通常用來解決什麼痛點或提升什麼效率。\n3. 自動化範例：提供一個除了卡片上以外的、更簡單或不同的 n8n 自動化流程概念範例來加深理解 (可以只用文字描述流程步驟)。`;
+
+    currentConversation.push({ role: "user", content: initialPrompt });
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                messages: currentConversation // Send full conversation history
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API 請求失敗: ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        const aiContent = data.choices[0].message.content;
+        currentConversation.push({ role: "assistant", content: aiContent });
+
+        // Remove initial loader and display AI's first response
+        const initialLoader = document.getElementById('initialLoader');
+        if (initialLoader) initialLoader.remove();
+        aiChatHistoryEl.innerHTML = `<div class="ai-message"><strong>AI 自動化家教:</strong><br>${renderMarkdown(aiContent)}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    } catch (error) {
+        console.error("AI Tutor API Error:", error);
+        const initialLoader = document.getElementById('initialLoader');
+        if (initialLoader) initialLoader.remove();
+        aiChatHistoryEl.innerHTML = `<div class="error-message">抱歉，呼叫 AI 失敗了。<br>錯誤訊息: ${error.message}<br><br>請檢查您的網路連線或 API 金鑰是否正確，並稍後再試。</div>`;
+    } finally {
+        userQuestionEl.disabled = false;
+        sendQuestionBtn.disabled = false;
+        userQuestionEl.focus(); // Focus on the input field for next question
+    }
+}
+
+// 傳送使用者問題並獲取 AI 回覆
+async function sendUserQuestion() {
+    const userQuestionEl = document.getElementById('userQuestion');
+    const aiChatHistoryEl = document.getElementById('aiChatHistory');
+    const sendQuestionBtn = document.getElementById('sendQuestionBtn');
+
+    const question = userQuestionEl.value.trim();
+    if (!question) return;
+
+    // Display user's question
+    aiChatHistoryEl.innerHTML += `<div class="user-message"><strong>你:</strong> ${question}</div>`;
+    userQuestionEl.value = ''; // Clear input
+    aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    currentConversation.push({ role: "user", content: question });
+
+    // Show loading indicator
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerHTML = `<div class="loader-container" id="chatLoader"><div class="loader"></div><p style="text-align: center;">AI 正在思考中...</p></div>`;
+    aiChatHistoryEl.appendChild(loadingDiv);
+    aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom again
+
+    userQuestionEl.disabled = true;
+    sendQuestionBtn.disabled = true;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                messages: currentConversation
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API 請求失敗: ${response.status} - ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        const aiContent = data.choices[0].message.content;
+        currentConversation.push({ role: "assistant", content: aiContent });
+
+        // Remove loading indicator
+        const chatLoader = document.getElementById('chatLoader');
+        if (chatLoader) chatLoader.remove();
+        // Display AI's response
+        aiChatHistoryEl.innerHTML += `<div class="ai-message"><strong>AI 自動化家教:</strong><br>${renderMarkdown(aiContent)}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    } catch (error) {
+        console.error("AI Tutor API Error during sendUserQuestion:", error);
+        const chatLoader = document.getElementById('chatLoader');
+        if (chatLoader) chatLoader.remove();
+        aiChatHistoryEl.innerHTML += `<div class="error-message"><strong>錯誤:</strong> 抱歉，AI 回覆失敗了。<br>錯誤訊息: ${error.message}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+    } finally {
+        userQuestionEl.disabled = false;
+        sendQuestionBtn.disabled = false;
+        userQuestionEl.focus(); // Focus on the input field for next question
+    }
+}
+
+
+// 當使用者點擊 modal 外部時，關閉 modal
+window.onclick = function(event) {
+  if (event.target == summaryModal) {
+    hideSummary();
+  }
+  if (event.target == fullscreenModal) {
+    hideFullscreenCard();
+  }
+  if (event.target == aiTutorModal) {
+    hideAiTutorModal();
+  }
+}
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>房地產仲介與代書自動化應用 (AI家教版)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding-top: 80px; /* 為固定按鈕留出空間 */
+  }
+  .toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f0f2f5;
+    padding: 15px 0;
+    text-align: center;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  #summaryBtn {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  #summaryBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    padding-bottom: 40px; /* [修復] 新增底部間距，避免最後一排卡片被裁切 */
+  }
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 300px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+  /* 簡化結構，移除 .card-content */
+  .card h2 {
+    color: #333;
+    font-size: 1.2em;
+    margin-top: 0;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+  }
+  .card p {
+    color: #555;
+    font-size: 0.9em;
+    line-height: 1.6;
+    flex-grow: 1; /* 讓 p 標籤填滿多餘空間 */
+  }
+  .card pre {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.85em;
+  }
+
+  .ai-tutor-btn {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #ff9800; /* 橘色 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+  }
+  .ai-tutor-btn:hover {
+      background-color: #f57c00;
+  }
+
+  /* Modal (彈出視窗) 樣式 */
+  .modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 25px 30px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: fadeIn 0.5s;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  .close-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .close-btn:hover,
+  .close-btn:focus {
+    color: black;
+    text-decoration: none;
+  }
+  #summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  #summaryTable th, #summaryTable td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  #summaryTable th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  #summaryTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  #summaryTable tr:hover {
+    background-color: #ddd;
+  }
+  
+  /* 全螢幕卡片 Modal */
+  #fullscreenCardModal .modal-content {
+    max-width: 600px; /* 調整全螢幕卡片的寬度 */
+    padding-bottom: 80px; /* 為按鈕留出空間 */
+  }
+  #cardSummaryBtn {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  #cardSummaryBtn:hover {
+    background-color: #218838;
+    transform: translateX(-50%) translateY(-1px);
+  }
+
+  /* AI 家教 Modal */
+  #aiTutorModal .modal-content {
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* 限制AI家教視窗最大高度 */
+  }
+  #aiChatHistory {
+    margin-top: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 20px;
+    min-height: 200px;
+    flex-grow: 1; /* 讓聊天記錄區塊自動佔滿可用空間 */
+    overflow-y: auto; /* 啟用滾動條 */
+    line-height: 1.7;
+    font-family: 'Segoe UI', sans-serif;
+    color: #343a40;
+    margin-bottom: 15px; /* 與輸入框的間距 */
+    border: 1px solid #e0e0e0;
+  }
+
+  /* Chat message styling */
+  .user-message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #e6f7ff;
+    border-radius: 8px;
+    text-align: right;
+    color: #0056b3;
+    word-break: break-word;
+  }
+  .ai-message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    text-align: left;
+    color: #343a40;
+    word-break: break-word;
+  }
+  .ai-message h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #007bff;
+      border-bottom: 1px solid #cce5ff;
+      padding-bottom: 5px;
+  }
+  .error-message {
+      color: #dc3545;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      word-break: break-word;
+  }
+
+  /* 讀取中動畫 */
+  .loader-container {
+      text-align: center;
+      margin: 20px auto;
+  }
+  .loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #ff9800;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* User input area for AI Tutor */
+  #userQuestion {
+    width: calc(100% - 22px); /* Adjust for padding and border */
+    min-height: 60px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    font-size: 0.9em;
+  }
+  #sendQuestionBtn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+  }
+  #sendQuestionBtn:hover {
+    background-color: #0056b3;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- 按鈕工具列 -->
+  <div class="toolbar">
+    <button id="summaryBtn" onclick="showSummary()">顯示總表</button>
+  </div>
+
+  <!-- 卡片容器 -->
+  <div class="card-container">
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>1. 網站表單自動處理</h2>
+        <p>當潛在客戶在公司網站上填寫「預約看房」或「房屋估價」表單時，n8n 自動將資料寫入 Google Sheets、CRM 系統，並透過 LINE Notify 或 Slack 通知指定業務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>2. Facebook 名單型廣告整合</h2>
+        <p>當有人在 Facebook 提交名單型廣告後，n8n 自動抓取該潛在客戶的聯絡資訊，新增到電子報系統 (如 Mailchimp)，並在 CRM 中建立新的潛在客戶檔案。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>3. 社群媒體監控</h2>
+        <p>設定關鍵字 (例如「尋找 [地區] 三房」)，n8n 自動監控 PTT、Dcard 或特定社團的貼文，一旦發現符合條件的內容，就發送通知給開發團隊。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>4. 自動發布物件資訊</h2>
+        <p>在 Google Sheets 中管理物件資料，當一個新物件的狀態標記為「可發布」時，n8n 自動將物件的圖文資訊格式化，並發布到公司的 Facebook 粉絲專頁、LINE 官方帳號。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>5. 競爭對手物件監控</h2>
+        <p>定時 (例如每天早上 9 點) 爬取 591 或其他房產網站上，指定區域內的新增物件，並將摘要資訊彙整成報告，發送到業務團隊的 Email。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>6. 內容行銷自動化</h2>
+        <p>當公司部落格 (WordPress) 發布一篇新文章 (例如「買房注意事項」) 後，n8n 自動將文章連結分享到多個社群平台。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>7. 潛在客戶自動評分</h2>
+        <p>根據客戶填寫的表單內容 (例如預算、地區、需求房型)，n8n 自動進行評分，高分客戶優先指派給資深業務，並在 Trello 或 Asana 中建立任務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>8. LINE 官方帳號關鍵字回覆</h2>
+        <p>客戶在 LINE 官方帳號輸入特定關鍵字 (例如「最新物件」、「買房流程」)，n8n 觸發預設好的回覆，提供相關資訊或文件。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>9. Google Maps 商家評論通知</h2>
+        <p>當公司收到新的 Google Maps 評論時，n8n 自動將評論內容和星級發送到內部通訊群組，以便團隊能即時回應。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>10. 自動化 Email Drip Campaign</h2>
+        <p>新客戶加入郵件列表後，n8n 自動觸發一系列預設好的 Email，例如第一天發送歡迎信，第三天發送服務介紹，第七天發送精選物件。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>11. 預約看房行程同步</h2>
+        <p>當業務在 Google Calendar 安排一個「帶看」行程並邀請客戶後，n8n 自動在 CRM 中記錄這次的活動。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>12. 看房前自動提醒</h2>
+        <p>在預定看房時間的前 24 小時與前 1 小時，n8n 自動透過 SMS 簡訊或 LINE 發送提醒給客戶，包含時間、地址和業務聯絡方式。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>13. 看房後意見追蹤</h2>
+        <p>看房行程結束後 3 小時，n8n 自動發送一封 Email 或訊息給客戶，詢問他們的看後感想，並附上一個簡單的回饋表單連結。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>14. 生日/紀念日自動祝福</h2>
+        <p>n8n 每天檢查 CRM 中的客戶生日，並自動發送客製化的生日祝福 Email 或 LINE 訊息，維繫長期關係。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>15. 客戶狀態自動更新</h2>
+        <p>當客戶回覆 Email 表示「暫不考慮」時，n8n 可以透過關鍵字識別，自動在 CRM 中將該客戶的狀態更新為「暫緩」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>16. 未聯繫客戶提醒</h2>
+        <p>n8n 定期掃描 CRM，找出超過 14 天未聯繫的潛在客戶，並在 Slack 中提醒負責的業務進行追蹤。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>17. 通話紀錄自動登錄</h2>
+        <p>(需搭配支援的網路電話系統) 當業務完成一通與客戶的通話後，n8n 自動將通話時間、長度和錄音連結記錄到 CRM 的客戶活動歷史中。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>18. 客戶文件收集提醒</h2>
+        <p>對於已進入流程的客戶，n8n 可根據 Trello 或 Google Sheets 中的 checklist，自動發送提醒給客戶：「您好，我們還需要您的身分證影本」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>19. 會議記錄自動整理</h2>
+        <p>使用語音轉文字工具 (如 aiko) 記錄會議內容，n8n 在會議結束後自動抓取文字稿，透過 AI (如 OpenAI) 進行摘要，並將摘要存檔至客戶的 Google Drive 資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>20. LINE 訊息整合 CRM</h2>
+        <p>將公司的 LINE 官方帳號與 n8n 串接，讓業務可以透過特定指令，直接在 LINE 中查詢或新增 CRM 的客戶資料，無需切換 APP。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>21. 新案件自動開案</h2>
+        <p>當收到新案件委託表單時，n8n 自動在專案管理工具 (如 Asana) 中建立一個新案件，並套用標準的「不動產買賣登記流程」任務範本。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>22. 標準化文件夾建立</h2>
+        <p>新案件成立後，n8n 自動在 Google Drive 或 Dropbox 中，以「[案號]_[客戶姓名]」為名建立主資料夾，並在其中生成「身分證明」、「契約文件」、「稅務文件」、「銀行文件」等標準子資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>23. 案件進度自動通知</h2>
+        <p>當代書在 Trello 或 Asana 中將案件卡片從「用印」拖到「完稅」階段時，n8n 自動發送一封進度更新 Email 或 LINE 訊息給買賣雙方及仲介。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>24. 關鍵時程自動提醒</h2>
+        <p>案件成立時，根據簽約日期，n8n 自動計算出「報稅截止日」、「過戶登記預計完成日」、「交屋日」等關鍵日期，並在 Google Calendar 中建立行事曆事件與提醒。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>25. 每日待辦事項彙報</h2>
+        <p>n8n 每天早上 8 點，自動彙整所有案件中「今天到期」的任務，並將清單發送到代書助理的 Slack 或 LINE。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>26. 謄本申請自動化</h2>
+        <p>(需搭配政府網站 API 或 RPA 工具) 當收到申請指令時，n8n 自動登入地政事務所網站，輸入地號/建號，申請電子謄本，並在下載完成後存入對應的案件資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>27. 稅額試算通知</h2>
+        <p>當契稅、增值稅等稅單核發下來，代書助理將金額填入 Google Sheets 後，n8n 自動產生一個包含費用明細的通知，發送給客戶請其準備款項。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>28. 銀行對保聯絡自動化</h2>
+        <p>當案件進度來到「銀行對保」階段，n8n 自動發送一封標準化的 Email 給銀行貸款專員，提供案件編號與客戶聯絡方式，請求安排對保事宜。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>29. 案件歸檔自動化</h2>
+        <p>當案件狀態更新為「已結案」時，n8n 自動將該案件在 Google Drive 的所有文件壓縮成一個 ZIP 檔，移動到「歸檔」資料夾，並更新案件總表的狀態。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>30. 客戶滿意度調查</h2>
+        <p>案件結案後一週，n8n 自動發送服務滿意度調查問卷給委託人，收集回饋以改善服務品質。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>31. 物件資料同步</h2>
+        <p>在一個主要的 Google Sheets 物件總表中更新資訊 (例如價格變更、狀態改為「已售出」)，n8n 自動將變動同步到公司網站的資料庫或其他行銷通路。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>32. 照片自動上浮水印</h2>
+        <p>當有新的物件照片上傳到指定的 Google Drive 資料夾時，n8n 自動為所有照片加上公司 Logo 的浮水印，並存放到「發布用」資料夾。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>33. 鑰匙管理系統</h2>
+        <p>透過一個簡單的表單來借用或歸還物件鑰匙，n8n 自動更新鑰匙狀態總表，並在有人借用鑰匙超過 3 天未歸還時發出提醒。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>34. 費用請款自動化</h2>
+        <p>員工透過表單提交費用申請 (例如交通費、廣告費) 並上傳收據照片，n8n 自動將申請記錄到會計用的 Google Sheets，並通知主管審批。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>35. 佣金計算自動化</h2>
+        <p>當一個案件結案並在系統中輸入成交金額後，n8n 根據預設的佣金規則，自動計算出仲介費、業務獎金、代書費等，並記錄到財務報表中。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>36. 每日業績戰報</h2>
+        <p>n8n 每天定時抓取 CRM 和成交記錄表的數據，自動生成當日的業績摘要（例如新增潛客數、帶看次數、成交金額），並發布到公司內部群組。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>37. 合約範本自動生成</h2>
+        <p>業務透過表單輸入買賣雙方、物件、價格等基本資訊，n8n 自動將這些資訊填入一個 Google Docs 的合約範本中，生成一份草稿合約。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>38. 輪值表自動提醒</h2>
+        <p>根據預先排好的輪值表 (Google Sheets)，n8n 每天自動提醒當天的值日生：「您好，今天輪到您負責辦公室開門與環境維護」。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>39. 法規新聞監控</h2>
+        <p>n8n 定期監控內政部地政司或相關法規網站，若有新的函釋或法規更新，自動將標題和連結發送到法務或代書團隊的頻道。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>40. IT 系統監控</h2>
+        <p>n8n 定時檢查公司網站是否能正常訪問，如果出現錯誤或無法連線，立即透過 Telegram 或簡訊通知 IT 管理員。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>41. 交屋 checklist 自動發送</h2>
+        <p>在交屋日的前三天，n8n 自動發送一份「交屋注意事項 checklist」給買方，提醒他們需要檢查的項目。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>42. 感謝信與推薦請求</h2>
+        <p>交屋完成後，n8n 自動發送感謝信，並在信中附上一個連結，邀請客戶在 Google 商家或公司臉書上留下好評。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>43. 客戶資料歸檔</h2>
+        <p>將已成交的客戶從「活躍客戶」列表中移至「已成交客戶」列表，並為其打上標籤，方便未來進行再行銷。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>44. 年度房屋稅/地價稅提醒</h2>
+        <p>n8n 在每年房屋稅、地價稅開徵前，自動發送提醒訊息給所有已成交客戶，提醒他們記得繳納，這是一個貼心的小服務。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>45. 「喬遷之喜」週年紀念</h2>
+        <p>在客戶交屋滿一年的時候，n8n 自動發送一封「Happy House Anniversary!」的祝賀郵件，強化客戶記憶。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>46. 行銷活動成效報告</h2>
+        <p>n8n 每週自動匯總來自 Facebook 廣告、Google Analytics 和 CRM 的數據，生成一份行銷管道成效報告，顯示每個管道帶來了多少潛在客戶及成交率。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>47. 業務績效儀表板數據彙整</h2>
+        <p>定時將各業務的帶看數、洽談中案件數、成交量等數據，從不同系統中抓取並整合到一個 Google Sheets，供 Google Data Studio 製作視覺化儀表板。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>48. 案件處理時長分析</h2>
+        <p>n8n 自動計算每個結案案件從「收件」到「交屋」所花費的天數，並進行統計分析，幫助管理者找出流程瓶頸。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>49. 客戶來源分析</h2>
+        <p>當案件成交時，n8n 自動根據 CRM 中記錄的客戶來源（例如：網路、老客戶介紹、路過客），生成客戶來源的圓餅圖，幫助公司了解哪個管道最有效。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+    <div class="card" onclick="showCardFullscreen(this)">
+        <h2>50. 每月財務摘要</h2>
+        <p>n8n 每月 1 號自動抓取上個月的總收入、總支出、佣金發放總額等數據，生成一份簡要的財務報告，發送給公司管理層。</p>
+        <button class="ai-tutor-btn" onclick="getAITutorExplanation(event)">AI自動化教學</button>
+    </div>
+    
+
+  </div>
+
+  <!-- 總表 Modal -->
+  <div id="summaryModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideSummary()">&times;</span>
+      <h2 style="text-align: center;">n8n 房地產仲介與代書自動化應用總表</h2>
+      <table id="summaryTable">
+        <thead>
+          <tr>
+            <th>編號</th>
+            <th>主題</th>
+            <th>簡介</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>網站表單自動處理</td><td>當潛在客戶在公司網站上填寫「預約看房」或「房屋估價」表單時，n8n 自動將資料寫入 Google Sheets、CRM 系統，並透過 LINE Notify 或 Slack 通知指定業務。</td></tr>
+            <tr><td>2</td><td>Facebook 名單型廣告整合</td><td>當有人在 Facebook 提交名單型廣告後，n8n 自動抓取該潛在客戶的聯絡資訊，新增到電子報系統 (如 Mailchimp)，並在 CRM 中建立新的潛在客戶檔案。</td></tr>
+            <tr><td>3</td><td>社群媒體監控</td><td>設定關鍵字 (例如「尋找 [地區] 三房」)，n8n 自動監控 PTT、Dcard 或特定社團的貼文，一旦發現符合條件的內容，就發送通知給開發團隊。</td></tr>
+            <tr><td>4</td><td>自動發布物件資訊</td><td>在 Google Sheets 中管理物件資料，當一個新物件的狀態標記為「可發布」時，n8n 自動將物件的圖文資訊格式化，並發布到公司的 Facebook 粉絲專頁、LINE 官方帳號。</td></tr>
+            <tr><td>5</td><td>競爭對手物件監控</td><td>定時 (例如每天早上 9 點) 爬取 591 或其他房產網站上，指定區域內的新增物件，並將摘要資訊彙整成報告，發送到業務團隊的 Email。</td></tr>
+            <tr><td>6</td><td>內容行銷自動化</td><td>當公司部落格 (WordPress) 發布一篇新文章 (例如「買房注意事項」) 後，n8n 自動將文章連結分享到多個社群平台。</td></tr>
+            <tr><td>7</td><td>潛在客戶自動評分</td><td>根據客戶填寫的表單內容 (例如預算、地區、需求房型)，n8n 自動進行評分，高分客戶優先指派給資深業務，並在 Trello 或 Asana 中建立任務。</td></tr>
+            <tr><td>8</td><td>LINE 官方帳號關鍵字回覆</td><td>客戶在 LINE 官方帳號輸入特定關鍵字 (例如「最新物件」、「買房流程」)，n8n 觸發預設好的回覆，提供相關資訊或文件。</td></tr>
+            <tr><td>9</td><td>Google Maps 商家評論通知</td><td>當公司收到新的 Google Maps 評論時，n8n 自動將評論內容和星級發送到內部通訊群組，以便團隊能即時回應。</td></tr>
+            <tr><td>10</td><td>自動化 Email Drip Campaign</td><td>新客戶加入郵件列表後，n8n 自動觸發一系列預設好的 Email，例如第一天發送歡迎信，第三天發送服務介紹，第七天發送精選物件。</td></tr>
+            <tr><td>11</td><td>預約看房行程同步</td><td>當業務在 Google Calendar 安排一個「帶看」行程並邀請客戶後，n8n 自動在 CRM 中記錄這次的活動。</td></tr>
+            <tr><td>12</td><td>看房前自動提醒</td><td>在預定看房時間的前 24 小時與前 1 小時，n8n 自動透過 SMS 簡訊或 LINE 發送提醒給客戶，包含時間、地址和業務聯絡方式。</td></tr>
+            <tr><td>13</td><td>看房後意見追蹤</td><td>看房行程結束後 3 小時，n8n 自動發送一封 Email 或訊息給客戶，詢問他們的看後感想，並附上一個簡單的回饋表單連結。</td></tr>
+            <tr><td>14</td><td>生日/紀念日自動祝福</td><td>n8n 每天檢查 CRM 中的客戶生日，並自動發送客製化的生日祝福 Email 或 LINE 訊息，維繫長期關係。</td></tr>
+            <tr><td>15</td><td>客戶狀態自動更新</td><td>當客戶回覆 Email 表示「暫不考慮」時，n8n 可以透過關鍵字識別，自動在 CRM 中將該客戶的狀態更新為「暫緩」。</td></tr>
+            <tr><td>16</td><td>未聯繫客戶提醒</td><td>n8n 定期掃描 CRM，找出超過 14 天未聯繫的潛在客戶，並在 Slack 中提醒負責的業務進行追蹤。</td></tr>
+            <tr><td>17</td><td>通話紀錄自動登錄</td><td>(需搭配支援的網路電話系統) 當業務完成一通與客戶的通話後，n8n 自動將通話時間、長度和錄音連結記錄到 CRM 的客戶活動歷史中。</td></tr>
+            <tr><td>18</td><td>客戶文件收集提醒</td><td>對於已進入流程的客戶，n8n 可根據 Trello 或 Google Sheets 中的 checklist，自動發送提醒給客戶：「您好，我們還需要您的身分證影本」。</td></tr>
+            <tr><td>19</td><td>會議記錄自動整理</td><td>使用語音轉文字工具 (如 aiko) 記錄會議內容，n8n 在會議結束後自動抓取文字稿，透過 AI (如 OpenAI) 進行摘要，並將摘要存檔至客戶的 Google Drive 資料夾。</td></tr>
+            <tr><td>20</td><td>LINE 訊息整合 CRM</td><td>將公司的 LINE 官方帳號與 n8n 串接，讓業務可以透過特定指令，直接在 LINE 中查詢或新增 CRM 的客戶資料，無需切換 APP。</td></tr>
+            <tr><td>21</td><td>新案件自動開案</td><td>當收到新案件委託表單時，n8n 自動在專案管理工具 (如 Asana) 中建立一個新案件，並套用標準的「不動產買賣登記流程」任務範本。</td></tr>
+            <tr><td>22</td><td>標準化文件夾建立</td><td>新案件成立後，n8n 自動在 Google Drive 或 Dropbox 中，以「[案號]_[客戶姓名]」為名建立主資料夾，並在其中生成「身分證明」、「契約文件」、「稅務文件」、「銀行文件」等標準子資料夾。</td></tr>
+            <tr><td>23</td><td>案件進度自動通知</td><td>當代書在 Trello 或 Asana 中將案件卡片從「用印」拖到「完稅」階段時，n8n 自動發送一封進度更新 Email 或 LINE 訊息給買賣雙方及仲介。</td></tr>
+            <tr><td>24</td><td>關鍵時程自動提醒</td><td>案件成立時，根據簽約日期，n8n 自動計算出「報稅截止日」、「過戶登記預計完成日」、「交屋日」等關鍵日期，並在 Google Calendar 中建立行事曆事件與提醒。</td></tr>
+            <tr><td>25</td><td>每日待辦事項彙報</td><td>n8n 每天早上 8 點，自動彙整所有案件中「今天到期」的任務，並將清單發送到代書助理的 Slack 或 LINE。</td></tr>
+            <tr><td>26</td><td>謄本申請自動化</td><td>(需搭配政府網站 API 或 RPA 工具) 當收到申請指令時，n8n 自動登入地政事務所網站，輸入地號/建號，申請電子謄本，並在下載完成後存入對應的案件資料夾。</td></tr>
+            <tr><td>27</td><td>稅額試算通知</td><td>當契稅、增值稅等稅單核發下來，代書助理將金額填入 Google Sheets 後，n8n 自動產生一個包含費用明細的通知，發送給客戶請其準備款項。</td></tr>
+            <tr><td>28</td><td>銀行對保聯絡自動化</td><td>當案件進度來到「銀行對保」階段，n8n 自動發送一封標準化的 Email 給銀行貸款專員，提供案件編號與客戶聯絡方式，請求安排對保事宜。</td></tr>
+            <tr><td>29</td><td>案件歸檔自動化</td><td>當案件狀態更新為「已結案」時，n8n 自動將該案件在 Google Drive 的所有文件壓縮成一個 ZIP 檔，移動到「歸檔」資料夾，並更新案件總表的狀態。</td></tr>
+            <tr><td>30</td><td>客戶滿意度調查</td><td>案件結案後一週，n8n 自動發送服務滿意度調查問卷給委託人，收集回饋以改善服務品質。</td></tr>
+            <tr><td>31</td><td>物件資料同步</td><td>在一個主要的 Google Sheets 物件總表中更新資訊 (例如價格變更、狀態改為「已售出」)，n8n 自動將變動同步到公司網站的資料庫或其他行銷通路。</td></tr>
+            <tr><td>32</td><td>照片自動上浮水印</td><td>當有新的物件照片上傳到指定的 Google Drive 資料夾時，n8n 自動為所有照片加上公司 Logo 的浮水印，並存放到「發布用」資料夾。</td></tr>
+            <tr><td>33</td><td>鑰匙管理系統</td><td>透過一個簡單的表單來借用或歸還物件鑰匙，n8n 自動更新鑰匙狀態總表，並在有人借用鑰匙超過 3 天未歸還時發出提醒。</td></tr>
+            <tr><td>34</td><td>費用請款自動化</td><td>員工透過表單提交費用申請 (例如交通費、廣告費) 並上傳收據照片，n8n 自動將申請記錄到會計用的 Google Sheets，並通知主管審批。</td></tr>
+            <tr><td>35</td><td>佣金計算自動化</td><td>當一個案件結案並在系統中輸入成交金額後，n8n 根據預設的佣金規則，自動計算出仲介費、業務獎金、代書費等，並記錄到財務報表中。</td></tr>
+            <tr><td>36</td><td>每日業績戰報</td><td>n8n 每天定時抓取 CRM 和成交記錄表的數據，自動生成當日的業績摘要（例如新增潛客數、帶看次數、成交金額），並發布到公司內部群組。</td></tr>
+            <tr><td>37</td><td>合約範本自動生成</td><td>業務透過表單輸入買賣雙方、物件、價格等基本資訊，n8n 自動將這些資訊填入一個 Google Docs 的合約範本中，生成一份草稿合約。</td></tr>
+            <tr><td>38</td><td>輪值表自動提醒</td><td>根據預先排好的輪值表 (Google Sheets)，n8n 每天自動提醒當天的值日生：「您好，今天輪到您負責辦公室開門與環境維護」。</td></tr>
+            <tr><td>39</td><td>法規新聞監控</td><td>n8n 定期監控內政部地政司或相關法規網站，若有新的函釋或法規更新，自動將標題和連結發送到法務或代書團隊的頻道。</td></tr>
+            <tr><td>40</td><td>IT 系統監控</td><td>n8n 定時檢查公司網站是否能正常訪問，如果出現錯誤或無法連線，立即透過 Telegram 或簡訊通知 IT 管理員。</td></tr>
+            <tr><td>41</td><td>交屋 checklist 自動發送</td><td>在交屋日的前三天，n8n 自動發送一份「交屋注意事項 checklist」給買方，提醒他們需要檢查的項目。</td></tr>
+            <tr><td>42</td><td>感謝信與推薦請求</td><td>交屋完成後，n8n 自動發送感謝信，並在信中附上一個連結，邀請客戶在 Google 商家或公司臉書上留下好評。</td></tr>
+            <tr><td>43</td><td>客戶資料歸檔</td><td>將已成交的客戶從「活躍客戶」列表中移至「已成交客戶」列表，並為其打上標籤，方便未來進行再行銷。</td></tr>
+            <tr><td>44</td><td>年度房屋稅/地價稅提醒</td><td>n8n 在每年房屋稅、地價稅開徵前，自動發送提醒訊息給所有已成交客戶，提醒他們記得繳納，這是一個貼心的小服務。</td></tr>
+            <tr><td>45</td><td>「喬遷之喜」週年紀念</td><td>在客戶交屋滿一年的時候，n8n 自動發送一封「Happy House Anniversary!」的祝賀郵件，強化客戶記憶。</td></tr>
+            <tr><td>46</td><td>行銷活動成效報告</td><td>n8n 每週自動匯總來自 Facebook 廣告、Google Analytics 和 CRM 的數據，生成一份行銷管道成效報告，顯示每個管道帶來了多少潛在客戶及成交率。</td></tr>
+            <tr><td>47</td><td>業務績效儀表板數據彙整</td><td>定時將各業務的帶看數、洽談中案件數、成交量等數據，從不同系統中抓取並整合到一個 Google Sheets，供 Google Data Studio 製作視覺化儀表板。</td></tr>
+            <tr><td>48</td><td>案件處理時長分析</td><td>n8n 自動計算每個結案案件從「收件」到「交屋」所花費的天數，並進行統計分析，幫助管理者找出流程瓶頸。</td></tr>
+            <tr><td>49</td><td>客戶來源分析</td><td>當案件成交時，n8n 自動根據 CRM 中記錄的客戶來源（例如：網路、老客戶介紹、路過客），生成客戶來源的圓餅圖，幫助公司了解哪個管道最有效。</td></tr>
+            <tr><td>50</td><td>每月財務摘要</td><td>n8n 每月 1 號自動抓取上個月的總收入、總支出、佣金發放總額等數據，生成一份簡要的財務報告，發送給公司管理層。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 全螢幕卡片 Modal -->
+  <div id="fullscreenCardModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="hideFullscreenCard()">&times;</span>
+        <div id="fullscreenCardContent">
+            <!-- 這裡會動態填入卡片內容 -->
+        </div>
+        <button id="cardSummaryBtn" onclick="showSummaryFromCard()">顯示總表</button>
+    </div>
+  </div>
+
+  <!-- AI 家教 Modal -->
+  <div id="aiTutorModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideAiTutorModal()">&times;</span>
+      <h2 id="aiTutorTitle">AI 自動化家教</h2>
+      <div id="aiChatHistory">
+        <!-- Chat messages will be appended here -->
+      </div>
+      <div style="margin-top: 15px;">
+        <textarea id="userQuestion" placeholder="請輸入您的問題..." ></textarea>
+        <button id="sendQuestionBtn" onclick="sendUserQuestion()">
+          傳送問題
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+// API 設定
+// const apiKey = "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"; // 請替換成您的實際 API 金鑰
+// const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+const apiKey = "AIzaSyAZP2k3NB42u3jG2USy1_GjOc9oQS2QYS8"; // 請替換成您的實際 API 金鑰
+const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+// 獲取 modal 元素
+var summaryModal = document.getElementById('summaryModal');
+var fullscreenModal = document.getElementById('fullscreenCardModal');
+var aiTutorModal = document.getElementById('aiTutorModal');
+
+// Global variable to store conversation history for the current session
+let currentConversation = [];
+let currentCardTitle = ""; // To store the title of the card being discussed
+
+// Function to render simple markdown bold (**) and headings (###) to HTML
+function renderMarkdown(text) {
+    // Convert ### Headings to <h3>, must be at the start of a line
+    text = text.replace(/^###\s*(.*)$/gm, '<h3>$1</h3>');
+    // Convert **bold** to <strong>bold</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Replace all remaining newlines with <br>
+    text = text.replace(/\n/g, '<br>');
+    return text;
+}
+
+// 顯示總表 modal
+function showSummary() {
+  summaryModal.style.display = 'block';
+}
+
+// 隱藏總表 modal
+function hideSummary() {
+  summaryModal.style.display = 'none';
+}
+
+// 顯示全螢幕卡片 modal
+function showCardFullscreen(cardElement) {
+    const fullscreenCardContent = document.getElementById('fullscreenCardContent');
+    // 複製除了按鈕以外的所有內容
+    let contentToCopy = '';
+    for(const child of cardElement.children){
+        if(!child.classList.contains('ai-tutor-btn')){
+            contentToCopy += child.outerHTML;
+        }
+    }
+    fullscreenCardContent.innerHTML = contentToCopy;
+    fullscreenModal.style.display = 'block';
+}
+
+
+// 隱藏全螢幕卡片 modal
+function hideFullscreenCard() {
+    fullscreenModal.style.display = 'none';
+}
+
+// 從全螢幕卡片中顯示總表
+function showSummaryFromCard() {
+    hideFullscreenCard(); 
+    showSummary();      
+}
+
+// 隱藏 AI 家教 modal
+function hideAiTutorModal() {
+    aiTutorModal.style.display = 'none';
+}
+
+// 呼叫 AI 家教 API 進行初始解釋
+async function getAITutorExplanation(event) {
+    event.stopPropagation(); // 阻止事件冒泡，避免觸發卡片的全螢幕點擊
+
+    const card = event.target.closest('.card');
+    currentCardTitle = card.querySelector('h2').textContent.split('. ')[1];
+    const aiChatHistoryEl = document.getElementById('aiChatHistory');
+    const aiTutorTitleEl = document.getElementById('aiTutorTitle');
+    const userQuestionEl = document.getElementById('userQuestion');
+    const sendQuestionBtn = document.getElementById('sendQuestionBtn');
+
+    aiTutorTitleEl.textContent = `AI 自動化家教: ${currentCardTitle}`;
+    aiChatHistoryEl.innerHTML = `<div class="loader-container" id="initialLoader"><div class="loader"></div><p style="text-align: center;">正在呼叫 AI 中，請稍候...</p></div>`;
+    aiTutorModal.style.display = 'block';
+
+    userQuestionEl.disabled = true;
+    sendQuestionBtn.disabled = true;
+    currentConversation = []; // Reset conversation for a new card
+
+    const initialPrompt = `你是一個 n8n 自動化工作流程的專家。請用台灣職場人士聽得懂的方式，簡短但清楚地解釋一下'${currentCardTitle}'這個自動化應用。請包含以下三點：\n1. 這是什麼：用簡單的比喻或定義說明。\n2. 為什麼重要：在房地產仲介或代書事務所中，它通常用來解決什麼痛點或提升什麼效率。\n3. 自動化範例：提供一個除了卡片上以外的、更簡單或不同的 n8n 自動化流程概念範例來加深理解 (可以只用文字描述流程步驟)。`;
+
+    currentConversation.push({ role: "user", content: initialPrompt });
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                messages: currentConversation // Send full conversation history
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API 請求失敗: ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        const aiContent = data.choices[0].message.content;
+        currentConversation.push({ role: "assistant", content: aiContent });
+
+        // Remove initial loader and display AI's first response
+        const initialLoader = document.getElementById('initialLoader');
+        if (initialLoader) initialLoader.remove();
+        aiChatHistoryEl.innerHTML = `<div class="ai-message"><strong>AI 自動化家教:</strong><br>${renderMarkdown(aiContent)}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    } catch (error) {
+        console.error("AI Tutor API Error:", error);
+        const initialLoader = document.getElementById('initialLoader');
+        if (initialLoader) initialLoader.remove();
+        aiChatHistoryEl.innerHTML = `<div class="error-message">抱歉，呼叫 AI 失敗了。<br>錯誤訊息: ${error.message}<br><br>請檢查您的網路連線或 API 金鑰是否正確，並稍後再試。</div>`;
+    } finally {
+        userQuestionEl.disabled = false;
+        sendQuestionBtn.disabled = false;
+        userQuestionEl.focus(); // Focus on the input field for next question
+    }
+}
+
+// 傳送使用者問題並獲取 AI 回覆
+async function sendUserQuestion() {
+    const userQuestionEl = document.getElementById('userQuestion');
+    const aiChatHistoryEl = document.getElementById('aiChatHistory');
+    const sendQuestionBtn = document.getElementById('sendQuestionBtn');
+
+    const question = userQuestionEl.value.trim();
+    if (!question) return;
+
+    // Display user's question
+    aiChatHistoryEl.innerHTML += `<div class="user-message"><strong>你:</strong> ${question}</div>`;
+    userQuestionEl.value = ''; // Clear input
+    aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    currentConversation.push({ role: "user", content: question });
+
+    // Show loading indicator
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerHTML = `<div class="loader-container" id="chatLoader"><div class="loader"></div><p style="text-align: center;">AI 正在思考中...</p></div>`;
+    aiChatHistoryEl.appendChild(loadingDiv);
+    aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom again
+
+    userQuestionEl.disabled = true;
+    sendQuestionBtn.disabled = true;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                messages: currentConversation
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API 請求失敗: ${response.status} - ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        const aiContent = data.choices[0].message.content;
+        currentConversation.push({ role: "assistant", content: aiContent });
+
+        // Remove loading indicator
+        const chatLoader = document.getElementById('chatLoader');
+        if (chatLoader) chatLoader.remove();
+        // Display AI's response
+        aiChatHistoryEl.innerHTML += `<div class="ai-message"><strong>AI 自動化家教:</strong><br>${renderMarkdown(aiContent)}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+
+    } catch (error) {
+        console.error("AI Tutor API Error during sendUserQuestion:", error);
+        const chatLoader = document.getElementById('chatLoader');
+        if (chatLoader) chatLoader.remove();
+        aiChatHistoryEl.innerHTML += `<div class="error-message"><strong>錯誤:</strong> 抱歉，AI 回覆失敗了。<br>錯誤訊息: ${error.message}</div>`;
+        aiChatHistoryEl.scrollTop = aiChatHistoryEl.scrollHeight; // Scroll to bottom
+    } finally {
+        userQuestionEl.disabled = false;
+        sendQuestionBtn.disabled = false;
+        userQuestionEl.focus(); // Focus on the input field for next question
+    }
+}
+
+
+// 當使用者點擊 modal 外部時，關閉 modal
+window.onclick = function(event) {
+  if (event.target == summaryModal) {
+    hideSummary();
+  }
+  if (event.target == fullscreenModal) {
+    hideFullscreenCard();
+  }
+  if (event.target == aiTutorModal) {
+    hideAiTutorModal();
+  }
+}
+</script>
+<script>
+    // 禁用右鍵選單
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // 禁用特定的組合鍵 (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U)
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+I (Elements)
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+J (Console)
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+C (Inspector)
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+        }
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && e.key === 'U') {
+            e.preventDefault();
+        }
+    });
+</script>
+</body>
+</html>
