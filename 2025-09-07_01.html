@@ -1,89 +1,461 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Top 100 AI Products and Applications by scratchinai01-gmail-com - powered by trinket.io">
-    <meta name="author" content="scratchinai01-gmail-com">
-    <meta property="og:site_name" content="trinket.io" />
-<meta property="og:title" content="Top 100 AI Products and Applications by scratchinai01-gmail-com" />
-<meta property="og:type" content="website" />
-<meta property="og:image" content="https://trinket-snapshots.trinket.io/avatar-default.png">
-<meta property="og:description" content="Top 100 AI Products and Applications by scratchinai01-gmail-com - powered by trinket.io" />
-<meta property="og:url" content="trinket.io/u/scratchinai01-gmail-com/sites/top-100-ai-products-and-applications" />
+    <title>AI 產品與應用程式精選 (科技版)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 變數與根設定 --- */
+        :root {
+            --bg-color: #0d0c22;
+            --card-bg-color: rgba(255, 255, 255, 0.05);
+            --card-border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #e0e0e0;
+            --title-color: #ffffff;
+            --description-color: #b0b0b0;
+            --glow-color-1: #00aaff;
+            --glow-color-2: #ff00ff;
+            --glow-color-3: #00ffaa;
+            --animation-speed: 30s;
+        }
 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@trinketapp">
-<meta name="twitter:title" content="Top 100 AI Products and Applications by scratchinai01-gmail-com">
-<meta name="twitter:description" content="Top 100 AI Products and Applications by scratchinai01-gmail-com - powered by trinket.io">
-<meta name="twitter:image:src" content="https://trinket-snapshots.trinket.io/avatar-default.png">
-<meta name="twitter:domain" content="trinket.io">
+        /* --- 動態極光背景 --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 15% 35%, var(--glow-color-1) 0%, transparent 25%),
+                        radial-gradient(circle at 85% 65%, var(--glow-color-2) 0%, transparent 25%),
+                        radial-gradient(circle at 50% 50%, var(--glow-color-3) 0%, transparent 20%);
+            filter: blur(100px);
+            z-index: -2;
+            animation: move-aurora var(--animation-speed) infinite alternate;
+        }
 
-    <title>Top 100 AI Products and Applications by scratchinai01-gmail-com</title>
-    <link rel="icon" href="/img/icons/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/cache-prefix-a35684d8/img/icons/apple-touch-icon-144x144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/cache-prefix-a35684d8/img/icons/apple-touch-icon-114x114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/cache-prefix-a35684d8/img/icons/apple-touch-icon-72x72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/cache-prefix-a35684d8/img/icons/apple-touch-icon-precomposed.png">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style type="text/css">
-      body, html {
-        margin : 0;
-        padding : 0;
-        height : 100%;
-        overflow : hidden;
-      }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 20%, var(--glow-color-3) 0%, transparent 20%),
+                        radial-gradient(circle at 30% 80%, var(--glow-color-1) 0%, transparent 25%);
+            filter: blur(80px);
+            z-index: -2;
+            animation: move-aurora-2 var(--animation-speed) infinite alternate;
+        }
 
-      #container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
-      #content {
-        position : absolute;
-        left : 0;
-        right : 0;
-        bottom : 0;
-        top : 0;
-      }
-      #report-this {
-        position: absolute;
-        right: 15px;
-        bottom: 15px;
-      }
-      #report-link:visited {
-        color: #0077db;
-      }
+        @keyframes move-aurora {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            100% { transform: translate(5%, 10%) rotate(10deg) scale(1.5); }
+        }
+        @keyframes move-aurora-2 {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            100% { transform: translate(-5%, -10%) rotate(-10deg) scale(1.5); }
+        }
+
+        /* --- 整體頁面樣式 --- */
+        body {
+            font-family: 'Inter', "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* --- 容器與標題 --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fade-in-down 1s ease-out;
+        }
+
+        header h1 {
+            font-size: 3em;
+            color: var(--title-color);
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: var(--description-color);
+        }
+
+        .section-title {
+            font-size: 2.2em;
+            color: var(--title-color);
+            border-bottom: 2px solid var(--glow-color-1);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            margin-bottom: 30px;
+        }
+
+        /* --- 卡片網格與入場動畫 --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            opacity: 0; /* 初始不可見 */
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        /* staggered animation delay for cards */
+        /* 為每個卡片設置不同的延遲，實現依序出現效果 */
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.15s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.25s; }
+        .card:nth-child(5) { animation-delay: 0.3s; }
+        /* ... you can continue this pattern if needed ... */
+
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fade-in-down {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 卡片樣式 (玻璃擬態 + 互動效果) --- */
+        .card {
+            background: var(--card-bg-color);
+            border: 1px solid var(--card-border-color);
+            border-radius: 16px;
+            padding: 25px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        
+        /* 聚光燈效果 */
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+
+        /* 光暈邊框效果 */
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: conic-gradient(from 180deg at 50% 50%, var(--glow-color-2), var(--glow-color-1), var(--glow-color-3), var(--glow-color-2));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .card:hover::before, .card:hover::after {
+            opacity: 1;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            color: var(--title-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title .icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover .card-title .icon {
+            transform: translateX(5px);
+        }
+
+        .card-description {
+            font-size: 0.95em;
+            color: var(--description-color);
+            flex-grow: 1;
+            margin: 0;
+            line-height: 1.7;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: #888;
+        }
     </style>
-    
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KW3JPB2M7P"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+</head>
+<body>
 
-  gtag('config', 'G-KW3JPB2M7P');
-</script>
+    <div class="container">
+        <header>
+            <h1>AI 產品與應用程式精選 100</h1>
+            <p> 智慧未來領袖學院   </p>
+            <p>研習邀約 Line ID : snake0203cheng</p>
+        </header>
 
+        <!-- ====================================================== -->
+        <!-- =================== AI 網頁產品 ===================== -->
+        <!-- ====================================================== -->
+        <h2 class="section-title">AI 網頁產品 (Top 50 Web Products)</h2>
+        <div class="card-grid" id="web-products-grid">
+            
+            <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">1. ChatGPT <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3>
+                    <p class="card-description">由 OpenAI 開發的領先對話式 AI。它能理解並生成極其自然的文字，可用於撰寫文章、編寫程式碼、回答問題、翻譯語言等多種任務。憑藉其強大的語言能力和廣泛的知識庫，成為了生成式 AI 領域的標竿產品。</p>
+                </div>
+            </a>
+            
+            <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" class="card">
+                 <div class="card-content">
+                    <h3 class="card-title">2. Gemini <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3>
+                    <p class="card-description">Google 開發的多模態 AI 模型，能同時理解和處理文字、圖片、音訊和影片。它不僅能進行流暢的對話，還能分析視覺資訊、解決複雜問題。Gemini 已深度整合到 Google 的各項服務中，旨在提供更智能、更全面的用戶體驗。</p>
+                </div>
+            </a>
+            
+            <a href="https://www.deepseek.com" target="_blank" rel="noopener noreferrer" class="card">
+                 <div class="card-content">
+                    <h3 class="card-title">3. deepseek <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3>
+                    <p class="card-description">由中國新創公司深度求索開發的 AI 平台。它不僅提供具備強大程式碼能力的開源大型語言模型，也推出 AI 搜尋引擎服務。其目標是透過先進的 AI 技術，為開發者和一般用戶提供高效、精準的資訊獲取與內容創作工具。</p>
+                </div>
+            </a>
 
-  </head>
-  <body>
-    <div id="container">
-      <div id="content">
-        <iframe id="trinket-iframe" width="100%" height="100%" frameborder="0" src="//trinket.io/published-embed/html/8ed6fc47dbf8"></iframe>
-        <div id="report-this">
-          <a id="report-link" href="//trinket.io/report-content" title="Report this content" target="_blank"><i class="fa fa-flag fa-lg"></i></a>
+            <!-- ... 這裡填入所有50個網頁產品的卡片 ... -->
+            <!-- 省略重複的 HTML 結構，實際使用時請填滿 -->
+             <a href="https://grok.x.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">4. Grok <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由 xAI 公司開發的對話式 AI，深度整合於社群平台 X (前身為 Twitter)。Grok 的特色是能即時存取 X 上的最新資訊，並以帶有幽默感和叛逆風格的口吻回答問題。</p></div></a>
+            <a href="https://character.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">5. Character.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個創新的 AI 聊天機器人平台，允許用戶創建並與各種虛構或真實人物的 AI 角色進行對話。它專注於提供富有沉浸感和個人化的角色扮演聊天體驗。</p></div></a>
+            <a href="https://www.perplexity.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">6. perplexity <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個 AI 對話式搜尋引擎，它直接提供問題的摘要性答案，並為答案附上清晰的引用來源，讓用戶可以驗證資訊的準確性。</p></div></a>
+            <a href="https://www.claude.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">7. Claude <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由 Anthropic 公司開發的 AI 助理，以其安全性、深度思考和強大的長文本處理能力而聞名，特別擅長處理複雜的寫作、摘要和分析任務。</p></div></a>
+            <a href="https://www.janitorai.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">8. JanitorAI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個專注於提供無限制、高自由度角色扮演體驗的 AI 聊天平台，在 NSFW (非工作安全) 內容方面擁有較寬鬆的政策。</p></div></a>
+            <a href="https://quark.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">9. Quark <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專為企業打造的 AI 平台，主要提供內容自動化與銷售賦能解決方案，幫助企業自動化創建和管理複雜的技術文件、行銷資料。</p></div></a>
+            <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">10. Google AI Studio <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Google 提供的網頁版開發工具，讓開發者可以快速測試和建構基於 Gemini 等 Google 最新生成式 AI 模型的功能原型。</p></div></a>
+            <a href="https://www.remove.bg" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">11. remove.bg <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個非常受歡迎的線上工具，利用 AI 技術在幾秒鐘內自動去除任何圖片的背景，極大地簡化了圖片編輯流程。</p></div></a>
+            <a href="https://www.doubao.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">12. Doubao (豆包) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由字節跳動開發的 AI 聊天機器人，在中國市場擁有龐大用戶群，提供聊天、寫作、翻譯及自然流暢的語音對話功能。</p></div></a>
+            <a href="https://notebooklm.google.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">13. NotebookLM <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Google 推出的一款 AI 研究和寫作助理。用戶可以上傳自己的文件，讓 AI 基於指定資料回答問題、生成摘要，使其成為個人化的知識專家。</p></div></a>
+            <a href="https://spicychat.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">14. SPICYCHAT.AI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於成人主題和 NSFW 內容的 AI 角色聊天平台，為用戶提供與各種虛擬角色進行無限制對話的空間。</p></div></a>
+            <a href="https://suno.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">15. SUNO <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個突破性的 AI 音樂生成工具，用戶只需輸入歌詞和音樂風格，即可生成包含人聲、樂器和完整編曲的歌曲。</p></div></a>
+            <a href="https://quillbot.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">16. QuillBot <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">廣受歡迎的 AI 寫作助手，核心功能是文章改寫，並提供文法檢查、摘要、引文生成等功能，提升寫作效率和品質。</p></div></a>
+            <a href="https://kimi.moonshot.cn" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">17. Kimi <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由月之暗面 (Moonshot AI) 開發的對話式 AI，擁有超長的上下文窗口能力，能夠一次處理和理解高達數十萬字的文本。</p></div></a>
+            <a href="https://poly.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">18. Poly.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於企業級客戶服務的 AI 語音平台，提供超乎真人水準的 AI 語音客服，能夠處理複雜的客戶來電並進行流暢對話。</p></div></a>
+            <a href="https://berrat.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">19. BERRAT.AI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">一個 AI 圖片生成平台，特別擅長創建逼真的人物肖像，用戶可以透過文字描述或參考圖片生成高品質、風格多樣的人物照片。</p></div></a>
+            <a href="https://qwen.aliyun.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">20. Qwen3 (通義千問3) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">阿里巴巴達摩院開發的最新一代大型語言模型，在語言理解、程式碼生成、多語言處理等方面達到了世界頂尖水準。</p></div></a>
+            <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">21. ElevenLabs <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">頂尖的 AI 語音合成和聲音複製平台，能生成極其逼真、情感豐富的語音，其獨特的聲音複製技術廣泛應用於有聲書、遊戲等領域。</p></div></a>
+            <a href="https://huggingface.co" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">22. Hugging Face <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">全球最大的開源 AI 社群和平台，提供 AI 模型、資料集、工具和函式庫，是推動 AI 民主化和協作創新的核心力量。</p></div></a>
+            <a href="https://lovable.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">23. Lovable <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專為行銷領域打造的 AI 內容生成平台，能幫助品牌快速生成高效能的廣告文案、社群媒體貼文和電子郵件內容。</p></div></a>
+            <a href="https://crushon.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">24. Crushon AI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">在 NSFW 和無限制 AI 角色扮演聊天領域廣受歡迎的平台，提供高度自由的對話環境，強調用戶體驗和對話的沉浸感。</p></div></a>
+            <a href="https://gamma.app" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">25. GAMMA <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">利用 AI 快速生成簡報、文件和網頁的工具，用戶只需輸入主題或大綱，即可自動設計版面、填充內容和配圖。</p></div></a>
+            <a href="https://cursor.so" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">26. CURSOR <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專為程式開發設計的 AI 程式碼編輯器，在 VS Code 基礎上深度整合 AI 功能，能幫助開發者更快地編寫、修改和除錯程式碼。</p></div></a>
+            <a href="https://pixelcut.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">27. Pixelcut <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">功能強大的 AI 圖片編輯工具，適合電商賣家，核心功能包括自動去背、背景生成、魔術橡皮擦和產品照片優化。</p></div></a>
+            <a href="https://www.midjourney.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">28. Midjourney <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">頂級的 AI 圖像生成工具，以產生充滿藝術感和高品質的圖像而聞名，深受藝術家和設計師的喜愛。</p></div></a>
+            <a href="https://turboscribe.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">29. TurboScribe <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">高效能的 AI 語音轉文字服務，支援上傳各種音訊和影片檔案，能快速、準確地將其轉換為文字稿。</p></div></a>
+            <a href="https://www.photoroom.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">30. Photoroom <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於商品和人像攝影的 AI 圖片編輯器，最知名的功能是精準的背景移除和替換，能輕鬆創建乾淨、專業的背景。</p></div></a>
+            <a href="https://manus.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">31. manus <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">AI 寫作輔助工具，旨在幫助用戶提升寫作的清晰度、風格和影響力，分析文章的語氣、結構和可讀性並提出改進建議。</p></div></a>
+            <a href="https://civitai.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">32. CIVITAI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專為 AI 藝術社群設計的模型分享中心，用戶可以在此瀏覽、下載和分享用於 Stable Diffusion 等圖像生成模型的自訂模型。</p></div></a>
+            <a href="https://kling.kuaishou.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">33. KlingAI (快手可靈) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由快手開發的先進文生影片大模型，能夠生成長達2分鐘、1080p 解析度的高畫質影片，並能模擬真實世界的物理運動。</p></div></a>
+            <a href="https://www.cutout.pro" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">34. cutout.pro <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">集成了多種 AI 視覺工具的線上平台，提供圖片去背、畫質增強、老照片修復、影片背景移除等多種功能。</p></div></a>
+            <a href="https://www.adot.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">35. Adot <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於廣告創意的 AI 生成平台，能幫助行銷團隊快速生成多樣化的廣告圖片、文案和影片素材。</p></div></a>
+            <a href="https://deepai.org" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">36. DeepAI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">提供多種 AI 工具和 API 的平台，包含了 AI 文本生成器、圖像生成器、風格轉換等多種功能。</p></div></a>
+            <a href="https://poe.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">37. Poe <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由 Quora 推出的 AI 聊天應用程式平台，集合了多款知名 AI 聊天機器人，讓用戶可以在一個平台上體驗和比較它們的性能。</p></div></a>
+            <a href="https://www.zerogpt.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">38. ZeroGPT <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">流行的 AI 內容偵測工具，透過分析文本的語言模式、複雜度和流暢性，來判斷一段文字是由人類撰寫還是由 AI 生成的。</p></div></a>
+            <a href="https://labs.google" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">39. Google Labs <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Google 用於展示和測試其前沿實驗性專案的平台，讓用戶可以搶先體驗最新的 AI 技術和應用並提供回饋。</p></div></a>
+            <a href="https://leonardo.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">40. Leonardo.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">功能強大的 AI 藝術和遊戲資產生成平台，能生成高品質的遊戲角色、場景、道具等美術素材，並讓用戶可以訓練自己的模型。</p></div></a>
+            <a href="https://replit.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">41. replit <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">強大的線上程式碼編輯器和開發環境 (IDE)，深度整合 AI 程式設計助手，讓開發者可以直接在瀏覽器中編寫、執行和協作專案。</p></div></a>
+            <a href="https://candy.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">42. candy.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">提供沉浸式 AI 伴侶聊天體驗的平台，用戶可以與各種具有不同個性和背景的虛擬 AI 角色進行深入對話和角色扮演。</p></div></a>
+            <a href="https://juicychat.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">43. JuicyChat <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於成人主題和 NSFW 內容的 AI 聊天平台，提供無過濾的環境，讓用戶可以與 AI 角色進行自由奔放的對話和角色扮演。</p></div></a>
+            <a href="https://www.veed.io" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">44. VEED <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">非常受歡迎的線上影片編輯平台，整合了大量簡單易用的 AI 工具，如自動上字幕、移除背景噪音、翻譯影片、生成影片腳本等。</p></div></a>
+            <a href="https://hailuoai.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">45. Hailuo AI (商湯日日新) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由商湯科技開發的大型語言模型系列，在語言理解、多模態互動和內容生成方面表現出色，廣泛應用於多個行業。</p></div></a>
+            <a href="https://ai.meta.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">46. Meta AI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Meta 推出的 AI 助理，整合到 WhatsApp、Instagram、Messenger 和 Facebook 等應用中，能回答提問、提供即時資訊、生成圖片。</p></div></a>
+            <a href="https://remaker.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">47. Remaker <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">多功能的 AI 內容創作工具集，提供了 AI 圖像生成、AI 換臉、照片修復和背景移除等多種工具。</p></div></a>
+            <a href="https://joi.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">48. JOI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">主打 AI 伴侶和情感連結的聊天應用程式，讓用戶可以創建和客製化自己的虛擬伴侶，進行日常對話、分享感受和角色扮演。</p></div></a>
+            <a href="https://monica.im" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">49. Monica <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">功能強大的瀏覽器擴充功能和 AI 助手，整合多種頂級 AI 模型，能隨時在任何網頁上提供聊天、搜尋、寫作、摘要、翻譯等服務。</p></div></a>
+            <a href="https://ourdream.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">50. ourdream.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">AI 圖像生成平台，專注於動漫和二次元風格的藝術創作，提供了多種針對動漫風格訓練的 AI 模型。</p></div></a>
+
         </div>
-      </div>
+
+
+        <!-- ====================================================== -->
+        <!-- ================= AI 手機應用程式 ==================== -->
+        <!-- ====================================================== -->
+        <h2 class="section-title">AI 手機應用程式 (Top 50 Mobile Apps)</h2>
+        <div class="card-grid" id="mobile-apps-grid">
+            
+            <!-- ... 這裡填入所有50個手機App的卡片 ... -->
+            <!-- 省略重複的 HTML 結構，實際使用時請填滿 -->
+             <a href="https://apps.apple.com/us/app/chatgpt/id6448311069" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">1. ChatGPT <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">OpenAI 官方應用，提供與網頁版同樣強大的對話能力，並整合語音輸入功能，讓用戶可以透過語音與 AI 進行更自然的互動。</p></div></a>
+            <a href="https://apps.apple.com/us/app/google-gemini/id6447990549" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">2. Gemini <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Google 的官方 AI 應用，深度整合 Android 系統，可作為預設數位助理，善於利用手機功能分析螢幕內容、從照片中獲取資訊。</p></div></a>
+            <a href="https://play.google.com/store/apps/details?id=com.ai.gallery.photo.editor.image.art" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">3. AI Gallery <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">智慧相簿管理與編輯應用，利用 AI 自動分類照片、識別人物，並提供一鍵美化、藝術濾鏡和創意拼貼等功能。</p></div></a>
+            <a href="https://apps.apple.com/us/app/doubao-ai-chatbot/id16Doubao75" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">4. Doubao (豆包) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">字節跳動的 AI 助理應用，行動版特別強化了語音對話功能，提供多種音色選擇，並與手機系統緊密結合。</p></div></a>
+            <a href="https://www.microsoft.com/edge" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">5. Microsoft Edge <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">微軟的行動瀏覽器，內建了強大的 Copilot (AI 助手)，用戶可以在瀏覽任何網頁時隨時呼叫 Copilot 進行摘要、提問或內容創作。</p></div></a>
+            <a href="https://remini.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">6. Remini <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於畫質修復的 AI 應用，能將模糊、低解析度的老舊照片和影片變得清晰銳利，效果驚人。</p></div></a>
+            <a href="https://apps.apple.com/us/app/baidu-ai-search/id382201985" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">7. Baidu AI Search (百度) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">中國最大的搜尋引擎應用，深度整合「文心一言」AI 模型，提供智慧摘要、對話式搜尋和內容生成服務。</p></div></a>
+            <a href="https://www.deepseek.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">8. deepseek <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">深度求索的行動應用，將其強大的 AI 模型和搜尋引擎帶到手機端，讓用戶能隨時隨地進行高效的程式碼查詢或獲取準確的資訊。</p></div></a>
+            <a href="https://www.meitu.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">9. meitu (美圖秀秀) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">國民級的修圖與自拍應用，以強大的 AI 美顏技術聞名，提供從磨皮、瘦臉到虛擬妝容的全套功能。</p></div></a>
+            <a href="https://www.perplexity.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">10. perplexity <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">其行動應用提供了極佳的語音搜尋體驗，用戶可以直接透過語音提問，並快速獲得附有來源的精準答案。</p></div></a>
+            <a href="https://www.faceapp.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">11. FaceApp <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">風靡全球的 AI 臉部編輯應用，其變老、變年輕、更換性別等濾鏡因其逼真效果而引發社群媒體的廣泛傳播。</p></div></a>
+            <a href="https://youcut.net" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">12. YouCut <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">簡單易用的手機影片剪輯應用，利用 AI 簡化了許多複雜的編輯步驟，如智能配樂、自動踩點和添加轉場特效。</p></div></a>
+            <a href="https://apps.apple.com/us/app/facemoji-keyboard-ai-chat/id1113511122" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">13. FaceMoji <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">AI 鍵盤應用，不僅能生成個人化的卡通頭像 (emoji)，還內建了 AI 聊天功能，可以在輸入時提供回覆建議或進行快速的資訊查詢。</p></div></a>
+            <a href="https://www.ciciai.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">14. Cici <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">AI 虛擬伴侶應用，專為提供情感支持和陪伴而設計，用戶可以與 Cici 建立長期關係，分享生活點滴。</p></div></a>
+            <a href="https://www.bing.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">15. Microsoft Bing <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Bing 搜尋應用已全面升級為 Microsoft Copilot，結合了搜尋引擎和先進的 AI 模型，提供強大的問答、寫作和圖像生成能力。</p></div></a>
+            <a href="https://www.hypic.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">16. Hypic <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">來自字節跳動的圖片編輯應用，主打年輕化和潮流感，提供了豐富的 AI 濾鏡、貼紙和創意模板。</p></div></a>
+            <a href="https://wink.meitu.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">17. Wink (醒圖) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">來自美圖公司的影片美容剪輯應用，將美圖秀秀在人像處理上的 AI 技術應用到影片中，實現了對影片中人臉和身體的精細調整。</p></div></a>
+            <a href="https://copilot.microsoft.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">18. Copilot <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">微軟的獨立 AI 助手應用，讓用戶可以直接使用 GPT-4 和 DALL-E 3 等頂尖模型，進行複雜的問答、創意寫作和高品質的圖像生成。</p></div></a>
+            <a href="https://character.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">19. Character.ai <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">其行動應用讓用戶能更方便地隨時隨地與自己喜愛的 AI 角色聊天，提供了流暢的對話體驗和便捷的角色發現功能。</p></div></a>
+            <a href="https://play.google.com/store/apps/details?id=photo.editor.photoeditor.filtersforpictures" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">20. Polish <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">功能全面的手機修圖應用，集合了 collage (拼貼)、濾鏡、美顏和各種 AI 特效，為用戶提供了一站式的圖片美化解決方案。</p></div></a>
+            <a href="https://www.photoroom.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">21. Photoroom <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">行動端 AI 圖片編輯利器，尤其適合電商賣家，用手機拍下產品後可立即自動去背並套用專業的商業攝影背景範本。</p></div></a>
+            <a href="https://youcut.net" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">22. YouCut <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">(重複) 一款簡單易用的手機影片剪輯應用，利用 AI 簡化編輯流程。</p></div></a>
+            <a href="https://grok.x.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">23. Grok <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">其功能主要整合在 X (前身為 Twitter) 的官方應用程式中，為 X Premium+ 訂閱用戶提供即時的 AI 問答和摘要服務。</p></div></a>
+            <a href="https://brainly.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">24. BRAINLY <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">全球性的學生互助學習社群應用，整合了 AI 功能，可以對學生的問題提供即時、詳細的解答步驟。</p></div></a>
+            <a href="https://pixverse.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">25. PixVerse <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">字節跳動推出的文生影片應用，用戶可以在手機上輸入文字或圖片，快速生成富有創意和視覺效果的短影片。</p></div></a>
+            <a href="https://photomath.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">26. Photomath <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">數學學習神器，只需用手機相機對準數學題目，就能立即識別並給出詳細的解題步驟和方法。</p></div></a>
+            <a href="https://translate.google.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">27. Translate (Google 翻譯) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Google 的官方翻譯應用，利用 AI 提供即時相機翻譯、語音對話翻譯和離線翻譯等強大功能。</p></div></a>
+            <a href="https://www.picturethisai.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">28. PictureThis <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">植物識別應用，透過 AI 圖像識別技術，用戶只需拍下植物照片，即可快速獲取其名稱、習性和養護方法。</p></div></a>
+            <a href="https://www.vivacut.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">29. VivaCut <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專業級的手機影片剪輯應用，提供了多軌道編輯、關鍵影格動畫和綠幕等高階功能，並輔以 AI 特效。</p></div></a>
+            <a href="https://papago.naver.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">30. papago <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">由韓國 Naver 公司開發的翻譯應用，在韓語、日語等亞洲語言的翻譯上表現尤為出色，翻譯結果更自然流暢。</p></div></a>
+            <a href="https://novaapp.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">31. NOVA <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">基於 ChatGPT API 開發的第三方 AI 聊天應用，提供了一個簡潔的介面，讓用戶可以在手機上方便地使用強大的 GPT 模型進行對話。</p></div></a>
+            <a href="https://www.beautyplus.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">32. BeautyPlus <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">歷史悠久的自拍美顏相機，利用 AI 技術提供即時的美妝、濾鏡和皮膚修飾效果，讓用戶在拍照或錄影時都能呈現最佳狀態。</p></div></a>
+            <a href="https://snow.me" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">33. SNOW <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">以 AR (擴增實境) 貼紙和濾鏡聞名的相機應用，利用 AI 臉部辨識技術，將各種有趣的動態效果疊加在人臉上。</p></div></a>
+            <a href="https://bc.meitu.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">34. BeautyCam (美顏相機) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">來自美圖公司的另一款熱門自拍應用，更專注於拍攝當下的即時美顏效果，追求自然、清新的影像風格。</p></div></a>
+            <a href="https://www.adobe.com/products/photoshop-express.html" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">35. Photoshop Express <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Adobe 專為行動裝置設計的輕量級 Photoshop，包含了許多由 AI 驅動的一鍵修復功能，如智慧裁切、瑕疵修正和人像美化。</p></div></a>
+            <a href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">36. Adobe Express <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">多合一的內容創作應用，利用 AI 和豐富的範本，幫助用戶快速在手機上製作適用於社群媒體的貼文、短影片和傳單設計。</p></div></a>
+            <a href="https://www.microsoft.com/swiftkey" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">37. SwiftKey <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">微軟旗下的智慧鍵盤應用，利用 AI 學習用戶的打字習慣和用詞，提供極其精準的自動更正和下一個詞預測。</p></div></a>
+            <a href="https://epik.snow.me" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">38. EPIK <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">功能強大的全能圖片編輯應用，不僅有豐富的濾鏡和美顏功能，還提供了許多專業級的 AI 編輯工具，如移除物件、天空替換等。</p></div></a>
+            <a href="https://poly.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">39. Poly.ai App <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">主要是一個企業級 AI 語音客服平台，其「應用」可能指供企業客戶管理其服務的後台 App，而非面向大眾市場。</p></div></a>
+            <a href="https://www.gauthmath.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">40. Gauth <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">AI 全科作業輔導應用，不僅能解決數學問題，還涵蓋物理、化學等多個學科，提供即時的解題步驟和真人輔導。</p></div></a>
+            <a href="https://play.google.com/store/apps/details?id=com.upfoto.photo.editor.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">41. UpFoto <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專注於照片畫質增強的 AI 應用，能有效修復模糊、有噪點或低解析度的舊照片，並支援黑白照片上色功能。</p></div></a>
+            <a href="https://www.mivi-app.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">42. MIVI <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">音樂影片製作應用，利用 AI 技術，讓用戶只需選擇照片和音樂，就能自動生成帶有酷炫轉場和節奏同步效果的音樂短影片。</p></div></a>
+            <a href="https://www.peachyapp.net" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">43. Peachy <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">注重細節的人像精修應用，提供由 AI 驅動的臉部微調和身材美化工具，讓用戶可以對人像的各個細節進行自然、精準的調整。</p></div></a>
+            <a href="https://filmora.wondershare.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">44. Filmora <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">Wondershare 推出的手機影片剪輯應用，在易用性和專業性之間取得了很好的平衡，並加入了 AI 摳像、智慧配樂等實用功能。</p></div></a>
+            <a href="https://www.remove.bg" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">45. Background Eraser <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專門用於去除圖片背景的工具型應用，利用 AI 自動偵測主體並一鍵清除背景，操作非常簡單，效果乾淨俐落。</p></div></a>
+            <a href="https://about.instagram.com/blog/announcements/introducing-new-ai-powered-features-for-editing-on-instagram" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">46. Edita (Instagram) <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">並非獨立 App，而是指 Instagram 內建的 AI 編輯功能套件，用戶在發布時可以使用 AI 生成貼紙、替換背景等。</p></div></a>
+            <a href="https://quark.ai" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">47. Quark <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">其行動應用主要服務企業客戶，讓他們可以在移動裝置上管理和存取由 AI 自動化生成的企業內容和銷售資料。</p></div></a>
+            <a href="https://www.oanda.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">48. OANDA <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">專業的外匯與差價合約 (CFD) 交易平台，其應用程式整合了 AI 分析工具，提供市場情緒分析、技術模式識別等功能。</p></div></a>
+            <a href="https://www.airbrush.com" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">49. AirBrush <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">操作極其簡單的自拍修圖應用，設計理念是「一鍵變美」，利用 AI 自動完成磨皮、亮眼、美白牙齒等所有基礎修飾。</p></div></a>
+            <a href="https://plantnet.org" target="_blank" rel="noopener noreferrer" class="card"><div class="card-content"><h3 class="card-title">50. Pl@ntNet <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></h3><p class="card-description">公民科學性質的植物識別應用，用戶上傳植物照片，AI 會進行識別，同時這些數據也會幫助全球科學家研究和保護植物多樣性。</p></div></a>
+
+        </div>
+        
+        <footer>
+            <p>頁面由 AI 生成 &copy; 2025</p>
+        </footer>
     </div>
+
     <script>
-    var thisLocation = window.location.href;
-    var reportLink   = document.getElementById("report-link");
-    reportLink.setAttribute("href", reportLink.getAttribute("href") + "?url=" + encodeURIComponent(thisLocation));
-    document.getElementById('trinket-iframe').onload = function() {
-      this.focus();
-    }
+        document.addEventListener('DOMContentLoaded', () => {
+            const grids = document.querySelectorAll('.card-grid');
+            grids.forEach(grid => {
+                grid.addEventListener('mousemove', e => {
+                    const cards = grid.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        
+                        // 設定聚光燈效果的 CSS 變數
+                        card.style.setProperty('--mouse-x', `${x}px`);
+                        card.style.setProperty('--mouse-y', `${y}px`);
+
+                        // 計算 3D 傾斜角度
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const rotateX = (y - centerY) / 20; // 除數越大，傾斜幅度越小
+                        const rotateY = (centerX - x) / 20;
+                        
+                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    });
+                });
+
+                grid.addEventListener('mouseleave', () => {
+                    const cards = grid.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        // 滑鼠離開時恢復原狀
+                        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                    });
+                });
+            });
+        });
     </script>
-  </body>
+    <script>
+    // 禁用右鍵選單
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // 禁用特定的組合鍵 (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U)
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+I (Elements)
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+J (Console)
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+C (Inspector)
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+        }
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && e.key === 'U') {
+            e.preventDefault();
+        }
+    });
+</script>
+</body>
 </html>
