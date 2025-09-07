@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages 檔案上傳工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .file-path-link {
+            word-break: break-all;
+        }
+        /* 簡單的 로딩 스피너 애니메이션 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 space-y-6">
+        <div class="text-center">
+             <div class="flex justify-center items-center gap-3">
+                <h1 class="text-2xl md:text-3xl font-bold text-white">GitHub Pages 檔案上傳工具</h1>
+                <button id="helpBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-full transition-colors duration-300" title="查看說明">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-lg" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M4.475 5.458c-.284 0-.514.237-.47.517l.273 1.512c.038.21.22.368.44.368h.975a.5.5 0 0 0 0-1H5.98l-.2-1.102a.49.49 0 0 1 .11-.328.5.5 0 0 1 .38-.187h.5a.5.5 0 0 0 0-1h-.5a1.5 1.5 0 0 0-1.5 1.5l-.273 1.512A1.5 1.5 0 0 0 5.69 8.5h.975a.5.5 0 0 0 0-1H6.665l.2-1.102a1.5 1.5 0 0 1 1.48-1.258h.5a.5.5 0 0 0 0-1h-.5A2.5 2.5 0 0 0 4.475 5.458zM8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm.002-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-gray-400 mt-2">將檔案或資料夾直接上傳到您的 GitHub 倉庫並取得網頁路徑。</p>
+        </div>
+
+        <!-- 說明區塊 -->
+        <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+            <h2 class="font-semibold text-lg text-blue-300 mb-2">使用步驟：</h2>
+            <ol class="list-decimal list-inside text-gray-300 space-y-2 text-sm">
+                <li>
+                    前往 GitHub 生成 <a href="https://github.com/settings/tokens/new?scopes=repo&description=WebUploaderToken" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Personal Access Token (PAT)</a>。
+                    <br>請務必勾選 `repo` 權限範圍。
+                </li>
+                <li>將生成的 Token、您的 GitHub 使用者名稱、倉庫名稱和分支名稱填入下方欄位。</li>
+                <li>選擇要上傳的檔案或資料夾。</li>
+                <li>點擊「開始上傳」按鈕。</li>
+            </ol>
+            <p class="text-xs text-yellow-400 mt-3"><strong>注意：</strong>您的資料 (包含 PAT) 將會儲存在您瀏覽器的本地儲存空間。<strong>請勿在公用電腦上使用此功能。</strong></p>
+        </div>
+
+        <!-- 輸入表單 -->
+        <div class="space-y-4">
+            <div>
+                <label for="token" class="block text-sm font-medium text-gray-300 mb-1">GitHub Personal Access Token (PAT)</label>
+                <input type="password" id="token" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="貼上您的 token">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-1">使用者名稱</label>
+                    <input type="text" id="username" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., octocat">
+                </div>
+                <div>
+                    <label for="repo" class="block text-sm font-medium text-gray-300 mb-1">倉庫名稱 (Repo)</label>
+                    <input type="text" id="repo" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., my-website">
+                </div>
+                <div>
+                    <label for="branch" class="block text-sm font-medium text-gray-300 mb-1">分支 (Branch)</label>
+                    <input type="text" id="branch" value="main" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., main 或 gh-pages">
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <div class="flex-grow">
+                    <label for="destinationPathSelect" class="block text-sm font-medium text-gray-300 mb-1">目標路徑 (可選)</label>
+                    <select id="destinationPathSelect" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <option value="">-- 先載入資料夾 --</option>
+                    </select>
+                </div>
+                <button id="loadFoldersBtn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-300 flex-shrink-0">載入資料夾</button>
+            </div>
+             <div>
+                <label for="files" class="block text-sm font-medium text-gray-300 mb-1">選擇檔案或資料夾</label>
+                <input type="file" id="files" multiple webkitdirectory class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+            </div>
+        </div>
+
+        <!-- 控制與狀態 -->
+        <div class="flex items-center justify-between">
+            <button id="uploadBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors duration-300 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                </svg>
+                <span>開始上傳</span>
+            </button>
+            <div id="status" class="text-sm text-gray-400 flex items-center gap-2"></div>
+        </div>
+
+        <!-- 結果區 -->
+        <div id="results" class="bg-gray-900/70 p-4 rounded-lg space-y-3 max-h-64 overflow-y-auto">
+            <!-- 上傳結果會顯示在這裡 -->
+        </div>
+
+        <div class="text-center text-xs text-gray-500 pt-4">
+            Made by 阿剛老師
+        </div>
+    </div>
+
+    <!-- 說明圖片 Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto relative p-4">
+            <button id="closeModalBtn" class="absolute top-3 right-3 text-gray-400 hover:text-white bg-gray-700 rounded-full p-1.5 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"></path>
+                </svg>
+            </button>
+            <img src="https://kentxchang-goedutw.github.io/web/github%E4%B8%8A%E5%82%B3%E5%B7%A5%E5%85%B7%E8%AA%AA%E6%98%8E/%E8%AA%AA%E6%98%8E.png" alt="說明文件圖片" class="w-full h-auto rounded-md">
+        </div>
+    </div>
+
+    <script>
+        const tokenInput = document.getElementById('token');
+        const usernameInput = document.getElementById('username');
+        const repoInput = document.getElementById('repo');
+        const branchInput = document.getElementById('branch');
+        const filesInput = document.getElementById('files');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const destinationPathSelect = document.getElementById('destinationPathSelect');
+        const loadFoldersBtn = document.getElementById('loadFoldersBtn');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        const STORAGE_KEY = 'githubUploaderData';
+
+        // 儲存資料到 localStorage (包含 Token)
+        function saveData() {
+            const data = {
+                token: tokenInput.value,
+                username: usernameInput.value.trim(),
+                repo: repoInput.value.trim(),
+                branch: branchInput.value.trim(),
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // 從 localStorage 載入資料
+        function loadAndApplyData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                tokenInput.value = data.token || '';
+                usernameInput.value = data.username || '';
+                repoInput.value = data.repo || '';
+                branchInput.value = data.branch || 'main';
+            }
+        }
+
+        // 將檔案內容轉換為 Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function fetchRepoFolders() {
+            const token = tokenInput.value.trim();
+            const username = usernameInput.value.trim();
+            const repo = repoInput.value.trim();
+            const branch = branchInput.value.trim();
+
+            if (!token || !username || !repo || !branch) {
+                statusDiv.innerHTML = '<span class="text-red-500">請先填寫 Token、使用者名稱、倉庫和分支欄位。</span>';
+                return;
+            }
+
+            loadFoldersBtn.disabled = true;
+            loadFoldersBtn.innerHTML = '<div class="loader" style="width:20px; height:20px; border-width: 2px;"></div>';
+            destinationPathSelect.innerHTML = '<option value="">載入中...</option>';
+            destinationPathSelect.disabled = true;
+
+            try {
+                // Step 1: Get branch info to find the latest commit SHA
+                const branchUrl = `https://api.github.com/repos/${username}/${repo}/branches/${branch}`;
+                const branchResponse = await fetch(branchUrl, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (!branchResponse.ok) {
+                    const errorData = await branchResponse.json().catch(() => ({}));
+                    throw new Error(`找不到分支 '${branch}' 或倉庫 (${branchResponse.status})。請檢查輸入。${errorData.message ? ' 提示: ' + errorData.message : ''}`);
+                }
+                const branchData = await branchResponse.json();
+                const latestCommitSha = branchData.commit.sha;
+
+                // Step 2: Get commit info to find the tree SHA
+                const commitUrl = `https://api.github.com/repos/${username}/${repo}/git/commits/${latestCommitSha}`;
+                const commitResponse = await fetch(commitUrl, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (!commitResponse.ok) throw new Error('無法獲取 commit 資料。');
+                const commitData = await commitResponse.json();
+                const treeSha = commitData.tree.sha;
+
+                // Step 3: Get the tree recursively
+                const treeUrl = `https://api.github.com/repos/${username}/${repo}/git/trees/${treeSha}?recursive=1`;
+                const treeResponse = await fetch(treeUrl, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (!treeResponse.ok) throw new Error('無法獲取倉庫檔案結構。');
+                const treeData = await treeResponse.json();
+                
+                const folders = treeData.tree
+                    .filter(item => item.type === 'tree')
+                    .map(item => item.path);
+
+                // Populate the select dropdown
+                destinationPathSelect.innerHTML = '';
+                const rootOption = document.createElement('option');
+                rootOption.value = '';
+                rootOption.textContent = '根目錄 (/)';
+                destinationPathSelect.appendChild(rootOption);
+
+                folders.forEach(folder => {
+                    const option = document.createElement('option');
+                    option.value = folder;
+                    option.textContent = folder;
+                    destinationPathSelect.appendChild(option);
+                });
+
+                destinationPathSelect.disabled = false;
+                statusDiv.innerHTML = `<span class="text-green-400">成功載入 ${folders.length} 個資料夾。</span>`;
+
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="text-red-500">錯誤: ${error.message}</span>`;
+                destinationPathSelect.innerHTML = '<option value="">-- 載入失敗 --</option>';
+            } finally {
+                loadFoldersBtn.disabled = false;
+                loadFoldersBtn.textContent = '載入資料夾';
+            }
+        }
+
+        // 上傳單一檔案到 GitHub
+        async function uploadFile(file, token, username, repo, branch, destinationPath) {
+            const localPath = file.webkitRelativePath || file.name;
+            
+            // 清理並組合最終路徑
+            const cleanedDestPath = destinationPath.replace(/^\/|\/$/g, '');
+            const finalPathParts = [];
+            if (cleanedDestPath) {
+                finalPathParts.push(cleanedDestPath);
+            }
+            finalPathParts.push(localPath);
+            const path = finalPathParts.join('/').replace(/\/\/+/g, '/');
+
+            const encodedPath = path.split('/').map(part => encodeURIComponent(part)).join('/');
+
+            try {
+                const content = await fileToBase64(file);
+                statusDiv.innerHTML = `<span class="text-yellow-400">正在處理: ${path}</span>`;
+                
+                // 1. 檢查檔案是否存在以取得 SHA
+                let sha;
+                const getFileUrl = `https://api.github.com/repos/${username}/${repo}/contents/${encodedPath}?ref=${branch}`;
+                const getFileResponse = await fetch(getFileUrl, {
+                    method: 'GET',
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                if (getFileResponse.ok) {
+                    const fileData = await getFileResponse.json();
+                    sha = fileData.sha; // 檔案已存在，取得其 SHA
+                } else if (getFileResponse.status !== 404) {
+                    // 如果不是 "Not Found" 錯誤，表示有其他問題 (例如權限或倉庫不存在)
+                    const errorData = await getFileResponse.json();
+                     if (getFileResponse.status === 401) {
+                        throw new Error(`授權失敗。請檢查您的 Token。`);
+                    }
+                    throw new Error(`檢查檔案時出錯 (${getFileResponse.status}): ${errorData.message}`);
+                }
+
+                // 2. 準備上傳
+                statusDiv.innerHTML = `<span class="text-yellow-400">${sha ? '正在更新' : '正在上傳'}: ${path}</span>`;
+                const uploadUrl = `https://api.github.com/repos/${username}/${repo}/contents/${encodedPath}`;
+                const payload = {
+                    message: `feat: ${sha ? 'update' : 'upload'} ${path} via web uploader`,
+                    content: content,
+                    branch: branch,
+                    ...(sha && { sha: sha }) // 如果是更新，則加入 sha
+                };
+
+                const uploadResponse = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!uploadResponse.ok) {
+                    const errorData = await uploadResponse.json();
+                     if (uploadResponse.status === 404) {
+                        throw new Error(`找不到倉庫。請檢查使用者名稱 '${username}' 和倉庫名稱 '${repo}'。`);
+                    }
+                    if (uploadResponse.status === 401) {
+                        throw new Error(`授權失敗。請檢查您的 Token 是否有 'repo' 權限。`);
+                    }
+                    throw new Error(`上傳時出錯 (${uploadResponse.status}): ${errorData.message}`);
+                }
+                
+                const data = await uploadResponse.json();
+                const pagesUrl = `https://${username}.github.io/${repo}/${path}`;
+
+                const resultEl = document.createElement('div');
+                resultEl.className = 'bg-gray-800 p-2 rounded-md text-sm';
+                resultEl.innerHTML = `
+                    <p class="text-green-400 font-medium">${sha ? '✅ 更新成功' : '✅ 上傳成功'}: ${path}</p>
+                    <a href="${pagesUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline file-path-link">${pagesUrl}</a>
+                `;
+                resultsDiv.appendChild(resultEl);
+
+            } catch (error) {
+                // The Fetch API 本身可能會拋出錯誤 (例如網路錯誤), 這不會是 JSON 回應
+                const errorMessage = error.message.includes('Failed to fetch') 
+                    ? '網路連線失敗。請檢查您的網路連線並確認瀏覽器沒有阻擋請求。' 
+                    : error.message;
+
+                console.error('上傳失敗:', error);
+                const resultEl = document.createElement('div');
+                resultEl.className = 'bg-gray-800 p-2 rounded-md text-sm';
+                resultEl.innerHTML = `
+                    <p class="text-red-400 font-medium">❌ 失敗: ${path}</p>
+                    <p class="text-gray-400 text-xs">${errorMessage}</p>
+                `;
+                resultsDiv.appendChild(resultEl);
+            }
+        }
+
+        // --- Event Listeners ---
+        // 當使用者輸入時自動儲存資料
+        tokenInput.addEventListener('input', saveData);
+        usernameInput.addEventListener('input', saveData);
+        repoInput.addEventListener('input', saveData);
+        branchInput.addEventListener('input', saveData);
+
+        loadFoldersBtn.addEventListener('click', fetchRepoFolders);
+
+        uploadBtn.addEventListener('click', async () => {
+            const token = tokenInput.value.trim();
+            const username = usernameInput.value.trim();
+            const repo = repoInput.value.trim();
+            const branch = branchInput.value.trim();
+            const destinationPath = destinationPathSelect.value.trim();
+            const files = filesInput.files;
+
+            if (!token || !username || !repo || !branch || files.length === 0) {
+                statusDiv.innerHTML = '<span class="text-red-500">所有欄位皆為必填，且必須選擇檔案。</span>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '';
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            statusDiv.innerHTML = '<div class="loader"></div> <span>準備上傳...</span>';
+
+            for (const file of files) {
+                // 加入一個小的延遲，避免過於頻繁地觸發 API
+                await new Promise(resolve => setTimeout(resolve, 200)); 
+                await uploadFile(file, token, username, repo, branch, destinationPath);
+            }
+
+            statusDiv.innerHTML = '<span class="text-green-400">🎉 所有檔案處理完成！</span>';
+            uploadBtn.disabled = false;
+            uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+
+        // Modal 控制
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+
+        helpModal.addEventListener('click', (e) => {
+            // 如果點擊的目標是背景遮罩本身，就關閉 modal
+            if (e.target === helpModal) {
+                helpModal.classList.add('hidden');
+            }
+        });
+
+        // 頁面載入時自動填入上次的資料
+        document.addEventListener('DOMContentLoaded', loadAndApplyData);
+    </script>
+</body>
+</html>
+
