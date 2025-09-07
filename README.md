@@ -13,3 +13,5 @@
 [AI Line 貼圖製造機](https://114000-maker.github.io/study/2025-09-07_02.html)
 # GitHub Pages 檔案上傳工具
 [GitHub Pages 檔案上傳工具](https://114000-maker.github.io/study/2025-09-07_03.html)
+# One Click Sticker 2.0
+[One Click Sticker 2.0](https://114000-maker.github.io/study/2025-09-07_04.html)
