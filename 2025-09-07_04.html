@@ -1,0 +1,1074 @@
+<!-- https://www.youtube.com/watch?v=JJGgQ7tKb0U -->
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Click Sticker 2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;500;600;700;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #000000; }
+        .font-caveat { font-family: 'Caveat', cursive; }
+        .bg-grid-pattern { background-image: linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 20px 20px; }
+        
+        @keyframes fade-in-down {
+            0% { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+            100% { opacity: 1; transform: translateY(0) translateX(-50%); }
+        }
+        .animate-fade-in-down { animation: fade-in-down 0.5s ease-out forwards; }
+        
+        .custom-checkbox:checked {
+            background-color: #FBBF24;
+            border-color: #FBBF24;
+        }
+        .custom-checkbox:checked::after {
+            opacity: 1;
+        }
+        
+        /* 動態效果的簡易 CSS 替代方案 */
+        .sticker-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .sticker-card:hover { transform: translateY(-8px) rotate(calc(var(--random-rotate, 0) * 1deg)); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-black text-gray-200">
+
+    <div id="app-container" class="min-h-screen flex flex-col items-center p-4 pb-20">
+
+        <!-- 錯誤通知 -->
+        <div id="error-notification" class="hidden fixed top-5 left-1/2 z-50 w-full max-w-md p-4 bg-gray-900 border border-gray-700 text-gray-300 rounded-lg shadow-2xl items-center justify-between animate-fade-in-down" style="transform: translateX(-50%);">
+            <span id="error-message"></span>
+            <button id="dismiss-error-btn" class="p-1 rounded-full hover:bg-gray-800 transition-colors ml-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- 相機彈出視窗 -->
+        <div id="camera-modal" class="hidden fixed inset-0 bg-black/80 z-50 items-center justify-center p-4">
+            <div class="bg-gray-900 rounded-2xl p-6 border border-gray-700 shadow-2xl w-full max-w-2xl text-center relative">
+                <h3 class="text-2xl font-semibold mb-4 text-white">相機</h3>
+                <div class="aspect-square bg-black rounded-lg overflow-hidden relative mb-4 flex items-center justify-center">
+                    <div id="camera-error" class="hidden p-4 text-red-400"></div>
+                    <img id="captured-image-preview" src="" alt="拍攝預覽" class="hidden w-full h-full object-cover" />
+                    <video id="camera-video" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+                </div>
+                <div id="camera-controls" class="flex justify-center gap-4">
+                    <!-- 控制按鈕會由 JS 動態填入 -->
+                </div>
+                <button id="close-camera-btn" class="absolute top-4 right-4 p-2 rounded-full bg-gray-800/70 text-white hover:bg-gray-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                </button>
+                <canvas id="camera-canvas" class="hidden"></canvas>
+            </div>
+        </div>
+
+        <div class="w-full max-w-6xl mx-auto">
+            <header class="text-center my-12">
+                <h1 class="text-6xl md:text-7xl font-bold text-white tracking-tight">
+                    One Click <span class="text-yellow-400">Sticker 2.0</span>
+                </h1>
+                <p class="mt-4 text-lg text-gray-500">將您的照片變成獨一無二的聊天貼圖。</p>
+            </header>
+
+            <main>
+                <div class="bg-gray-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-gray-800 mb-16">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+                        <!-- 左側：圖片上傳 -->
+                        <div>
+                            <h2 class="text-2xl font-semibold mb-6 text-white">1. 您的照片</h2>
+                            <div id="upload-box" class="w-full aspect-square border-4 border-dashed border-gray-700 rounded-xl flex items-center justify-center cursor-pointer hover:border-yellow-400 transition-colors bg-gray-800 overflow-hidden shadow-inner">
+                                <!-- 上傳狀態會由 JS 動態填入 -->
+                            </div>
+                            <div id="upload-buttons" class="flex flex-col sm:flex-row gap-4 mt-4 w-full hidden">
+                                <button id="change-file-btn" class="flex-1 px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                                    更換檔案
+                                </button>
+                                <button id="open-camera-btn-alt" class="flex-1 px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.776 48.776 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" /></svg>
+                                        <span>使用相機</span>
+                                    </div>
+                                </button>
+                            </div>
+                             <input type="file" id="file-input" accept="image/png, image/jpeg" class="hidden" />
+                        </div>
+
+                        <!-- 右側：貼圖選擇 -->
+                        <div>
+                             <h2 class="text-2xl font-semibold mb-6 text-white">2. 選擇貼圖</h2>
+                             
+                             <!-- Gemini LLM 功能區塊 -->
+                             <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 mb-6">
+                                <h3 class="font-semibold text-lg mb-2 text-yellow-300">✨ AI 貼圖創意產生器</h3>
+                                <p class="text-gray-400 text-sm mb-3">描述一個主題，或讓 AI 從您的照片找靈感！</p>
+                                
+                                <div class="mb-3">
+                                    <button id="get-inspiration-btn" class="w-full px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <!-- 按鈕內容由 JS 動態更新 -->
+                                        </div>
+                                    </button>
+                                    <div id="suggested-themes-container" class="flex flex-wrap gap-2 mt-3">
+                                        <!-- 建議主題由 JS 動態填入 -->
+                                    </div>
+                                </div>
+
+                                <textarea id="custom-idea-input" placeholder="例如：我家愛搗蛋的橘貓、辦公室專用..." class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white text-sm" rows="2"></textarea>
+                                <button id="generate-ideas-btn" class="w-full mt-3 px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-yellow-400 text-black hover:bg-yellow-300">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <!-- 按鈕內容由 JS 動態更新 -->
+                                    </div>
+                                </button>
+                             </div>
+
+                              <div class="flex justify-between items-center mb-4">
+                                <p class="text-gray-400">選擇您想生成的反應：</p>
+                                <button id="back-to-default-btn" class="text-xs text-yellow-400 hover:text-yellow-300 hidden">
+                                    ← 返回預設貼圖
+                                </button>
+                              </div>
+                              <div id="sticker-selection-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                 <!-- 貼圖選項由 JS 動態填入 -->
+                             </div>
+                              <div class="flex items-center space-x-6 mt-6">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="add-text-check" checked class="custom-checkbox relative peer shrink-0 appearance-none w-5 h-5 border-2 border-gray-500 rounded-sm bg-gray-800 transition-colors after:absolute after:left-0 after:top-0 after:h-full after:w-full after:bg-no-repeat after:bg-center after:opacity-0 after:content-['✔'] after:text-black after:text-sm" />
+                                    <label for="add-text-check" class="ml-3 text-gray-300 cursor-pointer">加上文字</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="is-dynamic-check" checked class="custom-checkbox relative peer shrink-0 appearance-none w-5 h-5 border-2 border-gray-500 rounded-sm bg-gray-800 transition-colors after:absolute after:left-0 after:top-0 after:h-full after:w-full after:bg-no-repeat after:bg-center after:opacity-0 after:content-['✔'] after:text-black after:text-sm" />
+                                    <label for="is-dynamic-check" class="ml-3 text-gray-300 cursor-pointer">動態預覽</label>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 text-center">
+                        <div id="action-buttons-container" class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                             <button id="generate-stickers-btn" disabled class="text-lg px-12 py-4 px-6 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-yellow-400 text-black hover:bg-yellow-300">
+                                <div class="flex items-center gap-3">
+                                   <!-- 按鈕內容由 JS 動態更新 -->
+                                </div>
+                            </button>
+                        </div>
+                        <div id="remove-bg-progress-container" class="w-full max-w-md mx-auto mt-4 hidden">
+                            <div class="bg-gray-800 rounded-full h-3 overflow-hidden shadow-md">
+                                <div id="remove-bg-progress-bar" class="bg-green-500 h-3 rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <p class="text-gray-400 mt-2 text-sm">正在去除亮綠色背景，請稍候...</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div id="results-section" class="w-full">
+                    <!-- 生成結果由 JS 動態填入 -->
+                </div>
+            </main>
+            
+            <footer class="mt-20 mb-8 w-full">
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-gray-300 mb-6">更多精彩工具</h3>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a href="https://www.youtube.com/watch?v=FXVu-1zmeKo" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            一鍵換臉
+                        </a>
+                        <a href="https://youtu.be/8M68FaiZ3I4?si=-5VXfob07bGVN_tL" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-3.876a1.5 1.5 0 0 0-4.471-4.471L9.53 16.122ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                            一鍵克隆風格
+                        </a>
+                        <a href="https://novelpd.online/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                            AI小說生成
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61556209555154" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            原創-欣欣
+                        </a>
+                        <a href="https://x.com/ririkaDDC" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            Ririka X
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- 應用程式狀態 ---
+        let state = {
+            uploadedImage: null,
+            generatedImages: [],
+            isLoading: false,
+            error: null,
+            isUploading: false,
+            isCameraOpen: false,
+            isRemovingBackground: false,
+            removeBgProgress: 0,
+            processedImages: [],
+            selectedStickers: [],
+            addText: true,
+            isDynamic: true,
+            isZipping: false,
+            customIdeaInput: '',
+            customStickerPack: [],
+            isGeneratingIdeas: false,
+            suggestedThemes: [],
+            isSuggestingThemes: false,
+        };
+
+        // --- DOM 元素 ---
+        const dom = {
+            errorNotification: document.getElementById('error-notification'),
+            errorMessage: document.getElementById('error-message'),
+            dismissErrorBtn: document.getElementById('dismiss-error-btn'),
+            cameraModal: document.getElementById('camera-modal'),
+            cameraError: document.getElementById('camera-error'),
+            capturedImagePreview: document.getElementById('captured-image-preview'),
+            cameraVideo: document.getElementById('camera-video'),
+            cameraControls: document.getElementById('camera-controls'),
+            closeCameraBtn: document.getElementById('close-camera-btn'),
+            cameraCanvas: document.getElementById('camera-canvas'),
+            uploadBox: document.getElementById('upload-box'),
+            uploadButtons: document.getElementById('upload-buttons'),
+            changeFileBtn: document.getElementById('change-file-btn'),
+            openCameraBtnAlt: document.getElementById('open-camera-btn-alt'),
+            fileInput: document.getElementById('file-input'),
+            getInspirationBtn: document.getElementById('get-inspiration-btn'),
+            suggestedThemesContainer: document.getElementById('suggested-themes-container'),
+            customIdeaInput: document.getElementById('custom-idea-input'),
+            generateIdeasBtn: document.getElementById('generate-ideas-btn'),
+            backToDefaultBtn: document.getElementById('back-to-default-btn'),
+            stickerSelectionGrid: document.getElementById('sticker-selection-grid'),
+            addTextCheck: document.getElementById('add-text-check'),
+            isDynamicCheck: document.getElementById('is-dynamic-check'),
+            actionButtonsContainer: document.getElementById('action-buttons-container'),
+            generateStickersBtn: document.getElementById('generate-stickers-btn'),
+            removeBgProgressContainer: document.getElementById('remove-bg-progress-container'),
+            removeBgProgressBar: document.getElementById('remove-bg-progress-bar'),
+            resultsSection: document.getElementById('results-section'),
+        };
+
+        let streamRef = null;
+
+        // --- 常量 ---
+        const defaultStickerPack = {
+            name: 'AI 貼圖包',
+            description: '從您的照片生成有趣的聊天貼圖。',
+            icon: '😜',
+            prompts: [
+                { id: '開心', base: 'a happy, joyful, smiling expression, maybe with stars in the eyes', memeText: 'YAY!' },
+                { id: '傷心', base: 'a sad expression, with cartoonishly large tears streaming down the face', memeText: 'SO SAD' },
+                { id: '大笑', base: 'laughing out loud hysterically, eyes squeezed shut', memeText: 'LOL' },
+                { id: '生氣', base: 'an angry, fuming expression with red cheeks and steam coming out of the ears', memeText: 'GRRR' },
+                { id: '愛心', base: 'an adoring expression with large heart-shaped eyes', memeText: 'UWU' },
+                { id: 'OK', base: 'giving a cheerful thumbs-up sign', memeText: 'OK!' },
+                { id: '問號', base: 'a confused expression with question marks floating around the head', memeText: '???' },
+                { id: '想睡', base: 'a very sleepy, yawning expression with a snot bubble', memeText: 'Zzz...' },
+                { id: '驚訝', base: 'a shocked, surprised expression with wide eyes and open mouth, like "wow"', memeText: 'WOW!' },
+                { id: '思考', base: 'a thoughtful expression with a finger on the chin, looking upwards', memeText: 'Hmm...' },
+                { id: '難過', base: 'a crying expression with a quivering lip, feeling wronged', memeText: 'SNIFF...' },
+                { id: '拜託', base: 'a pleading expression with big, shimmering "puppy dog" eyes', memeText: 'Pls?' },
+            ]
+        };
+        
+        // --- 輔助函式 (與 React 版本相同) ---
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        const fetchWithRetry = (url, options, retries = 5, backoff = 1000) => {
+            return new Promise((resolve, reject) => {
+                const attempt = async (retryCount, delay) => {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            console.error('API 錯誤:', errorData);
+                            if (response.status === 429 && retryCount > 0) {
+                                setTimeout(() => attempt(retryCount - 1, delay * 2), delay);
+                            } else if (response.status === 401) {
+                                reject(new Error(`API 請求失敗，狀態碼 401：未授權。`));
+                            } else {
+                                reject(new Error(`API 請求失敗，狀態碼 ${response.status}: ${errorData.error?.message || '未知錯誤'}`));
+                            }
+                        } else {
+                            resolve(response.json());
+                        }
+                    } catch (error) {
+                        if (retryCount > 0) {
+                            setTimeout(() => attempt(retryCount - 1, delay * 2), delay);
+                        } else {
+                            reject(error);
+                        }
+                    }
+                };
+                attempt(retries, backoff);
+            });
+        };
+        
+        const generateImageWithRetry = async (payload, totalAttempts = 3) => {
+            let lastError;
+            for (let attempt = 1; attempt <= totalAttempts; attempt++) {
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+                    const result = await fetchWithRetry(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                    if (base64Data) return `data:image/png;base64,${base64Data}`;
+                    lastError = new Error("API 未返回圖片資料。");
+                } catch (error) {
+                    lastError = error;
+                }
+                if (attempt < totalAttempts) {
+                    await new Promise(res => setTimeout(res, 2500 * Math.pow(2, attempt - 1)));
+                }
+            }
+            throw new Error(`圖片生成在 ${totalAttempts} 次嘗試後失敗。最後錯誤: ${lastError?.message || '未知錯誤'}`);
+        };
+
+        const removeBackground = (imageUrl) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i], g = data[i + 1], b = data[i + 2];
+                        const max = Math.max(r, g, b), min = Math.min(r, g, b), delta = max - min;
+                        let hue = 0;
+                        if (delta !== 0) {
+                            if (max === g) hue = 60 * ((b - r) / delta + 2);
+                            else if (max === r) hue = 60 * ((g - b) / delta + 4);
+                            else hue = 60 * ((r - g) / delta);
+                        }
+                        if (hue < 0) hue += 360;
+                        const saturation = max === 0 ? 0 : delta / max;
+                        const value = max / 255;
+                        const pixelIndex = i / 4, x = pixelIndex % canvas.width, y = Math.floor(pixelIndex / canvas.width);
+                        const isEdgePixel = (x < 15 || x > canvas.width - 15 || y < 15 || y > canvas.height - 15);
+                        const isBackground = ((hue >= 60 && hue <= 180) && saturation > 0.3 && value > 0.4) || (isEdgePixel && (g > r + 30 && g > b + 30) && g > 100) || (g > 200 && r < 50 && b < 50) || (Math.abs(r - 0) < 20 && Math.abs(g - 255) < 20 && Math.abs(b - 0) < 20);
+                        if (isBackground) data[i + 3] = 0;
+                    }
+                    let transparentPixels = 0;
+                    for (let i = 3; i < data.length; i += 4) if (data[i] === 0) transparentPixels++;
+                    if ((transparentPixels / (data.length / 4)) < 0.1) {
+                         const edgeColors = [], edgeSize = 5;
+                         for (let y = 0; y < edgeSize; y++) for (let x = 0; x < canvas.width; x++) { const idx = (y * canvas.width + x) * 4; edgeColors.push({ r: data[idx], g: data[idx + 1], b: data[idx + 2] }); }
+                         const colorCounts = {};
+                         edgeColors.forEach(color => { const key = `${Math.floor(color.r/20)*20},${Math.floor(color.g/20)*20},${Math.floor(color.b/20)*20}`; colorCounts[key] = (colorCounts[key] || 0) + 1; });
+                         const mostCommonColor = Object.keys(colorCounts).reduce((a, b) => colorCounts[a] > colorCounts[b] ? a : b);
+                         const [targetR, targetG, targetB] = mostCommonColor.split(',').map(Number);
+                         for (let i = 0; i < data.length; i += 4) {
+                             const colorDistance = Math.sqrt(Math.pow(data[i] - targetR, 2) + Math.pow(data[i+1] - targetG, 2) + Math.pow(data[i+2] - targetB, 2));
+                             if (colorDistance < 50) data[i + 3] = 0;
+                         }
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => reject(new Error('圖片載入失敗'));
+                img.src = imageUrl;
+            });
+        };
+
+        const getModelInstruction = (prompt, addText) => {
+            let instruction = `The highest priority is to maintain the exact facial features, likeness, and perceived gender of the person in the provided reference photo.
+Transform the person into a cute, expressive 1:1 aspect ratio chat sticker based on the following action: "${prompt.base}".
+The sticker MUST have a thick, clean white outline and a subtle drop shadow to make it pop.
+The sticker MUST have a solid, bright lime green background (RGB: 0, 255, 0) - this is crucial for background removal later.
+The final image should be a high-quality PNG. Do not alter the person's core facial structure.`;
+            if (addText && prompt.memeText) {
+                instruction += `\nAdditionally, incorporate the text "${prompt.memeText}" into the sticker design in a fun, stylized, and readable English font that matches the emotion. The text should be easily visible against the bright lime green background.`;
+            }
+            return instruction;
+        };
+
+        // --- 渲染函式 ---
+        
+        function updateUI() {
+            // 更新錯誤通知
+            if (state.error) {
+                dom.errorMessage.textContent = state.error;
+                dom.errorNotification.classList.remove('hidden');
+                dom.errorNotification.classList.add('flex');
+            } else {
+                dom.errorNotification.classList.add('hidden');
+                dom.errorNotification.classList.remove('flex');
+            }
+
+            // 更新上傳區域
+            renderUploadBox();
+            
+            // 更新貼圖選擇區域
+            renderStickerSelection();
+            
+            // 更新主要操作按鈕
+            renderActionButtons();
+
+            // 更新結果區域
+            renderResults();
+        }
+
+        function renderUploadBox() {
+            dom.uploadBox.innerHTML = '';
+            if (state.isUploading) {
+                dom.uploadBox.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-400"></div>
+                        <p class="text-gray-400 mt-4">上傳中...</p>
+                    </div>`;
+                dom.uploadButtons.classList.add('hidden');
+            } else if (state.uploadedImage) {
+                dom.uploadBox.innerHTML = `<img src="${state.uploadedImage}" alt="上傳預覽" class="w-full h-full object-cover" />`;
+                dom.uploadButtons.classList.remove('hidden');
+                dom.uploadBox.classList.remove('cursor-pointer');
+            } else {
+                dom.uploadBox.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-6 text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                        <p class="mt-4 text-lg text-gray-300">點擊以上傳檔案</p>
+                        <p class="mt-4 text-sm">或</p>
+                        <button id="open-camera-btn" class="mt-2 px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.776 48.776 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" /></svg>
+                                <span>使用相機</span>
+                            </div>
+                        </button>`;
+                dom.uploadButtons.classList.add('hidden');
+                dom.uploadBox.classList.add('cursor-pointer');
+                document.getElementById('open-camera-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openCameraModal();
+                });
+            }
+        }
+
+        function renderStickerSelection() {
+            const activeStickerPack = state.customStickerPack.length > 0 ? state.customStickerPack : defaultStickerPack.prompts;
+            dom.stickerSelectionGrid.innerHTML = '';
+            activeStickerPack.forEach(prompt => {
+                const isSelected = state.selectedStickers.includes(prompt.id);
+                const label = document.createElement('label');
+                label.className = `cursor-pointer p-3 rounded-lg border-2 text-center transition-colors duration-200 ${isSelected ? 'bg-yellow-400/20 border-yellow-400 text-white' : 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300'}`;
+                label.innerHTML = `
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} class="hidden" data-id="${prompt.id}" />
+                    <span class="font-semibold text-sm">${prompt.id}</span>
+                `;
+                label.querySelector('input').addEventListener('change', () => handleStickerSelection(prompt.id));
+                dom.stickerSelectionGrid.appendChild(label);
+            });
+            dom.backToDefaultBtn.classList.toggle('hidden', state.customStickerPack.length === 0);
+
+            // Render idea generation buttons
+            dom.getInspirationBtn.disabled = !state.uploadedImage || state.isSuggestingThemes;
+            dom.getInspirationBtn.innerHTML = state.isSuggestingThemes 
+                ? `<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-gray-300"></div><span>分析中...</span>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" /></svg><span>從圖片取得靈感</span>`;
+            
+            dom.generateIdeasBtn.disabled = state.isGeneratingIdeas;
+            dom.generateIdeasBtn.innerHTML = state.isGeneratingIdeas 
+                ? `<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-black"></div><span>產生中...</span>`
+                : '產生點子';
+
+            // Render suggested themes
+            dom.suggestedThemesContainer.innerHTML = state.suggestedThemes.map(theme => 
+                `<button class="px-3 py-1 bg-gray-700 text-sm rounded-full hover:bg-gray-600" data-theme="${theme}">${theme}</button>`
+            ).join('');
+            dom.suggestedThemesContainer.querySelectorAll('button').forEach(btn => 
+                btn.addEventListener('click', (e) => {
+                    dom.customIdeaInput.value = e.target.dataset.theme;
+                    handleGenerateIdeas();
+                })
+            );
+        }
+
+        function renderActionButtons() {
+            dom.generateStickersBtn.disabled = !state.uploadedImage || state.isLoading || state.isUploading;
+            const progress = state.generatedImages.length > 0 ? (state.generatedImages.filter(img => img.status !== 'pending').length / state.generatedImages.length) * 100 : 0;
+            dom.generateStickersBtn.innerHTML = `
+                <div class="flex items-center gap-3">
+                    ${state.isLoading 
+                        ? `<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-black"></div><span>生成中... (${Math.round(progress)}%)</span>`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" /></svg><span>生成貼圖</span>`
+                    }
+                </div>`;
+            
+            const existingRemoveBgBtn = document.getElementById('remove-bg-btn');
+            if (existingRemoveBgBtn) existingRemoveBgBtn.parentElement.remove();
+
+            if (!state.isLoading && state.generatedImages.some(img => img.status === 'success')) {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center gap-2';
+                container.innerHTML = `
+                    <button id="remove-bg-btn" class="text-lg px-8 py-4 px-6 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-green-600 hover:bg-green-500 text-white">
+                         <div class="flex items-center gap-3">
+                             ${state.isRemovingBackground 
+                                ? `<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div><span>去背中... (${Math.round(state.removeBgProgress)}%)</span>`
+                                : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-3.876a1.5 1.5 0 0 0-4.471-4.471L9.53 16.122ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg><span>一鍵去背</span>`
+                            }
+                        </div>
+                    </button>
+                    <p class="text-xs text-gray-400 text-center max-w-xs">智能去除亮綠色背景，保留人物細節</p>
+                `;
+                container.querySelector('#remove-bg-btn').disabled = state.isRemovingBackground;
+                container.querySelector('#remove-bg-btn').addEventListener('click', handleRemoveBackground);
+                dom.actionButtonsContainer.appendChild(container);
+            }
+
+            dom.removeBgProgressContainer.classList.toggle('hidden', !state.isRemovingBackground);
+            dom.removeBgProgressBar.style.width = `${state.removeBgProgress}%`;
+        }
+
+        function renderResults() {
+            if (!state.isLoading && state.generatedImages.length === 0) {
+                dom.resultsSection.innerHTML = '';
+                return;
+            }
+
+            let content = `<div class="mt-16"><h2 class="text-3xl font-bold text-white mb-8 text-center">您生成的貼圖</h2>`;
+
+            if (state.isLoading) {
+                const progress = state.generatedImages.length > 0 ? (state.generatedImages.filter(img => img.status !== 'pending').length / state.generatedImages.length) * 100 : 0;
+                content += `
+                    <div class="w-full max-w-4xl mx-auto mb-8 text-center">
+                        <div class="bg-gray-800 rounded-full h-3 overflow-hidden shadow-md">
+                            <div class="bg-yellow-400 h-3 rounded-full" style="width: ${progress}%"></div>
+                        </div>
+                        <p class="text-gray-400 mt-4 text-sm">生成貼圖時請保持此視窗開啟。</p>
+                    </div>`;
+            }
+
+            content += '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">';
+            state.generatedImages.forEach((img, index) => {
+                switch (img.status) {
+                    case 'success':
+                        const processedImg = state.processedImages.find(p => p.id === img.id);
+                        const displayImageUrl = processedImg ? processedImg.processedImageUrl : img.imageUrl;
+                        const isProcessed = processedImg ? processedImg.isProcessed : false;
+                        content += createStickerDisplayHTML(img.id, displayImageUrl, index, isProcessed);
+                        break;
+                    case 'failed':
+                        content += createErrorCardHTML(img.id, index);
+                        break;
+                    default: // pending
+                        content += createLoadingCardHTML(img.id);
+                }
+            });
+            content += '</div>';
+
+            if (!state.isLoading && state.generatedImages.length > 0) {
+                 content += `
+                    <div class="text-center mt-16 mb-12 flex flex-col sm:flex-row items-center justify-center gap-6">
+                        <button id="start-over-btn" class="px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">重新開始</button>
+                        <button id="download-zip-btn" class="px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-yellow-400 text-black hover:bg-yellow-300">
+                             <div class="flex items-center gap-2">
+                                ${state.isZipping 
+                                    ? `<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-black"></div><span>打包中...</span>`
+                                    : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg><span>打包下載</span>`
+                                }
+                            </div>
+                        </button>
+                    </div>`;
+            }
+
+            content += `</div>`;
+            dom.resultsSection.innerHTML = content;
+            
+            // Add event listeners for dynamic content
+            if (!state.isLoading && state.generatedImages.length > 0) {
+                document.getElementById('start-over-btn').addEventListener('click', handleStartOver);
+                const zipBtn = document.getElementById('download-zip-btn');
+                zipBtn.disabled = state.isZipping;
+                zipBtn.addEventListener('click', handleDownloadAllAsZip);
+            }
+            dom.resultsSection.querySelectorAll('.regenerate-btn').forEach(btn => btn.addEventListener('click', (e) => regenerateImageAtIndex(parseInt(e.currentTarget.dataset.index))));
+            dom.resultsSection.querySelectorAll('.download-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                const { url, emotion, processed } = e.currentTarget.dataset;
+                handleDownloadRequest(url, emotion, processed === 'true');
+            }));
+        }
+
+        function createStickerDisplayHTML(emotion, imageUrl, index, isProcessed) {
+            const dynamicStyle = state.isDynamic ? `style="--random-rotate: ${Math.random() * 6 - 3}"` : '';
+            return `
+                <div class="sticker-card relative group p-4 bg-gray-900/50 rounded-xl shadow-lg hover:shadow-2xl border border-gray-800" ${dynamicStyle}>
+                    <div class="aspect-square bg-grid-pattern flex items-center justify-center rounded-lg relative">
+                        <img src="${imageUrl}" alt="貼圖表情 ${emotion}" class="w-full h-full object-contain" />
+                        ${isProcessed ? `<div class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">透明背景</div>` : ''}
+                    </div>
+                    <p class="text-center mt-3 text-lg font-semibold text-gray-300 px-3">${emotion}</p>
+                    <div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <button class="regenerate-btn p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm shadow-lg" data-index="${index}" aria-label="重新生成貼圖">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 16.023A7.5 7.5 0 1 0 8.25 8.25V6.75a.75.75 0 0 1 1.5 0v3.75a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1 0-1.5h2.37a5.98 5.98 0 0 1 8.403 8.403Z" /></svg>
+                        </button>
+                        <button class="download-btn p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm shadow-lg" data-url="${imageUrl}" data-emotion="${emotion}" data-processed="${isProcessed}" aria-label="下載貼圖">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function createLoadingCardHTML(emotion) {
+            return `
+                <div class="p-4 bg-gray-900 rounded-xl shadow-md">
+                    <div class="aspect-square bg-grid-pattern rounded-lg relative flex items-center justify-center">
+                         <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-400"></div>
+                    </div>
+                    <div class="mt-3 h-5 w-1/2 mx-auto rounded-md animate-pulse bg-gray-800"></div>
+                </div>`;
+        }
+
+        function createErrorCardHTML(emotion, index) {
+            return `
+                <div class="p-4 bg-gray-900 rounded-xl shadow-md border border-red-500/30">
+                    <div class="aspect-square bg-grid-pattern rounded-lg flex flex-col items-center justify-center text-center p-4 border-2 border-dashed border-red-500/50">
+                         <p class="text-red-400 font-medium mb-4">生成失敗</p>
+                         <button class="regenerate-btn px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-yellow-400 text-black hover:bg-yellow-300" data-index="${index}">
+                             重試
+                         </button>
+                    </div>
+                    <p class="text-center mt-3 text-lg font-semibold text-gray-300 px-3">${emotion}</p>
+                </div>`;
+        }
+        
+        // --- 事件處理函式 ---
+
+        function setError(message) {
+            state.error = message;
+            updateUI();
+        }
+
+        function handleStickerSelection(stickerId) {
+            const index = state.selectedStickers.indexOf(stickerId);
+            if (index > -1) {
+                state.selectedStickers.splice(index, 1);
+            } else {
+                state.selectedStickers.push(stickerId);
+            }
+            updateUI();
+        }
+
+        async function regenerateImageAtIndex(imageIndex) {
+            const imageToRegenerate = state.generatedImages[imageIndex];
+            if (!imageToRegenerate) return;
+        
+            state.generatedImages[imageIndex].status = 'pending';
+            setError(null);
+            updateUI();
+        
+            const activeStickerPack = state.customStickerPack.length > 0 ? state.customStickerPack : defaultStickerPack.prompts;
+            const originalPrompts = activeStickerPack.filter(p => state.generatedImages.map(gi => gi.id).includes(p.id));
+            const prompt = originalPrompts[imageIndex];
+    
+            if (!prompt) {
+                setError("找不到要重新生成的提示。");
+                state.generatedImages[imageIndex].status = 'failed';
+                updateUI();
+                return;
+            }
+        
+            try {
+                const imageWithoutPrefix = state.uploadedImage.split(',')[1];
+                const modelInstruction = getModelInstruction(prompt, state.addText);
+                const payload = { contents: [{ parts: [{ text: modelInstruction }, { inlineData: { mimeType: "image/png", data: imageWithoutPrefix } }] }] };
+                const imageUrl = await generateImageWithRetry(payload);
+                state.generatedImages[imageIndex] = { ...state.generatedImages[imageIndex], status: 'success', imageUrl };
+            } catch (err) {
+                console.error(`為 ${prompt.id} 重新生成失敗:`, err);
+                setError(`哎呀！為 "${prompt.id}" 重新生成失敗。請再試一次。`);
+                state.generatedImages[imageIndex].status = 'failed';
+            }
+            updateUI();
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                state.isUploading = true;
+                setError(null);
+                updateUI();
+                try {
+                    const base64Image = await toBase64(file);
+                    state.uploadedImage = base64Image;
+                    state.generatedImages = [];
+                    state.processedImages = [];
+                    state.suggestedThemes = [];
+                } catch (err) {
+                    console.error("圖片上傳時發生錯誤:", err);
+                    setError("該圖片無法處理。請嘗試其他檔案。");
+                } finally {
+                    state.isUploading = false;
+                    updateUI();
+                }
+            }
+        }
+        
+        function handleCaptureConfirm(imageDataUrl) {
+            state.uploadedImage = imageDataUrl;
+            state.generatedImages = [];
+            state.processedImages = [];
+            setError(null);
+            state.suggestedThemes = [];
+            updateUI();
+        }
+
+        async function handleGenerateClick() {
+            if (!state.uploadedImage) return setError("請先上傳一張照片！");
+            if (state.selectedStickers.length === 0) return setError("請至少選擇一個貼圖來生成！");
+
+            state.isLoading = true;
+            setError(null);
+            state.generatedImages = [];
+            state.processedImages = [];
+            updateUI();
+            
+            setTimeout(() => dom.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+            const imageWithoutPrefix = state.uploadedImage.split(',')[1];
+            const activeStickerPack = state.customStickerPack.length > 0 ? state.customStickerPack : defaultStickerPack.prompts;
+            const promptsForGeneration = activeStickerPack.filter(p => state.selectedStickers.includes(p.id));
+
+            state.generatedImages = promptsForGeneration.map(p => ({ id: p.id, status: 'pending', imageUrl: null }));
+            updateUI();
+
+            for (let i = 0; i < promptsForGeneration.length; i++) {
+                const p = promptsForGeneration[i];
+                try {
+                    const modelInstruction = getModelInstruction(p, state.addText);
+                    const payload = { contents: [{ parts: [{ text: modelInstruction }, { inlineData: { mimeType: "image/png", data: imageWithoutPrefix } }] }] };
+                    const imageUrl = await generateImageWithRetry(payload);
+                    state.generatedImages[i] = { ...state.generatedImages[i], status: 'success', imageUrl };
+                } catch (err) {
+                    console.error(`為 ${p.id} 生成圖片在所有重試後失敗:`, err);
+                    state.generatedImages[i].status = 'failed';
+                }
+                updateUI(); // Update after each image
+            }
+
+            state.isLoading = false;
+            updateUI();
+        }
+
+        function triggerDownload(href, fileName) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function handleDownloadRequest(imageUrl, emotion, isProcessed = false) {
+            const suffix = isProcessed ? '-transparent' : '';
+            const fileName = `sticker-${emotion.toLowerCase().replace(/\s+/g, '-')}${suffix}.png`;
+            triggerDownload(imageUrl, fileName);
+        }
+
+        async function handleDownloadAllAsZip() {
+            if (state.isZipping || typeof window.JSZip === 'undefined') {
+                if (typeof window.JSZip === 'undefined') setError("壓縮程式庫尚未載入，請稍後再試。");
+                return;
+            }
+            
+            state.isZipping = true;
+            setError(null);
+            updateUI();
+            
+            try {
+                const zip = new window.JSZip();
+                const imagesToPack = state.processedImages.length > 0 ? state.processedImages : state.generatedImages.filter(img => img.status === 'success');
+                if (imagesToPack.length === 0) return setError("沒有可以打包的貼圖。");
+
+                const imagePromises = imagesToPack.map(async (img) => {
+                    const imageUrl = img.processedImageUrl || img.imageUrl;
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const suffix = img.isProcessed ? '-transparent' : '';
+                    const fileName = `sticker-${img.id.toLowerCase().replace(/\s+/g, '-')}${suffix}.png`;
+                    zip.file(fileName, blob);
+                });
+
+                await Promise.all(imagePromises);
+                const content = await zip.generateAsync({ type: "blob" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = state.processedImages.length > 0 ? "ai-sticker-pack-transparent.zip" : "ai-sticker-pack.zip";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            } catch (err) {
+                console.error("建立壓縮檔時發生錯誤:", err);
+                setError("建立壓縮檔失敗，請再試一次。");
+            } finally {
+                state.isZipping = false;
+                updateUI();
+            }
+        }
+        
+        function handleStartOver() {
+            state.generatedImages = [];
+            state.uploadedImage = null;
+            setError(null);
+            state.customStickerPack = [];
+            state.customIdeaInput = '';
+            state.suggestedThemes = [];
+            state.selectedStickers = defaultStickerPack.prompts.map(p => p.id);
+            state.processedImages = [];
+            state.removeBgProgress = 0;
+            dom.customIdeaInput.value = '';
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function handleRemoveBackground() {
+            const successfulImages = state.generatedImages.filter(img => img.status === 'success');
+            if (successfulImages.length === 0) return setError("沒有可以處理的貼圖。");
+
+            state.isRemovingBackground = true;
+            state.removeBgProgress = 0;
+            setError(null);
+            state.processedImages = [];
+            updateUI();
+
+            try {
+                const processedResults = [];
+                for (let i = 0; i < successfulImages.length; i++) {
+                    const img = successfulImages[i];
+                    try {
+                        const processedImageUrl = await removeBackground(img.imageUrl);
+                        processedResults.push({ ...img, processedImageUrl, isProcessed: true });
+                    } catch (err) {
+                        processedResults.push({ ...img, processedImageUrl: img.imageUrl, isProcessed: false });
+                    }
+                    state.removeBgProgress = ((i + 1) / successfulImages.length) * 100;
+                    updateUI(); // Update progress bar
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                state.processedImages = processedResults;
+            } catch (err) {
+                setError("去背處理失敗，請再試一次。");
+            } finally {
+                state.isRemovingBackground = false;
+                updateUI();
+            }
+        }
+
+        async function handleGenerateIdeas() {
+            const idea = dom.customIdeaInput.value.trim();
+            if (!idea) return setError("請輸入您的貼圖點子描述！");
+            
+            state.isGeneratingIdeas = true;
+            setError(null);
+            state.customStickerPack = [];
+            state.suggestedThemes = [];
+            updateUI();
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const systemPrompt = `You are a creative assistant that generates fun and expressive chat sticker ideas. Based on the user's description, provide a list of 6 to 8 sticker ideas. Each idea MUST include:
+1.  A short, descriptive \`id\` in Traditional Chinese.
+2.  A detailed \`base\` prompt in English for an image generation model.
+3.  A short, catchy, English \`memeText\`.
+Your response MUST be a valid JSON array of objects. Do not include any other text or markdown formatting.`;
+            const payload = {
+                contents: [{ parts: [{ text: idea }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: { type: "ARRAY", items: { type: "OBJECT", properties: { "id": { "type": "STRING" }, "base": { "type": "STRING" }, "memeText": { "type": "STRING" } }, required: ["id", "base", "memeText"] } }
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    const ideas = JSON.parse(jsonText);
+                    state.customStickerPack = ideas;
+                    state.selectedStickers = ideas.map(idea => idea.id);
+                } else {
+                    throw new Error("API did not return valid JSON content.");
+                }
+            } catch (err) {
+                setError("無法產生貼圖點子，請稍後再試。");
+            } finally {
+                state.isGeneratingIdeas = false;
+                updateUI();
+            }
+        }
+        
+        async function handleGetInspirationFromImage() {
+            if (!state.uploadedImage) return setError("請先上傳一張照片才能取得靈感！");
+            
+            state.isSuggestingThemes = true;
+            setError(null);
+            state.suggestedThemes = [];
+            updateUI();
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const imageWithoutPrefix = state.uploadedImage.split(',')[1];
+            const textPrompt = `Analyze this image. Suggest 3 creative, short, fun themes for a sticker pack in Traditional Chinese. Return your answer as a simple JSON array of strings, like \`["主題一", "主題二", "主題三"]\`. Only return the JSON array.`;
+            const payload = {
+                contents: [{ parts: [{ text: textPrompt }, { inlineData: { mimeType: "image/png", data: imageWithoutPrefix } }] }],
+                generationConfig: { responseMimeType: "application/json", responseSchema: { type: "ARRAY", items: { type: "STRING" } } }
+            };
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    state.suggestedThemes = JSON.parse(jsonText);
+                } else {
+                    throw new Error("API did not return valid theme suggestions.");
+                }
+            } catch(err) {
+                setError("無法從圖片取得建議，請稍後再試。");
+            } finally {
+                state.isSuggestingThemes = false;
+                updateUI();
+            }
+        }
+
+        // --- Camera Modal Logic ---
+        function openCameraModal() {
+            dom.cameraModal.classList.remove('hidden');
+            dom.cameraModal.classList.add('flex');
+            startCamera();
+        }
+
+        function closeCameraModal() {
+            dom.cameraModal.classList.add('hidden');
+            dom.cameraModal.classList.remove('flex');
+            stopCamera();
+        }
+
+        function stopCamera() {
+            if (streamRef) {
+                streamRef.getTracks().forEach(track => track.stop());
+                streamRef = null;
+            }
+            if (dom.cameraVideo) {
+                dom.cameraVideo.srcObject = null;
+            }
+        }
+
+        async function startCamera() {
+            if (dom.cameraVideo) {
+                dom.cameraError.classList.add('hidden');
+                dom.capturedImagePreview.classList.add('hidden');
+                dom.cameraVideo.classList.remove('hidden');
+                try {
+                    stopCamera();
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: { ideal: 1024 }, height: { ideal: 1024 }, facingMode: 'user' }
+                    });
+                    dom.cameraVideo.srcObject = stream;
+                    streamRef = stream;
+                    renderCameraControls(false);
+                } catch (err) {
+                    dom.cameraError.textContent = "相機存取被拒絕。請在您的瀏覽器設定中允許相機存取。";
+                    dom.cameraError.classList.remove('hidden');
+                    dom.cameraVideo.classList.add('hidden');
+                }
+            }
+        }
+
+        function handleCapture() {
+            if (dom.cameraVideo && dom.cameraCanvas) {
+                const video = dom.cameraVideo;
+                const canvas = dom.cameraCanvas;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.scale(-1, 1);
+                context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                dom.capturedImagePreview.src = dataUrl;
+                dom.capturedImagePreview.classList.remove('hidden');
+                dom.cameraVideo.classList.add('hidden');
+                stopCamera();
+                renderCameraControls(true, dataUrl);
+            }
+        }
+
+        function renderCameraControls(isCaptured, imageDataUrl = '') {
+            dom.cameraControls.innerHTML = '';
+            if (isCaptured) {
+                dom.cameraControls.innerHTML = `
+                    <button id="retake-btn" class="px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">重拍</button>
+                    <button id="confirm-capture-btn" class="px-6 py-2 rounded-md font-semibold tracking-wider uppercase transition-all duration-300 bg-yellow-400 text-black hover:bg-yellow-300">使用照片</button>
+                `;
+                document.getElementById('retake-btn').addEventListener('click', startCamera);
+                document.getElementById('confirm-capture-btn').addEventListener('click', () => {
+                    handleCaptureConfirm(imageDataUrl);
+                    closeCameraModal();
+                });
+            } else {
+                dom.cameraControls.innerHTML = `<button id="capture-btn" class="w-20 h-20 rounded-full bg-white border-4 border-gray-600 focus:outline-none focus:ring-4 focus:ring-yellow-400 transition-all hover:border-yellow-400"></button>`;
+                document.getElementById('capture-btn').disabled = !!dom.cameraError.textContent;
+                document.getElementById('capture-btn').addEventListener('click', handleCapture);
+            }
+        }
+
+        // --- 初始化 ---
+        function init() {
+            // Initial render
+            state.selectedStickers = defaultStickerPack.prompts.map(p => p.id);
+            updateUI();
+
+            // Event Listeners
+            dom.dismissErrorBtn.addEventListener('click', () => setError(null));
+            dom.uploadBox.addEventListener('click', () => {
+                 if (!state.uploadedImage) dom.fileInput.click();
+            });
+            dom.changeFileBtn.addEventListener('click', () => dom.fileInput.click());
+            dom.openCameraBtnAlt.addEventListener('click', openCameraModal);
+            dom.closeCameraBtn.addEventListener('click', closeCameraModal);
+            dom.fileInput.addEventListener('change', handleImageUpload);
+            dom.generateStickersBtn.addEventListener('click', handleGenerateClick);
+            dom.addTextCheck.addEventListener('change', (e) => state.addText = e.target.checked);
+            dom.isDynamicCheck.addEventListener('change', (e) => state.isDynamic = e.target.checked);
+            
+            dom.backToDefaultBtn.addEventListener('click', () => {
+                state.customStickerPack = [];
+                state.selectedStickers = defaultStickerPack.prompts.map(p => p.id);
+                updateUI();
+            });
+            dom.generateIdeasBtn.addEventListener('click', handleGenerateIdeas);
+            dom.getInspirationBtn.addEventListener('click', handleGetInspirationFromImage);
+        }
+
+        // 當 DOM 完全載入後執行
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
