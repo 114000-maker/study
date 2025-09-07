@@ -1,4 +1,6 @@
 # [Github](https://github.com/)
+# 教師課堂管理整合工具(更新日1140821)
+[教師課堂管理整合工具(更新日1140821)](./2025-09-06.html)
 # [Study](https://114000-maker.github.io/study/)
 [2025-09-06](https://114000-maker.github.io/study/2025-09-06.html)
 # 1943 Battle of Midway - Final Version
