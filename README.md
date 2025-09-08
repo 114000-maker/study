@@ -19,3 +19,5 @@
 [韋哥科技教室工具探索小瑪莉程式](https://114000-maker.github.io/study/2025-09-07_05.html)
 # 作業點收整合系統
 [作業點收整合系統](https://114000-maker.github.io/study/2025-09-08_01.html)
+# 數學公式查詢
+[數學公式查詢](https://114000-maker.github.io/study/2025-09-08_02.html)
