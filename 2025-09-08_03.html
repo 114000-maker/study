@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>數學公式查詢器</title>
+  <style>
+    /* CSS Reset 與基本樣式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    h2 {
+      color: #3498db;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+    }
+    .search-section {
+      display: flex;
+      margin-bottom: 30px;
+    }
+    #searchInput {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      font-size: 16px;
+    }
+    #searchButton {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    #searchButton:hover {
+      background-color: #2980b9;
+    }
+    .category-section {
+      margin-bottom: 30px;
+    }
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .category-button {
+      padding: 8px 15px;
+      background-color: #f1f1f1;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .category-button:hover {
+      background-color: #e0e0e0;
+    }
+    .category-button.active {
+      background-color: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+    .formula-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    /* 公式按鈕樣式 */
+    .formula-button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      background-color: #f1f1f1;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .formula-button:hover {
+      background-color: #e0e0e0;
+    }
+    /* 公式詳細顯示區 */
+    #formula-detail {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      border-radius: 6px;
+    }
+    /* 聊天介面相關 */
+    #chat-container {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 20px;
+    }
+    #api-key-section {
+      margin-bottom: 10px;
+    }
+    #apiKeyInput {
+      width: 70%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #saveApiKeyButton {
+      padding: 8px 15px;
+      margin-left: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #chat-messages {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #fafafa;
+    }
+    .chat-message {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    .chat-message.user {
+      background-color: #d1e7dd;
+      text-align: right;
+    }
+    .chat-message.ai {
+      background-color: #f8d7da;
+      text-align: left;
+    }
+    #chat-input-section {
+      display: flex;
+    }
+    #chatInput {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #sendChatButton {
+      padding: 8px 15px;
+      margin-left: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .categories {
+        flex-direction: column;
+      }
+      .search-section {
+        flex-direction: column;
+      }
+      #searchInput {
+        border-radius: 4px;
+        margin-bottom: 10px;
+      }
+      #searchButton {
+        border-radius: 4px;
+      }
+    }
+  </style>
+  <!-- 引入 MathJax -->
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>數學公式查詢器</h1>
+    <div class="search-section">
+      <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋公式..."/>
+      <button id="searchButton">搜尋</button>
+    </div>
+    <div class="category-section">
+      <h2>公式類別</h2>
+      <div class="categories" id="categories">
+        <!-- 每一個分類將自動轉換成按鈕 -->
+      </div>
+    </div>
+    <div class="formula-section">
+      <h2 id="formula-title">所有公式</h2>
+      <div id="formula-list">
+        <!-- 所有公式以按鈕方式呈現 -->
+      </div>
+      <!-- 公式詳細內容與互動教學區 -->
+      <div id="formula-detail"></div>
+    </div>
+  </div>
+  
+  <script>
+    // 完整 63 個公式資料
+    const formulas = [
+      { id: 1, category: "代數", name: "二次方程式", content: "$$ax^2 + bx + c = 0$$", solution: "$$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$$", description: "用於解決形如 ax² + bx + c = 0 的方程式，其中 a ≠ 0。" },
+      { id: 2, category: "代數", name: "因式分解公式", content: "$$a^2 - b^2 = (a+b)(a-b)$$", description: "平方差公式，用於因式分解。" },
+      { id: 3, category: "代數", name: "完全平方公式", content: "$$a^2 + 2ab + b^2 = (a+b)^2$$", description: "用於將多項式表示為平方形式。" },
+      { id: 4, category: "幾何", name: "圓面積", content: "$$A = \\pi r^2$$", description: "計算圓的面積，其中 r 是圓的半徑。" },
+      { id: 5, category: "幾何", name: "圓周長", content: "$$C = 2\\pi r$$", description: "計算圓的周長，其中 r 是圓的半徑。" },
+      { id: 6, category: "幾何", name: "三角形面積", content: "$$A = \\frac{1}{2} \\times b \\times h$$", description: "計算三角形的面積，其中 b 是底邊長度，h 是高度。" },
+      { id: 7, category: "三角學", name: "畢氏定理", content: "$$a^2 + b^2 = c^2$$", description: "直角三角形中，兩條直角邊的平方和等於斜邊的平方。" },
+      { id: 8, category: "三角學", name: "正弦定理", content: "$$\\frac{a}{\\sin A} = \\frac{b}{\\sin B} = \\frac{c}{\\sin C}$$", description: "在任意三角形中，各邊長與其對角正弦值的比相等。" },
+      { id: 9, category: "三角學", name: "餘弦定理", content: "$$c^2 = a^2 + b^2 - 2ab\\cos C$$", description: "用於計算三角形中，已知兩邊及其夾角時的第三邊長度。" },
+      { id: 10, category: "微積分", name: "導數基本公式", content: "$$\\frac{d}{dx}[x^n] = nx^{n-1}$$", description: "冪函數求導公式，用於計算 x^n 的導數。" },
+      { id: 11, category: "微積分", name: "積分基本公式", content: "$$\\int x^n dx = \\frac{x^{n+1}}{n+1} + C, \\quad n \\neq -1$$", description: "冪函數積分公式，用於計算 x^n 的不定積分。" },
+      { id: 12, category: "微積分", name: "連鎖律", content: "$$\\frac{d}{dx}[f(g(x))] = f'(g(x)) \\cdot g'(x)$$", description: "用於計算複合函數的導數。" },
+      { id: 13, category: "概率統計", name: "期望值", content: "$$E(X) = \\sum_{i=1}^{n} x_i P(X = x_i)$$", description: "離散隨機變量的期望值公式。" },
+      { id: 14, category: "概率統計", name: "標準差", content: "$$\\sigma = \\sqrt{\\frac{\\sum_{i=1}^{n}(x_i - \\mu)^2}{n}}$$", description: "用於測量數據分佈的離散程度。" },
+      { id: 15, category: "概率統計", name: "正態分佈", content: "$$f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}(\\frac{x-\\mu}{\\sigma})^2}$$", description: "描述許多自然現象的機率分佈，由平均值 μ 和標準差 σ 決定。" },
+      { id: 16, category: "代數", name: "對數乘法公式", content: "$$\\log_b(mn)=\\log_b m + \\log_b n$$", description: "對數的乘法公式，適用於相同底數。" },
+      { id: 17, category: "代數", name: "指數加法律", content: "$$a^{m+n}=a^m \\cdot a^n$$", description: "指數相加的規則，適用於相同底數。" },
+      { id: 18, category: "代數", name: "等差數列通項公式", content: "$$a_n=a_1+(n-1)d$$", description: "等差數列的通項公式，a₁ 為首項，d 為公差。" },
+      { id: 19, category: "代數", name: "等差數列求和公式", content: "$$S_n=\\frac{n}{2}(a_1+a_n)$$", description: "等差數列前 n 項和公式。" },
+      { id: 20, category: "代數", name: "等比數列通項公式", content: "$$a_n=a_1\\cdot r^{n-1}$$", description: "等比數列的通項公式，a₁ 為首項，r 為公比。" },
+      { id: 21, category: "代數", name: "等比數列求和公式 (有限項)", content: "$$S_n=a_1\\frac{1-r^n}{1-r}\\quad(r\\neq1)$$", description: "等比數列前 n 項和公式，適用於公比不等於 1 的情況。" },
+      { id: 22, category: "幾何", name: "梯形面積", content: "$$A=\\frac{1}{2}(a+b)h$$", description: "計算梯形面積的公式，其中 a、b 為上下底，h 為高。" },
+      { id: 23, category: "幾何", name: "矩形面積", content: "$$A=l\\times w$$", description: "計算矩形面積的公式，其中 l 為長，w 為寬。" },
+      { id: 24, category: "幾何", name: "矩形周長", content: "$$P=2(l+w)$$", description: "計算矩形周長的公式。" },
+      { id: 25, category: "概率統計", name: "組合公式", content: "$$C(n,k)=\\frac{n!}{k!(n-k)!}$$", description: "用於計算從 n 個物品中取 k 個的組合數。" },
+      { id: 26, category: "線性代數", name: "矩陣乘法", content: "$$(AB)_{ij} = \\sum_{k}a_{ik}b_{kj}$$", description: "矩陣乘法公式，表示兩矩陣乘積中第 i 行第 j 列的元素。" },
+      { id: 27, category: "線性代數", name: "行列式計算", content: "$$\\det\\begin{pmatrix}a & b\\\\c & d\\end{pmatrix} = ad - bc$$", description: "二階行列式的計算公式。" },
+      { id: 28, category: "複數", name: "歐拉公式", content: "$$e^{i\\theta} = \\cos\\theta + i\\sin\\theta$$", description: "歐拉公式，連結複數與三角函數。" },
+      { id: 29, category: "微分方程", name: "一階線性微分方程通解", content: "$$y = e^{-\\int P(x)dx}\\Big(\\int Q(x)e^{\\int P(x)dx}dx + C\\Big)$$", description: "一階線性微分方程的通解公式。" },
+      { id: 30, category: "數論", name: "最大公因數與最小公倍數關係", content: "$$a \\times b = \\text{gcd}(a,b) \\times \\text{lcm}(a,b)$$", description: "兩數最大公因數與最小公倍數之間的關係。" },
+      { id: 31, category: "數論", name: "質數分解定理", content: "$$n=p_1^{a_1}p_2^{a_2}\\cdots p_k^{a_k}$$", description: "每個大於 1 的正整數均可唯一分解為質數乘積。" },
+      { id: 32, category: "立體幾何", name: "球體積", content: "$$V=\\frac{4}{3}\\pi r^3$$", description: "計算球體積的公式，其中 r 為球的半徑。" },
+      { id: 33, category: "立體幾何", name: "球面積", content: "$$A=4\\pi r^2$$", description: "計算球面積的公式，其中 r 為球的半徑。" },
+      { id: 34, category: "向量", name: "向量內積", content: "$$\\mathbf{a}\\cdot\\mathbf{b}=\\|\\mathbf{a}\\|\\|\\mathbf{b}\\|\\cos\\theta$$", description: "兩向量內積的定義公式。" },
+      { id: 35, category: "向量", name: "向量外積", content: "$$\\|\\mathbf{a}\\times\\mathbf{b}\\|=\\|\\mathbf{a}\\|\\|\\mathbf{b}\\|\\sin\\theta$$", description: "兩向量外積的大小公式。" },
+      { id: 36, category: "排列組合", name: "排列公式", content: "$$P(n,k)=\\frac{n!}{(n-k)!}$$", description: "計算從 n 個物品中取 k 個排列的公式。" },
+      { id: 37, category: "排列組合", name: "重複排列公式", content: "$$n^k$$", description: "計算 n 個物品中取 k 個，允許重複排列的公式。" },
+      { id: 38, category: "國小", name: "正方形面積", content: "$$A=s^2$$", description: "計算正方形面積，其中 s 為邊長。" },
+      { id: 39, category: "國小", name: "正方形周長", content: "$$P=4s$$", description: "計算正方形周長，其中 s 為邊長。" },
+      { id: 40, category: "國小", name: "比例交叉相乘", content: "$$a:b = c:d \\Rightarrow a\\times d = b\\times c$$", description: "利用交叉相乘法驗證比例關係。" },
+      { id: 41, category: "國小", name: "算術平均數", content: "$$\\text{平均數}=\\frac{a_1+a_2+\\cdots+a_n}{n}$$", description: "計算數據集的算術平均數。" },
+      { id: 42, category: "國小", name: "正多邊形周長", content: "$$P=n\\times s$$", description: "計算正多邊形周長，其中 n 為邊數，s 為邊長。" },
+      { id: 43, category: "國小", name: "正方形對角線", content: "$$d=s\\sqrt{2}$$", description: "計算正方形的對角線長度，其中 s 為邊長。" },
+      { id: 44, category: "國小", name: "三角形周長", content: "$$P=a+b+c$$", description: "計算三角形周長，其中 a、b、c 為三邊長。" },
+      { id: 45, category: "國小", name: "直角三角形面積", content: "$$A=\\frac{1}{2}ab$$", description: "計算直角三角形面積，其中 a 與 b 為直角邊長。" },
+      { id: 46, category: "國小", name: "正方體體積", content: "$$V=s^3$$", description: "計算正方體的體積，其中 s 為邊長。" },
+      { id: 47, category: "國小", name: "正方體表面積", content: "$$A=6s^2$$", description: "計算正方體的表面積，其中 s 為邊長。" },
+      { id: 48, category: "國小", name: "長方形對角線", content: "$$d=\\sqrt{l^2+w^2}$$", description: "計算長方形對角線長度，其中 l 為長，w 為寬。" },
+      { id: 49, category: "國小", name: "比例式求解", content: "$$\\frac{a}{b}=\\frac{c}{d} \\Rightarrow a\\times d=b\\times c$$", description: "解比例式的基本關係。" },
+      { id: 50, category: "國小", name: "加法交換律", content: "$$a+b=b+a$$", description: "加法的交換律。" },
+      { id: 51, category: "國小", name: "加法結合法則", content: "$$(a+b)+c = a+(b+c)$$", description: "加法的結合法則，數字分組不影響總和。" },
+      { id: 52, category: "國小", name: "乘法交換律", content: "$$a \\times b = b \\times a$$", description: "乘法的交換律，順序不影響結果。" },
+      { id: 53, category: "國小", name: "乘法結合法則", content: "$$(a \\times b) \\times c = a \\times (b \\times c)$$", description: "乘法的結合法則，分組不影響乘積。" },
+      { id: 54, category: "國小", name: "乘法分配律", content: "$$a(b+c)=ab+ac$$", description: "乘法對加法的分配性質。" },
+      { id: 55, category: "國小", name: "除法定義", content: "$$a \\div b = c \\iff a = b \\times c$$", description: "除法與乘法互為逆運算。" },
+      { id: 56, category: "國小", name: "等邊三角形面積", content: "$$A=\\frac{\\sqrt{3}}{4}a^2$$", description: "計算等邊三角形面積，其中 a 為邊長。" },
+      { id: 57, category: "國小", name: "倒數定義", content: "$$a^{-1}=\\frac{1}{a}$$", description: "非零數的倒數等於其分數形式。" },
+      { id: 58, category: "國小", name: "相似三角形比例", content: "$$\\frac{a}{a'}=\\frac{b}{b'}=\\frac{c}{c'}$$", description: "相似三角形中對應邊的比例相等。" },
+      { id: 59, category: "國小", name: "平方根概念", content: "$$\\sqrt{a^2}=|a|$$", description: "平方根的基本定義，結果取絕對值。" },
+      { id: 60, category: "國小", name: "分數乘法", content: "$$\\frac{a}{b} \\times \\frac{c}{d}=\\frac{ac}{bd}$$", description: "分數乘法的計算規則。" },
+      { id: 61, category: "國小", name: "分數除法", content: "$$\\frac{a}{b} \\div \\frac{c}{d}=\\frac{a}{b} \\times \\frac{d}{c}$$", description: "分數除法的計算規則。" },
+      { id: 62, category: "國小", name: "簡單百分比", content: "$$\\text{百分比}=\\frac{\\text{部分}}{\\text{整體}}\\times100\\%$$", description: "計算部分占整體的百分比。" },
+      { id: 63, category: "國小", name: "基本加減法", content: "$$a \\pm b$$", description: "加減運算的基本表示方式。" }
+    ];
+
+    // 初始化
+    document.addEventListener("DOMContentLoaded", () => {
+      initCategories();
+      displayFormulas(formulas);
+      document.getElementById("searchButton").addEventListener("click", searchFormulas);
+      document.getElementById("searchInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") searchFormulas();
+      });
+    });
+
+    // 建立每個分類的按鈕（包含預設「全部」）
+    function initCategories() {
+      const categoriesContainer = document.getElementById('categories');
+      const categories = [...new Set(formulas.map(formula => formula.category))];
+
+      // 建立「全部」按鈕
+      const allButton = document.createElement('button');
+      allButton.classList.add('category-button', 'active');
+      allButton.textContent = '全部';
+      allButton.dataset.category = 'all';
+      allButton.addEventListener('click', () => filterByCategory('all', allButton));
+      categoriesContainer.appendChild(allButton);
+
+      // 為每個獨立分類建立按鈕
+      categories.forEach(category => {
+        const button = document.createElement('button');
+        button.classList.add('category-button');
+        button.textContent = category;
+        button.dataset.category = category;
+        button.addEventListener('click', () => filterByCategory(category, button));
+        categoriesContainer.appendChild(button);
+      });
+    }
+
+    // 根據選擇的分類過濾公式
+    function filterByCategory(category, buttonElement) {
+      document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+      buttonElement.classList.add('active');
+      
+      document.getElementById('formula-title').textContent = category === 'all' ? '所有公式' : `${category}公式`;
+      const filteredFormulas = category === 'all' ? formulas : formulas.filter(formula => formula.category === category);
+
+      // 清空公式詳細區
+      document.getElementById('formula-detail').innerHTML = '';
+      displayFormulas(filteredFormulas);
+    }
+
+    // 搜尋公式功能
+    function searchFormulas() {
+      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (searchTerm === "") {
+        displayFormulas(formulas);
+        document.getElementById('formula-title').textContent = "所有公式";
+        return;
+      }
+      const filteredFormulas = formulas.filter(formula =>
+        formula.name.toLowerCase().includes(searchTerm) ||
+        formula.description.toLowerCase().includes(searchTerm) ||
+        formula.category.toLowerCase().includes(searchTerm)
+      );
+      document.getElementById('formula-title').textContent = `搜尋結果：${searchTerm}`;
+      displayFormulas(filteredFormulas);
+      
+      // 重置分類按鈕的狀態
+      document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('[data-category="all"]').classList.add('active');
+    }
+
+    // 顯示所有公式：以按鈕方式呈現
+    // 點擊後顯示該公式的詳細內容 +「啟動 GPT 協助」按鈕
+    function displayFormulas(formulasToDisplay) {
+      const formulaList = document.getElementById('formula-list');
+      formulaList.innerHTML = "";
+      if (formulasToDisplay.length === 0) {
+        formulaList.innerHTML = '<p style="text-align: center; color: #666;">找不到符合的公式</p>';
+        return;
+      }
+
+      formulasToDisplay.forEach(formula => {
+        const btn = document.createElement("button");
+        btn.classList.add("formula-button");
+        btn.textContent = formula.name;
+        btn.addEventListener("click", () => onFormulaButtonClick(formula));
+        formulaList.appendChild(btn);
+      });
+
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+    }
+
+    // 點擊公式按鈕後：顯示詳細內容與「啟動 GPT 協助」按鈕
+    function onFormulaButtonClick(formula) {
+      const detail = document.getElementById('formula-detail');
+      // 先清空
+      detail.innerHTML = "";
+
+      // 若是「二次方程式」，以條列式 MathJax 示範
+      if (formula.name === "二次方程式") {
+        detail.innerHTML = `
+          <h3>二次方程式（條列式示範）</h3>
+          <ul style="margin-left:20px;">
+            <li>定義：形如 <strong>$$ax^2 + bx + c = 0$$</strong>，其中 <strong>$$a \\neq 0$$</strong>。</li>
+            <li>求根公式：
+              <ul style="margin-left:20px;">
+                <li>
+                  <strong>$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$</strong>
+                </li>
+              </ul>
+            </li>
+            <li>範例：
+              <ul style="margin-left:20px;">
+                <li>$$2x^2 - 4x + 2 = 0$$  &rarr;  $$x = 1$$（重根）</li>
+              </ul>
+            </li>
+          </ul>
+          <button id="startGptButton" style="margin-top:10px; padding:8px 15px; background-color:#3498db; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+            啟動 GPT 協助
+          </button>
+        `;
+      } else {
+        // 其他公式維持原本顯示方式
+        const formulaHTML = `
+          <h3>${formula.name}</h3>
+          <div class="formula-content">${formula.content}</div>
+          ${formula.solution ? `<div class="formula-content">解答: ${formula.solution}</div>` : ""}
+          <div class="formula-description">${formula.description}</div>
+          <button id="startGptButton" style="margin-top:10px; padding:8px 15px; background-color:#3498db; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+            啟動 GPT 協助
+          </button>
+        `;
+        detail.innerHTML = formulaHTML;
+      }
+
+      // MathJax 重新渲染
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+
+      // 點擊「啟動 GPT 協助」後才顯示聊天介面
+      document.getElementById('startGptButton').addEventListener('click', () => {
+        initChatInterface(formula);
+      });
+    }
+
+    // 初始化 GPT 聊天介面
+    function initChatInterface(formula) {
+      // 若已存在 chat-container，先移除，重新生成
+      let oldChat = document.getElementById("chat-container");
+      if (oldChat) oldChat.remove();
+
+      // 在公式區塊後方插入聊天容器
+      const detail = document.getElementById('formula-detail');
+      const chatContainer = document.createElement('div');
+      chatContainer.id = "chat-container";
+      detail.appendChild(chatContainer);
+
+      // 建立 API 金鑰輸入區
+      const apiKeySection = document.createElement('div');
+      apiKeySection.id = "api-key-section";
+      apiKeySection.innerHTML = `
+        <input type="text" id="apiKeyInput" placeholder="請輸入 API 金鑰">
+        <button id="saveApiKeyButton">儲存 API 金鑰</button>
+      `;
+      chatContainer.appendChild(apiKeySection);
+
+      // 若 localStorage 中已有 API 金鑰，則填入輸入框
+      const storedKey = localStorage.getItem('api_key');
+      if (storedKey) {
+        document.getElementById('apiKeyInput').value = storedKey;
+      }
+
+      // 儲存 API 金鑰按鈕事件
+      document.getElementById('saveApiKeyButton').addEventListener('click', () => {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        if (key === "") {
+          alert("請輸入有效的 API 金鑰！");
+        } else {
+          localStorage.setItem('api_key', key);
+          alert("API 金鑰已儲存！");
+        }
+      });
+
+      // 建立聊天訊息顯示區
+      const chatMessages = document.createElement('div');
+      chatMessages.id = "chat-messages";
+      chatContainer.appendChild(chatMessages);
+
+      // 建立聊天輸入區
+      const chatInputSection = document.createElement('div');
+      chatInputSection.id = "chat-input-section";
+      chatInputSection.innerHTML = `
+        <input type="text" id="chatInput" placeholder="輸入訊息...">
+        <button id="sendChatButton">送出</button>
+      `;
+      chatContainer.appendChild(chatInputSection);
+
+      // 設定聊天歷史（包含 system 提示，指示 AI 以繁體中文回答，並結合該主題）
+      let chatHistory = [
+        { role: "system", content: `你是一個專業的數學老師，請針對「${formula.name}」主題提供立即互動教學，回答皆以繁體中文呈現。` }
+      ];
+
+      // 送出聊天訊息
+      document.getElementById('sendChatButton').addEventListener('click', () => {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message === "") return;
+
+        // 檢查 API 金鑰
+        const apiKey = localStorage.getItem('api_key');
+        if (!apiKey) {
+          alert("請先儲存 API 金鑰！");
+          return;
+        }
+
+        // 顯示使用者訊息
+        appendChatMessage("user", message);
+        chatHistory.push({ role: "user", content: message });
+        chatInput.value = "";
+
+        // 發送訊息至 GPT API
+        fetchGPTResponse(apiKey, chatHistory)
+          .then(responseText => {
+            appendChatMessage("ai", responseText);
+            chatHistory.push({ role: "assistant", content: responseText });
+          })
+          .catch(error => {
+            appendChatMessage("ai", "發生錯誤：" + error.message);
+          });
+      });
+
+      // 自動捲動到聊天最底
+      function appendChatMessage(role, text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add("chat-message", role);
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+    // 使用 fetch 向 Snake's GPT API 發送請求，取得回應
+    async function fetchGPTResponse(apiKey, chatHistory) {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: "llama-3.2-90b-vision-preview",
+          messages: chatHistory
+        })
+      });
+      if (!response.ok) {
+        throw new Error("API 請求失敗，狀態：" + response.status);
+      }
+      const data = await response.json();
+      // 假設回應結構：{ choices: [ { message: { content: "..." } } ] }
+      return data.choices[0].message.content;
+    }
+  </script>
+</body>
+</html>
