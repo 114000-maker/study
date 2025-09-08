@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業點收整合系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .student-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .student-btn.submitted {
+            background-color: #10B981; /* green-500 */
+            color: white;
+            transform: scale(1.05);
+        }
+        .student-btn.absent {
+            background-color: #fca5a5; /* red-300 */
+            color: #7f1d1d; /* red-900 */
+            text-decoration: line-through;
+        }
+        [v-cloak] {
+            display: none;
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" v-cloak class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-slate-900">
+                作業點收整合系統
+                <span v-if="currentClass" class="text-indigo-600">- {{ currentClass.name }}</span>
+            </h1>
+            <p class="text-lg text-slate-600 mt-2" id="current-date">正在載入日期...</p>
+        </header>
+
+        <main>
+             <!-- Step 0: Class Management -->
+            <section id="class-management-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                <h2 class="text-2xl font-semibold mb-4">
+                    <span class="text-indigo-600 mr-2">❖</span>班級管理
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="class-select" class="block text-sm font-medium text-slate-700">目前班級</label>
+                        <select id="class-select" v-model="currentClassId" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md appearance-none form-select">
+                            <option v-for="c in allData.classes" :key="c.id" :value="c.id">{{ c.name }}</option>
+                             <option v-if="!allData.classes.length" disabled value="">請先新增班級</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-grow">
+                             <label for="new-class-name" class="block text-sm font-medium text-slate-700">新增班級</label>
+                            <input type="text" id="new-class-name" v-model.trim="newClassName" @keyup.enter="addClass" placeholder="例如：三年一班" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <button @click="addClass" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-semibold whitespace-nowrap h-10">新增</button>
+                    </div>
+                </div>
+                 <div v-if="currentClass" class="mt-4 pt-4 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <button @click="renameClass" class="w-full sm:w-auto flex-1 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 font-semibold">重新命名目前班級</button>
+                    <button @click="requestDeleteClass" class="w-full sm:w-auto flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold">刪除目前班級</button>
+                </div>
+            </section>
+            
+            <div v-if="!currentClass" class="text-center py-12 bg-white rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-slate-700">請先新增一個班級以開始使用！</h2>
+                <p class="text-slate-500 mt-2">您可以在上方的「班級管理」區塊新增班級。</p>
+            </div>
+
+            <template v-if="currentClass">
+                 <!-- Step 1: Settings -->
+                <section id="settings-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <div @click="toggleSection('settings')" class="flex justify-between items-center cursor-pointer">
+                        <h2 class="text-2xl font-semibold">
+                            <span class="text-indigo-600 mr-2">1</span>基本設定 (作業項目庫)
+                        </h2>
+                        <svg :class="{'rotate-180': sections.settings.open}" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <div v-show="sections.settings.open" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Homework Items -->
+                        <div>
+                            <h3 class="text-lg font-medium mb-2">作業項目庫管理</h3>
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="text" v-model.trim="newHomeworkItem" @keyup.enter="addHomeworkItem" placeholder="例如：國語習作" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <button @click="addHomeworkItem" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-semibold whitespace-nowrap">新增</button>
+                            </div>
+                            <ul class="space-y-2">
+                                <li v-for="(item, index) in homeworkItems" :key="index" class="flex items-center justify-between bg-slate-100 px-4 py-2 rounded-lg">
+                                    <span>{{ item }}</span>
+                                    <button @click="removeHomeworkItem(index)" class="text-red-500 hover:text-red-700">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </li>
+                                <li v-if="!homeworkItems.length" class="text-slate-500 text-center py-2">尚未新增作業項目。</li>
+                            </ul>
+                        </div>
+
+                        <!-- Student Numbers -->
+                        <div>
+                            <h3 class="text-lg font-medium mb-2">學生座號設定</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="start-seat" class="block text-sm font-medium text-slate-700">起始座號</label>
+                                    <input type="number" id="start-seat" v-model.number="startSeat" min="1" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="end-seat" class="block text-sm font-medium text-slate-700">結束座號</label>
+                                    <input type="number" id="end-seat" v-model.number="endSeat" :min="startSeat" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label for="empty-seats" class="block text-sm font-medium text-slate-700">空號 (用逗號分隔)</label>
+                                <input type="text" id="empty-seats" v-model="emptySeats" placeholder="例如：4, 13, 24" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Step 2: Select Today's Homework -->
+                <section id="select-homework-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <div @click="toggleSection('homeworkSelection')" class="flex justify-between items-center cursor-pointer">
+                        <h2 class="text-2xl font-semibold">
+                            <span class="text-indigo-600 mr-2">2</span>選擇今日點收項目
+                        </h2>
+                        <svg :class="{'rotate-180': sections.homeworkSelection.open}" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div v-show="sections.homeworkSelection.open" class="mt-6">
+                        <p class="mb-4 text-slate-600">請勾選今天要點收的作業項目。</p>
+                        <div v-if="homeworkItems.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div v-for="item in homeworkItems" :key="item" class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input :id="'hw-' + item" :value="item" v-model="selectedHomeworkForToday" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                </div>
+                                <div class="ml-3 text-base leading-6">
+                                    <label :for="'hw-' + item" class="font-medium text-gray-900 cursor-pointer">{{ item }}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-slate-500 text-center py-4">
+                            請先在「基本設定」中新增作業項目。
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 3: Absentees -->
+                <section id="absentee-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <div @click="toggleSection('absentees')" class="flex justify-between items-center cursor-pointer">
+                        <h2 class="text-2xl font-semibold">
+                            <span class="text-indigo-600 mr-2">3</span>登記今日請假學生
+                        </h2>
+                        <svg :class="{'rotate-180': sections.absentees.open}" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    
+                    <div v-show="sections.absentees.open" class="mt-6">
+                        <p class="mb-4 text-slate-600">請點選今天請假的學生座號。這些學生將不會出現在點收清單中。</p>
+                        <div class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
+                            <button v-for="seat in allStudents" :key="seat" 
+                                    @click="toggleAbsentee(seat)"
+                                    :class="{'bg-red-500 text-white': isAbsent(seat), 'bg-slate-100 hover:bg-slate-200': !isAbsent(seat)}"
+                                    class="p-3 rounded-lg font-mono text-center transition-colors">
+                                {{ seat }}
+                            </button>
+                        </div>
+                        <button @click="startCollection" class="w-full mt-6 bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 font-bold text-lg">
+                            開始點收作業
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Step 4: Collection Area -->
+                <section id="collection-section" v-if="collectionStarted" class="space-y-8">
+                    <h2 class="text-2xl font-semibold text-center mb-6 border-b pb-4">
+                        <span class="text-indigo-600 mr-2">4</span>作業點收區
+                    </h2>
+                    <div v-for="item in selectedHomeworkForToday" :key="item" class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold">{{ item }}</h3>
+                            <div class="flex gap-2">
+                                <button @click="markAllAsSubmitted(item)" class="bg-green-100 text-green-800 px-3 py-1 text-sm font-medium rounded-full hover:bg-green-200">全繳</button>
+                                <button @click="clearAllSubmissions(item)" class="bg-red-100 text-red-800 px-3 py-1 text-sm font-medium rounded-full hover:bg-red-200">全清</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-5 gap-3">
+                            <button v-for="seat in presentStudents" :key="seat"
+                                    @click="toggleSubmission(item, seat)"
+                                    :class="{'submitted': isSubmitted(item, seat)}"
+                                    class="student-btn p-3 rounded-lg font-mono text-lg text-center bg-slate-100 hover:bg-slate-200">
+                                {{ seat }}
+                            </button>
+                        </div>
+                    </div>
+                    <button @click="generateReport" class="w-full mt-8 bg-teal-600 text-white px-4 py-3 rounded-lg hover:bg-teal-700 font-bold text-lg">
+                        完成點收，查看報告並儲存紀錄
+                    </button>
+                </section>
+
+                <!-- Step 5: Report -->
+                <section id="report-section" v-if="reportGenerated" class="bg-white p-6 rounded-2xl shadow-lg mt-8">
+                    <h2 class="text-2xl font-semibold text-center mb-6">
+                        <span class="text-indigo-600 mr-2">5</span>今日作業缺交報告
+                    </h2>
+                    <div v-if="hasMissing" class="space-y-4">
+                         <div v-for="item in selectedHomeworkForToday" :key="item">
+                            <div v-if="getMissingFor(item).length > 0">
+                                <h3 class="text-lg font-medium text-slate-900">{{ item }}</h3>
+                                <div class="flex flex-wrap gap-2 p-3 bg-red-50 rounded-md mt-1">
+                                    <button v-for="seat in getMissingFor(item)" :key="seat" @click="markAsSubmittedFromReport(item, seat)" 
+                                        class="bg-red-200 text-red-800 font-mono text-lg px-3 py-1 rounded-md hover:bg-red-300 hover:text-red-900 transition-colors"
+                                        title="點擊登記為已繳交">
+                                        {{ seat }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="text-center py-8">
+                        <p class="text-2xl font-bold text-green-600">🎉 太棒了！今天所有作業全部交齊！</p>
+                    </div>
+                     <button @click="resetForDay" class="w-full mt-8 bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 font-bold text-lg">
+                        返回重新點收
+                    </button>
+                </section>
+                
+                <!-- History Section -->
+                <section id="history-section" class="bg-white p-6 rounded-2xl shadow-lg mt-8">
+                    <div @click="toggleSection('history')" class="flex justify-between items-center cursor-pointer">
+                        <h2 class="text-2xl font-semibold">
+                            <span class="text-indigo-600 mr-2">📜</span>歷史紀錄
+                        </h2>
+                        <svg :class="{'rotate-180': sections.history.open}" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <div v-show="sections.history.open" class="mt-6">
+                        <div id="history-log-content" v-if="sortedHistoryDates.length > 0">
+                            <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                                <div v-for="dateKey in sortedHistoryDates" :key="dateKey" class="border border-slate-200 rounded-lg p-4 transition-all hover:shadow-md hover:border-indigo-200">
+                                    <h3 class="font-semibold text-lg text-slate-800">{{ historyLog[dateKey].date }}</h3>
+                                    <div class="mt-2 text-sm text-slate-600 space-y-2">
+                                        <div>
+                                            <span class="font-medium">請假學生：</span>
+                                            <span>{{ historyLog[dateKey].absentees.join(', ') || '無' }}</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">缺交狀況：</p>
+                                            <ul v-if="Object.keys(historyLog[dateKey].missing).length > 0" class="list-disc list-inside ml-2 mt-1 space-y-1">
+                                                <li v-for="(students, homework) in historyLog[dateKey].missing" :key="homework">
+                                                    <strong>{{ homework }}:</strong> <span class="font-mono text-red-600">{{ students.join(', ') }}</span>
+                                                </li>
+                                            </ul>
+                                            <p v-else class="text-green-600 ml-2 mt-1">所有作業皆已繳交</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                                <button @click="exportPDF" :disabled="isExportingPDF" class="w-full sm:w-auto flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-semibold disabled:bg-blue-300 disabled:cursor-not-allowed">
+                                    {{ isExportingPDF ? '正在產生PDF...' : '匯出歷史紀錄為 PDF' }}
+                                </button>
+                                <button @click="requestClearHistory" class="w-full sm:w-auto flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold">清除所有歷史紀錄</button>
+                             </div>
+                        </div>
+                        <div v-else class="text-slate-500 text-center py-4">
+                            尚無歷史紀錄。
+                        </div>
+                    </div>
+                </section>
+            </template>
+        </main>
+        
+        <!-- Confirmation Modals -->
+        <div v-if="modal.show" class="modal-overlay">
+            <div class="modal-content text-center">
+                <h3 class="text-xl font-bold text-slate-800">{{ modal.title }}</h3>
+                <p class="text-slate-600 my-4" v-html="modal.message"></p>
+                <div class="flex justify-center gap-4">
+                    <button @click="modal.onConfirm" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-semibold">{{ modal.confirmText }}</button>
+                    <button @click="modal.onCancel" class="bg-slate-200 text-slate-800 px-6 py-2 rounded-lg hover:bg-slate-300 font-semibold">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Modal -->
+        <div v-if="notification.show" class="modal-overlay">
+            <div class="modal-content text-center">
+                <h3 class="text-xl font-bold text-slate-800">{{ notification.title }}</h3>
+                <p class="text-slate-600 my-4">{{ notification.message }}</p>
+                <div class="flex justify-center gap-4">
+                    <button @click="closeNotification" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-semibold">關閉</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateEl = document.getElementById('current-date');
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            dateEl.textContent = `今天日期：${today.toLocaleDateString('zh-TW', options)}`;
+        });
+
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        createApp({
+            setup() {
+                // --- Major State ---
+                const allData = ref({
+                    currentClassId: null,
+                    classes: []
+                });
+                const newClassName = ref('');
+                
+                // --- UI State ---
+                const newHomeworkItem = ref('');
+                const selectedHomeworkForToday = ref([]);
+                const collectionData = ref({});
+                const collectionStarted = ref(false);
+                const reportGenerated = ref(false);
+                const isExportingPDF = ref(false);
+                const notification = ref({ show: false, title: '', message: '' });
+                const modal = ref({ show: false, title: '', message: '', confirmText: '確定', onConfirm: () => {}, onCancel: () => {} });
+                const sections = ref({
+                    settings: { open: true },
+                    homeworkSelection: { open: true },
+                    absentees: { open: true },
+                    history: { open: false }
+                });
+
+                // --- Computed Properties for Current Class ---
+                const currentClassId = computed({
+                    get: () => allData.value.currentClassId,
+                    set: (id) => {
+                        allData.value.currentClassId = id;
+                        resetForDay(); // Reset state when switching class
+                    }
+                });
+
+                const currentClass = computed(() => {
+                    if (!currentClassId.value) return null;
+                    return allData.value.classes.find(c => c.id === currentClassId.value);
+                });
+                
+                const createClassComputed = (key) => computed({
+                    get: () => currentClass.value ? currentClass.value.settings[key] : '',
+                    set: (value) => {
+                        if (currentClass.value) {
+                            currentClass.value.settings[key] = value;
+                        }
+                    }
+                });
+
+                const homeworkItems = createClassComputed('homeworkItems');
+                const startSeat = createClassComputed('startSeat');
+                const endSeat = createClassComputed('endSeat');
+                const emptySeats = createClassComputed('emptySeats');
+                const dailyAbsentees = createClassComputed('dailyAbsentees');
+                const historyLog = computed(() => currentClass.value ? currentClass.value.history : {});
+
+
+                const parsedEmptySeats = computed(() => {
+                    if (!currentClass.value) return [];
+                    return emptySeats.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                });
+
+                const allStudents = computed(() => {
+                    if (!currentClass.value) return [];
+                    const students = [];
+                    for (let i = startSeat.value; i <= endSeat.value; i++) {
+                        if (i > 0 && !parsedEmptySeats.value.includes(i)) {
+                            students.push(i);
+                        }
+                    }
+                    return students;
+                });
+
+                const presentStudents = computed(() => {
+                    if (!currentClass.value) return [];
+                    return allStudents.value.filter(seat => !dailyAbsentees.value.includes(seat));
+                });
+                
+                const hasMissing = computed(() => {
+                    if (!reportGenerated.value || !currentClass.value) return false;
+                    for(const item of selectedHomeworkForToday.value) {
+                        if (getMissingFor(item).length > 0) return true;
+                    }
+                    return false;
+                });
+
+                const sortedHistoryDates = computed(() => {
+                    if (!currentClass.value) return [];
+                    return Object.keys(historyLog.value).sort((a, b) => b.localeCompare(a));
+                });
+
+                // --- Data Management ---
+                const saveAllData = () => {
+                    localStorage.setItem('homeworkSystemData', JSON.stringify(allData.value));
+                };
+
+                const loadAllData = () => {
+                    const data = localStorage.getItem('homeworkSystemData');
+                    if (data) {
+                        allData.value = JSON.parse(data);
+                        return;
+                    }
+                    
+                    // Migration from old version
+                    const oldSettingsData = localStorage.getItem('homeworkCheckerSettings');
+                    const oldHistoryData = localStorage.getItem('homeworkCheckerHistory');
+
+                    if (oldSettingsData || oldHistoryData) {
+                        const newId = crypto.randomUUID();
+                        const migratedClass = {
+                            id: newId,
+                            name: "我的班級",
+                            settings: JSON.parse(oldSettingsData || '{}'),
+                            history: JSON.parse(oldHistoryData || '{}')
+                        };
+                        // Ensure defaults for migration
+                        if (!migratedClass.settings.homeworkItems) migratedClass.settings.homeworkItems = [];
+                        if (!migratedClass.settings.startSeat) migratedClass.settings.startSeat = 1;
+                        if (!migratedClass.settings.endSeat) migratedClass.settings.endSeat = 40;
+                        if (!migratedClass.settings.emptySeats) migratedClass.settings.emptySeats = '';
+                        if (!migratedClass.settings.dailyAbsentees) migratedClass.settings.dailyAbsentees = [];
+
+
+                        allData.value.classes.push(migratedClass);
+                        allData.value.currentClassId = newId;
+
+                        localStorage.removeItem('homeworkCheckerSettings');
+                        localStorage.removeItem('homeworkCheckerHistory');
+                        showNotification('系統升級成功！', '您之前的資料已自動移轉到新的班級管理系統中。');
+                    }
+                };
+                
+                watch(allData, saveAllData, { deep: true });
+
+                // --- Methods ---
+                const addClass = () => {
+                    if (!newClassName.value) return;
+                    const newId = crypto.randomUUID();
+                    allData.value.classes.push({
+                        id: newId,
+                        name: newClassName.value,
+                        settings: {
+                            homeworkItems: [],
+                            startSeat: 1,
+                            endSeat: 40,
+                            emptySeats: '',
+                            dailyAbsentees: []
+                        },
+                        history: {}
+                    });
+                    currentClassId.value = newId;
+                    newClassName.value = '';
+                };
+
+                const renameClass = () => {
+                    if (!currentClass.value) return;
+                    const name = prompt('請輸入新的班級名稱：', currentClass.value.name);
+                    if (name) {
+                        currentClass.value.name = name;
+                    }
+                };
+
+                const requestDeleteClass = () => {
+                    if (!currentClass.value) return;
+                    modal.value = {
+                        show: true,
+                        title: '確定要刪除班級嗎？',
+                        message: `您即將刪除「<strong>${currentClass.value.name}</strong>」。<br>此操作將會移除這個班級所有的設定與歷史紀錄，且無法復原。`,
+                        confirmText: '確定刪除',
+                        onConfirm: deleteClass,
+                        onCancel: () => modal.value.show = false,
+                    };
+                };
+
+                const deleteClass = () => {
+                    const classIndex = allData.value.classes.findIndex(c => c.id === currentClassId.value);
+                    if (classIndex > -1) {
+                        allData.value.classes.splice(classIndex, 1);
+                        currentClassId.value = allData.value.classes.length > 0 ? allData.value.classes[0].id : null;
+                    }
+                    modal.value.show = false;
+                };
+
+                const getTodayDateString = () => new Date().toISOString().slice(0, 10);
+
+                const showNotification = (title, message) => { notification.value = { show: true, title, message }; };
+                const closeNotification = () => { notification.value.show = false; };
+                const toggleSection = (sectionName) => { sections.value[sectionName].open = !sections.value[sectionName].open; };
+
+                const addHomeworkItem = () => {
+                    if (newHomeworkItem.value && !homeworkItems.value.includes(newHomeworkItem.value)) {
+                        homeworkItems.value.push(newHomeworkItem.value);
+                        newHomeworkItem.value = '';
+                    }
+                };
+
+                const removeHomeworkItem = (index) => {
+                    homeworkItems.value.splice(index, 1);
+                };
+                
+                const requestClearHistory = () => {
+                     modal.value = {
+                        show: true,
+                        title: '確定要清除嗎？',
+                        message: '您確定要清除目前班級的所有歷史紀錄嗎？<br>此操作無法復原。',
+                        confirmText: '確定清除',
+                        onConfirm: confirmClearHistory,
+                        onCancel: () => modal.value.show = false,
+                    };
+                };
+                
+                const confirmClearHistory = () => {
+                   if(currentClass.value) currentClass.value.history = {};
+                   modal.value.show = false;
+                };
+                
+                const toggleAbsentee = (seat) => {
+                    const index = dailyAbsentees.value.indexOf(seat);
+                    if (index > -1) {
+                        dailyAbsentees.value.splice(index, 1);
+                    } else {
+                        dailyAbsentees.value.push(seat);
+                    }
+                };
+                
+                const isAbsent = (seat) => dailyAbsentees.value.includes(seat);
+                
+                const startCollection = () => {
+                    if (selectedHomeworkForToday.value.length === 0) {
+                        showNotification('操作提醒', '請先至少選擇一個今日作業項目！'); return;
+                    }
+                    if (presentStudents.value.length === 0) {
+                        showNotification('操作提醒', '沒有學生需要點收作業！'); return;
+                    }
+                    collectionStarted.value = true;
+                    reportGenerated.value = false;
+                    
+                    const newData = {};
+                    selectedHomeworkForToday.value.forEach(item => { newData[item] = []; });
+                    collectionData.value = newData;
+                    
+                    sections.value.settings.open = false;
+                    sections.value.homeworkSelection.open = false;
+                    sections.value.absentees.open = false;
+                };
+
+                const toggleSubmission = (item, seat) => {
+                    const submittedList = collectionData.value[item];
+                    const index = submittedList.indexOf(seat);
+                    if (index > -1) {
+                        submittedList.splice(index, 1);
+                    } else {
+                        submittedList.push(seat);
+                    }
+                };
+
+                const isSubmitted = (item, seat) => collectionData.value[item]?.includes(seat);
+
+                const generateReport = () => {
+                    if (!currentClass.value) return;
+                    collectionStarted.value = false;
+                    reportGenerated.value = true;
+                    
+                    const todayStr = getTodayDateString();
+                    const missingReport = {};
+                    selectedHomeworkForToday.value.forEach(item => {
+                        const missingStudents = getMissingFor(item);
+                        if (missingStudents.length > 0) {
+                            missingReport[item] = missingStudents;
+                        }
+                    });
+                    
+                    currentClass.value.history[todayStr] = {
+                        date: new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }),
+                        absentees: [...dailyAbsentees.value],
+                        missing: missingReport
+                    };
+                };
+
+                const getMissingFor = (item) => {
+                    const submitted = collectionData.value[item] || [];
+                    return presentStudents.value.filter(seat => !submitted.includes(seat));
+                };
+                
+                const resetForDay = () => {
+                    reportGenerated.value = false;
+                    collectionStarted.value = false;
+                    collectionData.value = {};
+                    selectedHomeworkForToday.value = [];
+                    sections.value.homeworkSelection.open = true;
+                    sections.value.absentees.open = true;
+                };
+
+                const markAllAsSubmitted = (item) => { collectionData.value[item] = [...presentStudents.value]; };
+                const clearAllSubmissions = (item) => { collectionData.value[item] = []; };
+
+                const markAsSubmittedFromReport = (item, seat) => {
+                    if (collectionData.value[item] && !collectionData.value[item].includes(seat)) {
+                        collectionData.value[item].push(seat);
+                        collectionData.value[item].sort((a, b) => a - b);
+                    }
+
+                    const todayStr = getTodayDateString();
+                    if (currentClass.value?.history[todayStr]?.missing[item]) {
+                        const updatedMissingList = currentClass.value.history[todayStr].missing[item].filter(s => s !== seat);
+                        if (updatedMissingList.length > 0) {
+                            currentClass.value.history[todayStr].missing[item] = updatedMissingList;
+                        } else {
+                            delete currentClass.value.history[todayStr].missing[item];
+                        }
+                    }
+                };
+
+                const exportPDF = () => {
+                    isExportingPDF.value = true;
+                    const { jsPDF } = window.jspdf;
+                    const historyElement = document.getElementById('history-log-content');
+                    const clone = historyElement.cloneNode(true);
+                    clone.querySelector('.mt-6.flex')?.remove();
+                    document.body.appendChild(clone);
+                    Object.assign(clone.style, { position: 'absolute', left: '-9999px', top: '0', width: '800px' });
+
+                    html2canvas(clone, { scale: 2, useCORS: true }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF('p', 'mm', 'a4');
+                        const { width: pdfWidth, height: pdfHeight } = pdf.internal.pageSize;
+                        const ratio = canvas.width / canvas.height;
+                        let finalImgWidth = pdfWidth - 20;
+                        let finalImgHeight = finalImgWidth / ratio;
+                        let heightLeft = finalImgHeight;
+                        let position = 10;
+                        
+                        pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+                        heightLeft -= (pdfHeight - 20);
+
+                        while (heightLeft > 0) {
+                            position = heightLeft - finalImgHeight + 10;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+                            heightLeft -= (pdfHeight - 20);
+                        }
+                        
+                        pdf.save(`作業點收歷史紀錄-${currentClass.value.name}-${getTodayDateString()}.pdf`);
+                    }).catch(err => {
+                        console.error("PDF export failed:", err);
+                        showNotification('匯出失敗', '匯出PDF失敗，請檢查主控台錯誤訊息。');
+                    }).finally(() => {
+                        isExportingPDF.value = false;
+                        document.body.removeChild(clone);
+                    });
+                };
+
+                onMounted(loadAllData);
+
+                return {
+                    allData, newClassName, newHomeworkItem, selectedHomeworkForToday, collectionData,
+                    collectionStarted, reportGenerated, isExportingPDF, notification, modal, sections,
+                    currentClassId, currentClass, homeworkItems, startSeat, endSeat, emptySeats,
+                    historyLog, parsedEmptySeats, allStudents, presentStudents, hasMissing, sortedHistoryDates,
+                    addClass, renameClass, requestDeleteClass, closeNotification, toggleSection, addHomeworkItem,
+                    removeHomeworkItem, requestClearHistory, toggleAbsentee, isAbsent, startCollection,
+                    toggleSubmission, isSubmitted, generateReport, getMissingFor, resetForDay,
+                    markAllAsSubmitted, clearAllSubmissions, markAsSubmittedFromReport, exportPDF,
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+
