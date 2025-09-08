@@ -17,3 +17,5 @@
 [One Click Sticker 2.0](https://114000-maker.github.io/study/2025-09-07_04.html)
 # 韋哥科技教室工具探索小瑪莉程式
 [韋哥科技教室工具探索小瑪莉程式](https://114000-maker.github.io/study/2025-09-07_05.html)
+# 作業點收整合系統
+[作業點收整合系統](https://114000-maker.github.io/study/2025-09-08_01.html)
