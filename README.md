@@ -21,3 +21,5 @@
 [作業點收整合系統](https://114000-maker.github.io/study/2025-09-08_01.html)
 # 數學公式查詢
 [數學公式查詢](https://114000-maker.github.io/study/2025-09-08_02.html)
+# 自我領導力課程筆記 - 9月8日課堂記錄
+[自我領導力課程筆記 - 9月8日課堂記錄](https://114000-maker.github.io/study/2025-09-09_01.html)
