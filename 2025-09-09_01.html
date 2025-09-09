@@ -1,0 +1,909 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自我領導力課程筆記 - 9月8日課堂記錄</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.3.0/dist/preline.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Noto Sans TC', sans-serif; }
+        .font-serif { font-family: 'Noto Serif TC', serif; }
+        .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.1); }
+        .dark .glass-effect { background: rgba(0, 0, 0, 0.2); }
+        .scroll-fade { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+        .scroll-fade.visible { opacity: 1; transform: translateY(0); }
+    </style>
+<script src="https://felo.ai/js/iframe.js?v=1757340303045"></script>
+ <style>
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #bfc5ce transparent !important;
+}
+*::-webkit-scrollbar {
+  width: 6px !important;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #bfc5ce !important;
+  border-radius: 9999px !important;
+}
+*::-webkit-scrollbar-track {
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+}
+</style></head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-graduation-cap text-2xl text-indigo-600"></i>
+                    <span class="text-xl font-semibold">自我領導力課程</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#overview" class="text-sm font-medium hover:text-indigo-600 transition-colors">課程概述</a>
+                    <a href="#classroom" class="text-sm font-medium hover:text-indigo-600 transition-colors">班級管理</a>
+                    <a href="#mindmap" class="text-sm font-medium hover:text-indigo-600 transition-colors">心智圖教學</a>
+                    <a href="#smart" class="text-sm font-medium hover:text-indigo-600 transition-colors">SMART法則</a>
+                    <a href="#planning" class="text-sm font-medium hover:text-indigo-600 transition-colors">週規劃</a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
+            <div class="mb-8">
+                <span class="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-medium mb-6">9月8日 - 9月14日</span>
+                <h1 class="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+                    自我領導力
+                    <span class="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                        課程筆記
+                    </span>
+                </h1>
+                <p class="text-xl lg:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    班級規則建立、心智圖繪製、SMART目標設定、週行事曆規劃與4F模式心得撰寫的完整學習記錄
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <div class="glass-effect rounded-xl p-6 text-center">
+                    <i class="fas fa-users text-3xl mb-4 text-yellow-300"></i>
+                    <h3 class="text-lg font-semibold mb-2">班級管理</h3>
+                    <p class="text-sm text-gray-200">分組座位、組長職責與作業收取流程</p>
+                </div>
+                <div class="glass-effect rounded-xl p-6 text-center">
+                    <i class="fas fa-brain text-3xl mb-4 text-yellow-300"></i>
+                    <h3 class="text-lg font-semibold mb-2">學習工具</h3>
+                    <p class="text-sm text-gray-200">心智圖繪製與九宮格目標設定</p>
+                </div>
+                <div class="glass-effect rounded-xl p-6 text-center">
+                    <i class="fas fa-calendar-alt text-3xl mb-4 text-yellow-300"></i>
+                    <h3 class="text-lg font-semibold mb-2">時間管理</h3>
+                    <p class="text-sm text-gray-200">SMART法則與週行事曆規劃</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative elements -->
+        <div class="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 right-10 w-48 h-48 bg-yellow-300/20 rounded-full blur-2xl"></div>
+    </section>
+
+    <!-- Course Overview -->
+    <section id="overview" class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">課程架構總覽</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    本次課程涵蓋自我領導力的核心要素，從班級組織到個人目標管理的完整學習體系
+                </p>
+            </div>
+
+            <div class="mb-16 scroll-fade">
+                <div class="mermaid bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
+                    flowchart TD
+                        A["自我領導力課程"] --> B["班級管理"]
+                        A --> C["學習工具"]
+                        A --> D["時間管理"]
+                        A --> E["心得撰寫"]
+                        
+                        B --> B1["座位分組"]
+                        B --> B2["組長職責"]
+                        B --> B3["作業流程"]
+                        
+                        C --> C1["九宮格目標"]
+                        C --> C2["心智圖繪製"]
+                        C --> C3["筆記技巧"]
+                        
+                        D --> D1["SMART法則"]
+                        D --> D2["代辦事項"]
+                        D --> D3["週行事曆"]
+                        
+                        E --> E1["4F模式"]
+                        E --> E2["事實感受發現未來"]
+                        
+                        style A fill:#667eea,stroke:#333,stroke-width:3px,color:#fff
+                        style B fill:#f093fb,stroke:#333,stroke-width:2px
+                        style C fill:#ffecd2,stroke:#333,stroke-width:2px
+                        style D fill:#a8edea,stroke:#333,stroke-width:2px
+                        style E fill:#fad0c4,stroke:#333,stroke-width:2px
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center scroll-fade">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">課程核心理念</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-eye text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-2">聽清楚、看清楚</h4>
+                                <p class="text-gray-600 dark:text-gray-400">建立清晰的班級規則與學習期待，避免事後處理問題</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-users text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-2">主動積極</h4>
+                                <p class="text-gray-600 dark:text-gray-400">鼓勵學生主動參與，專注自身影響圈的改善</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-target text-yellow-600 dark:text-yellow-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-2">目標導向</h4>
+                                <p class="text-gray-600 dark:text-gray-400">運用SMART法則制定具體可執行的學業目標</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="https://api.felo.ai/images/s/1M5AWr8DrQ" alt="自我領導力教學情境" class="rounded-2xl shadow-2xl w-full h-auto">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classroom Management -->
+    <section id="classroom" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">班級管理與組織</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400">建立有序的學習環境與明確的責任分工</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg card-hover scroll-fade">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chair text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">座位分組安排</h3>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-500 text-sm"></i>
+                            <span>依亂數分組入座</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-500 text-sm"></i>
+                            <span>座位表放置前方</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-500 text-sm"></i>
+                            <span>特殊狀況可調整</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-500 text-sm"></i>
+                            <span>各組需完成編號</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg card-hover scroll-fade">
+                    <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-user-tie text-2xl text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">組長職責</h3>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-star text-yellow-500 text-sm"></i>
+                            <span>各組三號擔任組長</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-star text-yellow-500 text-sm"></i>
+                            <span>下課前收取筆記作業</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-star text-yellow-500 text-sm"></i>
+                            <span>依號碼順序收齊</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-star text-yellow-500 text-sm"></i>
+                            <span>檢查完成情況</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg card-hover scroll-fade">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-clipboard-list text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">作業收取流程</h3>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-arrow-right text-indigo-500 text-sm"></i>
+                            <span>各組二號分發筆記紙</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-arrow-right text-indigo-500 text-sm"></i>
+                            <span>最後一人交回剩餘紙張</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-arrow-right text-indigo-500 text-sm"></i>
+                            <span>心智圖朝上排序</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-arrow-right text-indigo-500 text-sm"></i>
+                            <span>未完成可補交</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg scroll-fade">
+                <h3 class="text-2xl font-semibold mb-6 text-center">班級分工架構</h3>
+                <div class="mermaid">
+                    flowchart LR
+                        A["老師"] --> B["各組組長<br/>(三號)"]
+                        B --> C["收取作業"]
+                        B --> D["檢查完成"]
+                        
+                        A --> E["各組二號"]
+                        E --> F["分發筆記紙"]
+                        E --> G["交回剩餘紙張"]
+                        
+                        A --> H["全班學生"]
+                        H --> I["完成分組編號"]
+                        H --> J["主動告知特殊狀況"]
+                        H --> K["遵守班級規則"]
+                        
+                        style A fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                        style B fill:#f093fb,stroke:#333,stroke-width:2px
+                        style E fill:#ffecd2,stroke:#333,stroke-width:2px
+                        style H fill:#a8edea,stroke:#333,stroke-width:2px
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mind Map Teaching -->
+    <section id="mindmap" class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">心智圖教學與九宮格目標</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400">掌握視覺化思考工具，提升學習效率</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="scroll-fade">
+                    <img src="https://api.felo.ai/images/s/6FRfNiWOUJ" alt="心智圖範例" class="rounded-2xl shadow-xl w-full h-auto mb-6">
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-xl p-6">
+                        <h3 class="text-xl font-semibold mb-4">九宮格學習目標</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-calendar-day text-indigo-600"></i>
+                                <span><strong>日期：</strong>9月8日至9月14日</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user text-indigo-600"></i>
+                                <span><strong>填寫：</strong>班級、姓名、座號</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-bullseye text-indigo-600"></i>
+                                <span><strong>目標：</strong>本週學業相關目標</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scroll-fade">
+                    <h3 class="text-2xl font-semibold mb-6">心智圖五大重點</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-red-600 dark:text-red-400 font-bold text-sm">1</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">右上角順時針書寫</h4>
+                                <p class="text-gray-600 dark:text-gray-400">從右上方開始，依順時針方向展開分支</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-orange-600 dark:text-orange-400 font-bold text-sm">2</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">使用關鍵字</h4>
+                                <p class="text-gray-600 dark:text-gray-400">避免長句，精準抓取核心概念</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-yellow-600 dark:text-yellow-400 font-bold text-sm">3</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">用自己的話</h4>
+                                <p class="text-gray-600 dark:text-gray-400">避免抄襲，用個人理解表達</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-green-600 dark:text-green-400 font-bold text-sm">4</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">主幹用不同顏色</h4>
+                                <p class="text-gray-600 dark:text-gray-400">下週記得攜帶色鉛筆</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-purple-600 dark:text-purple-400 font-bold text-sm">5</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">可加圖示</h4>
+                                <p class="text-gray-600 dark:text-gray-400">增加視覺記憶效果</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900 dark:to-blue-900 rounded-2xl p-8 scroll-fade">
+                <h3 class="text-2xl font-semibold mb-6 text-center">自我領導力筆記架構</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <i class="fas fa-project-diagram text-3xl text-indigo-600 mb-4"></i>
+                        <h4 class="font-semibold mb-2">心智圖繪製</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">運用五大重點技巧</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <i class="fas fa-tasks text-3xl text-green-600 mb-4"></i>
+                        <h4 class="font-semibold mb-2">代辦事項撰寫</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">SMART法則應用</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <i class="fas fa-chart-line text-3xl text-yellow-600 mb-4"></i>
+                        <h4 class="font-semibold mb-2">週勢力分析</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">規劃表與行事曆</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <i class="fas fa-pen-fancy text-3xl text-purple-600 mb-4"></i>
+                        <h4 class="font-semibold mb-2">4F模式心得</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">事實感受發現未來</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SMART Method -->
+    <section id="smart" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">SMART法則與代辦事項</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400">讓目標具體化、可執行化的科學方法</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="scroll-fade">
+                    <img src="https://api.felo.ai/images/s/8MiMJohbBB" alt="SMART目標設定法則" class="rounded-2xl shadow-xl w-full h-auto mb-6">
+                </div>
+
+                <div class="scroll-fade">
+                    <h3 class="text-2xl font-semibold mb-6">SMART五大原則</h3>
+                    <div class="space-y-6">
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                    <span class="font-bold text-blue-600 dark:text-blue-400">S</span>
+                                </div>
+                                <h4 class="text-lg font-semibold">Specific - 具體</h4>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">明確說明要做什麼，避免模糊概念</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                    <span class="font-bold text-green-600 dark:text-green-400">M</span>
+                                </div>
+                                <h4 class="text-lg font-semibold">Measurable - 加數字</h4>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">用數字量化目標，便於追蹤進度</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                                    <span class="font-bold text-yellow-600 dark:text-yellow-400">A</span>
+                                </div>
+                                <h4 class="text-lg font-semibold">Achievable - 可執行</h4>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">確保目標在能力範圍內可達成</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                    <span class="font-bold text-purple-600 dark:text-purple-400">R</span>
+                                </div>
+                                <h4 class="text-lg font-semibold">Relevant - 相關</h4>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">與學業目標和個人發展相關</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                                    <span class="font-bold text-red-600 dark:text-red-400">T</span>
+                                </div>
+                                <h4 class="text-lg font-semibold">Time-bound - 壓時間</h4>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">設定明確的完成時間點</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg scroll-fade">
+                <h3 class="text-2xl font-semibold mb-6 text-center">代辦事項規劃流程</h3>
+                <div class="mermaid">
+                    flowchart LR
+                        A["今天必做<br/>三件學業事項"] --> B["運用SMART法則<br/>具體化目標"]
+                        B --> C["明天一件事"]
+                        C --> D["後天一件事"]
+                        D --> E["大後天一件事"]
+                        E --> F["參考同學行事曆<br/>補充計畫"]
+                        
+                        G["每日記錄三件事"] --> H["完成打勾 ✓"]
+                        G --> I["未完成打叉 ✗"]
+                        
+                        style A fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                        style B fill:#f093fb,stroke:#333,stroke-width:2px
+                        style F fill:#ffecd2,stroke:#333,stroke-width:2px
+                        style G fill:#a8edea,stroke:#333,stroke-width:2px
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-xl p-6">
+                        <h4 class="font-semibold mb-3 text-center">今日必做事項</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-square-check text-green-500"></i>
+                                <span>國文注釋完成5頁</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-square-check text-green-500"></i>
+                                <span>數學習題練習20題</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-square-check text-green-500"></i>
+                                <span>英文單字背誦30個</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-xl p-6">
+                        <h4 class="font-semibold mb-3 text-center">明日預計事項</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-clock text-orange-500"></i>
+                                <span>暑假作業整理檢查</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 rounded-xl p-6">
+                        <h4 class="font-semibold mb-3 text-center">本週重要事項</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-exclamation-triangle text-red-500"></i>
+                                <span>數學考試準備</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-book text-blue-500"></i>
+                                <span>攜帶色鉛筆和規劃表</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Weekly Planning -->
+    <section id="planning" class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">週行事曆規劃與角色管理</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400">以週為單位進行全面規劃，逐步延伸至月、季、年</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="scroll-fade">
+                    <img src="https://api.felo.ai/images/s/3s3iMq97tv" alt="時間規劃表範例" class="rounded-2xl shadow-xl w-full h-auto mb-6">
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 rounded-xl p-6">
+                        <h4 class="font-semibold mb-3">規劃表使用要點</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                <span>聚焦與目標相關的重要事項</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                <span>日常習慣不必重複書寫</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                <span>臨時緊急事項利用空檔處理</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="scroll-fade">
+                    <h3 class="text-2xl font-semibold mb-6">時間管理策略</h3>
+                    <div class="space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-calendar-week text-indigo-600 mr-3"></i>
+                                週為單位規劃
+                            </h4>
+                            <p class="text-gray-600 dark:text-gray-400 mb-3">適合未來有意創業或自主管理的學生</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                    <span>週 → 月 → 季 → 年 逐步延伸</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                    <span>將各種角色的重要事項納入規劃</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-bullseye text-green-600 mr-3"></i>
+                                專注影響圈
+                            </h4>
+                            <p class="text-gray-600 dark:text-gray-400 mb-3">主動積極，專注自身可影響範圍</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <span>優先完成重要但不緊急的事項</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <span>善用SMART法則具體化目標</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-users text-purple-600 mr-3"></i>
+                                科目任務協調
+                            </h4>
+                            <p class="text-gray-600 dark:text-gray-400 mb-3">各科小老師討論本週任務</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                    <span>國文注釋、數學考試、暑假作業抽查</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                    <span>確保每人每日至少有一件事記錄</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-2xl p-8 scroll-fade">
+                <h3 class="text-2xl font-semibold mb-6 text-center">4F模式心得撰寫</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">F</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">事實 Facts</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">客觀描述發生的事情</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-green-600 dark:text-green-400">F</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">感受 Feelings</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">表達內心的情感反應</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">F</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">發現 Findings</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">從中學到的啟發洞察</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg">
+                        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">F</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">未來 Future</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">規劃下一步行動計畫</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h4 class="font-semibold mb-4">心得撰寫要點</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-pen text-indigo-600"></i>
+                                <span>心得需超過20字</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-pen text-indigo-600"></i>
+                                <span>寫自己的感受與發現</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-pen text-indigo-600"></i>
+                                <span>不可抄襲他人內容</span>
+                            </li>
+                        </ul>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-map text-green-600"></i>
+                                <span>將心得寫在心智圖上</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-map text-green-600"></i>
+                                <span>補充週行事曆未完成事項</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-map text-green-600"></i>
+                                <span>心得在評分中占重要比例</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Action Items Summary -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-fade">
+                <h2 class="text-4xl font-bold mb-6">行動項目總結</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400">課程中需要完成的具體任務與準備物品</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-fade">
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+                    <h3 class="text-xl font-semibold mb-6 flex items-center">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        課堂完成事項
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>完成分組編號並入座</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>填寫九宮格學業目標及日期</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>完成自我領導力筆記（四個主題）</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>用SMART法則寫下今天三件學業事項</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>規劃未來三天每天一件事</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square-check text-green-500 mt-1"></i>
+                            <span>用4F模式撰寫課堂心得（20字以上）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+                    <h3 class="text-xl font-semibold mb-6 flex items-center">
+                        <i class="fas fa-calendar-plus text-blue-600 mr-3"></i>
+                        下週準備事項
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>攜帶色鉛筆（心智圖主幹用色）</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>攜帶射箭筆及週行事曆作業</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>明天早上至教務處領取規劃表</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>小老師於禮拜五聯絡簿提醒同學</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>各科確認本週需完成事項</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-500 mt-1"></i>
+                            <span>準備暑假作業抽查、國文注釋、數學考試</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white text-center scroll-fade">
+                <h3 class="text-2xl font-semibold mb-4">持續改進要點</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-rocket text-3xl mb-3"></i>
+                        <h4 class="font-semibold mb-2">主動積極</h4>
+                        <p class="text-sm text-indigo-100">專注自身影響圈，主動詢問問題</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-chart-line text-3xl mb-3"></i>
+                        <h4 class="font-semibold mb-2">持續追蹤</h4>
+                        <p class="text-sm text-indigo-100">每天記錄三件事，完成打勾、未完成打叉</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-lightbulb text-3xl mb-3"></i>
+                        <h4 class="font-semibold mb-2">反思成長</h4>
+                        <p class="text-sm text-indigo-100">運用4F模式深度反思學習歷程</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex justify-center items-center space-x-4 mb-6">
+                    <i class="fas fa-graduation-cap text-2xl text-indigo-400"></i>
+                    <span class="text-xl font-semibold">自我領導力課程筆記</span>
+                </div>
+                
+                <div class="border-t border-gray-700 pt-6">
+                    <p class="text-gray-400">
+                        © 2025 陳乃誠. 課程記錄與整理.
+                    </p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        培養自我領導力，成就未來無限可能
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            html.classList.toggle('dark', savedTheme === 'dark');
+        } else {
+            html.classList.toggle('dark', systemPrefersDark);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Reinitialize Mermaid with new theme
+            initializeMermaid();
+        });
+
+        // Mermaid initialization
+        function initializeMermaid() {
+            const isDark = html.classList.contains('dark');
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: isDark ? 'dark' : 'default',
+                themeVariables: {
+                    fontFamily: 'Noto Sans TC, sans-serif'
+                }
+            });
+            
+            // Re-render existing diagrams
+            const mermaidElements = document.querySelectorAll('.mermaid');
+            mermaidElements.forEach((element, index) => {
+                element.removeAttribute('data-processed');
+                element.innerHTML = element.innerHTML;
+            });
+            mermaid.run();
+        }
+
+        // Initialize Mermaid on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeMermaid();
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll fade animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-fade').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
