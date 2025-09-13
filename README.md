@@ -23,3 +23,5 @@
 [數學公式查詢](https://114000-maker.github.io/study/2025-09-08_02.html)
 # 自我領導力課程筆記 - 9月8日課堂記錄
 [自我領導力課程筆記 - 9月8日課堂記錄](https://114000-maker.github.io/study/2025-09-09_01.html)
+# 六何法 AI 生成設計
+[六何法 AI 生成設計](https://114000-maker.github.io/study/2025-09-13_01.html)
