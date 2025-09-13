@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六何法 AI 生成設計表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center p-8">
+
+    <div class="max-w-4xl w-full">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">六何法 AI 生成設計表</h1>
+            <p class="text-lg text-gray-600">使用 5W1H 框架，幫助你釐清設計專案的關鍵要素。</p>
+        </div>
+
+        <!-- 輸入表單 -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-8">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 問題輸入 -->
+                <div class="flex flex-col">
+                    <label for="questionWho" class="text-sm font-medium text-gray-700 mb-1">何人 (Who)？</label>
+                    <input type="text" id="questionWho" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="目標使用者是誰？">
+                </div>
+                <div class="flex flex-col">
+                    <label for="questionWhat" class="text-sm font-medium text-gray-700 mb-1">何事 (What)？</label>
+                    <input type="text" id="questionWhat" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="設計目的為何？">
+                </div>
+                <div class="flex flex-col">
+                    <label for="questionWhen" class="text-sm font-medium text-gray-700 mb-1">何時 (When)？</label>
+                    <input type="text" id="questionWhen" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="專案時程為何？">
+                </div>
+                <div class="flex flex-col">
+                    <label for="questionWhere" class="text-sm font-medium text-gray-700 mb-1">何地 (Where)？</label>
+                    <input type="text" id="questionWhere" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="在哪個平台上運行？">
+                </div>
+                <div class="flex flex-col">
+                    <label for="questionWhy" class="text-sm font-medium text-gray-700 mb-1">為何 (Why)？</label>
+                    <input type="text" id="questionWhy" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="為何需要此設計？">
+                </div>
+                <div class="flex flex-col">
+                    <label for="questionHow" class="text-sm font-medium text-gray-700 mb-1">如何 (How)？</label>
+                    <input type="text" id="questionHow" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="如何實現？">
+                </div>
+            </div>
+            
+            <div class="flex justify-center mt-6 space-x-4">
+                <button id="generateBtn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-blue-700 transition-colors">生成設計卡片</button>
+                <button id="loadExampleBtn" class="bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-full shadow-md hover:bg-gray-400 transition-colors">載入範例</button>
+                <button id="clearBtn" class="bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-red-600 transition-colors">清除範例</button>
+            </div>
+        </div>
+
+        <!-- 顯示卡片區域 -->
+        <div id="cardsContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 卡片會動態生成在這裡 -->
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generateBtn');
+            const loadExampleBtn = document.getElementById('loadExampleBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const cardsContainer = document.getElementById('cardsContainer');
+            const questions = {
+                who: document.getElementById('questionWho'),
+                what: document.getElementById('questionWhat'),
+                when: document.getElementById('questionWhen'),
+                where: document.getElementById('questionWhere'),
+                why: document.getElementById('questionWhy'),
+                how: document.getElementById('questionHow')
+            };
+
+            const cardLabels = {
+                who: '何人 (Who)',
+                what: '何事 (What)',
+                when: '何時 (When)',
+                where: '何地 (Where)',
+                why: '為何 (Why)',
+                how: '如何 (How)'
+            };
+
+            // AI 內容寫作工具的範例
+            const exampleData = {
+                who: '內容創作者、部落客、行銷人員、學生。',
+                what: '開發一款 AI 內容寫作工具，根據關鍵字或主題生成文章、社群貼文、廣告文案。',
+                when: '一個月內完成 MVP（最小可行性產品），三個月後推出完整版本。',
+                where: '網頁應用程式為主，未來考慮推出瀏覽器擴充功能。',
+                why: '提高內容產出效率，幫助用戶克服寫作瓶頸，節省時間與人力成本。',
+                how: '使用 GPT-3 或類似的大型語言模型 API，並建立用戶友好的輸入與編輯介面。'
+            };
+
+            generateBtn.addEventListener('click', () => {
+                // 清空現有卡片
+                cardsContainer.innerHTML = '';
+
+                // 遍歷問題並生成卡片
+                let hasContent = false;
+                for (const key in questions) {
+                    const value = questions[key].value.trim();
+                    if (value) {
+                        hasContent = true;
+                        const card = document.createElement('div');
+                        card.className = 'card p-6';
+                        card.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl font-bold mr-2 text-blue-600">${cardLabels[key].charAt(0)}</span>
+                                <h3 class="text-xl font-semibold text-gray-800">${cardLabels[key]}</h3>
+                            </div>
+                            <p class="text-gray-600">${value}</p>
+                        `;
+                        cardsContainer.appendChild(card);
+                    }
+                }
+
+                if (!hasContent) {
+                    const message = document.createElement('div');
+                    message.className = 'col-span-full text-center text-gray-500 p-8';
+                    message.textContent = '請至少輸入一個問題，然後點擊生成。';
+                    cardsContainer.appendChild(message);
+                }
+            });
+
+            loadExampleBtn.addEventListener('click', () => {
+                questions.who.value = exampleData.who;
+                questions.what.value = exampleData.what;
+                questions.when.value = exampleData.when;
+                questions.where.value = exampleData.where;
+                questions.why.value = exampleData.why;
+                questions.how.value = exampleData.how;
+                cardsContainer.innerHTML = ''; // 清空卡片以重新生成
+            });
+
+            clearBtn.addEventListener('click', () => {
+                for (const key in questions) {
+                    questions[key].value = '';
+                }
+                cardsContainer.innerHTML = '';
+            });
+        });
+    </script>
+</body>
+</html>
