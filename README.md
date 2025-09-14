@@ -27,3 +27,5 @@
 [六何法 AI 生成設計](https://114000-maker.github.io/study/2025-09-13_01.html)
 ## 阿貴校長的PDF整合工具
 [阿貴校長的PDF整合工具](https://114000-maker.github.io/study/2025-09-14_01.html)
+## Google 教育家基礎課程
+[Google 教育家基礎課程](https://114000-maker.github.io/study/2025-09-14_02.html)
