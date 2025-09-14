@@ -1,0 +1,988 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>阿貴校長的PDF整合工具</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    /* ===== Design Tokens ===== */
+    :root {
+      --bg: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 50%, #ec4899 100%);
+      --card-bg: rgba(255,255,255,0.75);
+      --card-border: rgba(255,255,255,0.35);
+      --fg: #0f172a;                 /* slate-900 */
+      --fg-soft: #334155;            /* slate-700 */
+      --accent: #7c3aed;             /* violet-600 */
+      --accent-2: #0ea5e9;           /* sky-500 */
+      --accent-3: #ec4899;           /* pink-500 */
+      --muted: #64748b;              /* slate-500 */
+      --btn-fg: #ffffff;
+      --nav-btn-bg: rgba(255, 255, 255, 0.2);
+      --radius-xl: 20px;
+      --radius-2xl: 28px;
+      --shadow-1: 0 10px 25px rgba(15, 23, 42, 0.15);
+      --shadow-2: 0 20px 45px rgba(15, 23, 42, 0.18);
+      --sans: "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --card-bg: rgba(13, 18, 30, 0.72);
+        --card-border: rgba(255,255,255,0.08);
+        --fg: #e5e7eb;       /* gray-200 */
+        --fg-soft: #cbd5e1;   /* slate-300 */
+        --muted: #94a3b8;     /* slate-400 */
+        --nav-btn-bg: rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    /* ===== Base & Layout ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; font-family: var(--sans); color: var(--fg);
+      background: var(--bg) fixed;
+      padding: clamp(24px, 5vw, 48px);
+    }
+    .container-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .main-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .main-title {
+        font-size: clamp(28px, 5vw, 42px);
+        font-weight: 800;
+        color: #fff;
+        text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        margin: 12px 0 0 0;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      padding: 10px 24px;
+      border-radius: 999px;
+      color: var(--btn-fg);
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+      box-shadow: var(--shadow-1);
+    }
+    
+    /* ===== Navigation Bar ===== */
+    .nav-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 40px;
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+        background: var(--card-bg);
+        padding: 16px;
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--card-border);
+        box-shadow: var(--shadow-2);
+        backdrop-filter: blur(14px) saturate(120%);
+        -webkit-backdrop-filter: blur(14px) saturate(120%);
+    }
+    .nav-btn {
+        font-size: 16px; 
+        font-weight: 700;
+        padding: 10px 20px;
+        border-radius: 99px;
+        text-decoration: none;
+        transition: all .2s ease;
+        color: var(--fg-soft);
+        background-color: var(--nav-btn-bg);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .nav-btn:hover {
+        color: var(--accent);
+        background-color: rgba(124, 58, 237, 0.2);
+        border-color: var(--accent);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* ===== App Card ===== */
+    .app {
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-2);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    .app__header {
+      padding: clamp(20px, 4vw, 32px) clamp(20px, 4vw, 32px) 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    h1.tool-title {
+      margin: 0 0 6px; font-size: clamp(20px, 3vw, 28px);
+      line-height: 1.25; font-weight: 800;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .subtitle { margin: 0; color: var(--muted); font-size: clamp(14px, 1.8vw, 16px); }
+    .app__body {
+      padding: 22px clamp(20px, 4vw, 32px) clamp(20px, 4vw, 32px);
+      display: grid; gap: 24px;
+    }
+    
+    /* ===== Form, Inputs, Buttons, Results... (Other Styles) ===== */
+    .form-group { display: grid; gap: 8px; }
+    .form-group label { font-weight: 700; color: var(--fg-soft); font-size: 14px; }
+    .input, select, input[type="text"], input[type="number"], input[type="password"] {
+      width: 100%; padding: 12px 16px; font-size: 16px; font-family: var(--sans);
+      color: var(--fg); background: rgba(255,255,255,0.6);
+      border: 1px solid var(--card-border); border-radius: 14px;
+      outline: none; transition: all .2s ease;
+    }
+    .input:focus, select:focus, input:focus {
+      border-color: rgba(124, 58, 237, 0.7);
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
+      background: rgba(255,255,255,0.8);
+    }
+    input[type="file"] { display: none; }
+    .file-upload-label {
+        display: block; padding: 24px; width: 100%;
+        border: 2px dashed var(--card-border); border-radius: var(--radius-xl);
+        background-color: rgba(255,255,255,0.1); cursor: pointer;
+        transition: all .2s ease;
+    }
+    .file-upload-label:hover { background-color: rgba(255,255,255,0.2); border-color: var(--accent); }
+    .file-upload-label .icon { font-size: 2.5rem; color: var(--accent); }
+    .file-upload-label .text { margin-top: 8px; font-weight: 700; color: var(--fg-soft); }
+    .file-name { font-size: 14px; color: var(--muted); margin-top: 12px; min-height: 1.2em; }
+    .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .btn {
+      appearance: none; border: 0; padding: 14px 18px;
+      font-weight: 800; font-size: 16px; letter-spacing: .2px;
+      border-radius: 14px; color: var(--btn-fg); cursor: pointer;
+      transition: all .2s ease; box-shadow: var(--shadow-1);
+      user-select: none; display: flex; align-items: center;
+      justify-content: center; gap: 8px; text-decoration: none;
+    }
+    .btn:active { transform: translateY(1px) scale(.997); }
+    .btn:disabled { cursor: not-allowed; opacity: 0.6; filter: grayscale(40%); }
+    .btn--primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%); }
+    .btn--secondary { background: linear-gradient(135deg, #22c55e 0%, #10b981 100%); }
+    .btn--outline {
+      color: var(--fg); background: transparent;
+      border: 1px solid var(--card-border); backdrop-filter: blur(4px);
+    }
+    .results-area { margin-top: 16px; display: grid; gap: 12px; }
+    .result-card {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl); padding: 16px;
+      text-align: center;
+    }
+    @media (prefers-color-scheme: dark) { .result-card { background: rgba(0,0,0,0.2); } }
+    .preview-image {
+      width: 100%; height: auto; border-radius: 12px;
+      margin-bottom: 16px; border: 1px solid var(--card-border);
+    }
+  </style>
+
+<style id="wmScopedStyle">
+  /* Minimal, scoped spacing tweaks for watermark controls only */
+  #wmControls,
+  #wmControls + .form-group,
+  #wmControls + .form-group + .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;       /* row gap, column gap */
+    align-items: center;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+  /* Inputs get a reasonable minimum width to avoid crowding */
+  #wmControls .input,
+  #wmControls + .form-group .input,
+  #wmControls + .form-group + .form-group .input {
+    min-width: 120px;
+  }
+  /* Make text inputs a bit wider for readability */
+  #wmText { min-width: 220px; }
+  #wmRange { min-width: 180px; }
+
+  /* On smaller screens, stretch inputs to full row width where helpful */
+  @media (max-width: 768px) {
+    #wmControls .input,
+    #wmControls + .form-group .input,
+    #wmControls + .form-group + .form-group .input {
+      flex: 1 1 180px;
+    }
+  }
+</style>
+
+</head>
+<body>
+
+  <div class="container-wrap">
+    
+    <header class="main-header">
+      <span class="badge">阿貴校長的教育現場助手系列工具</span>
+      <h1 class="main-title">PDF 整合工具</h1>
+    </header>
+    
+    <nav class="nav-bar" id="navBar">
+      <a href="#imgTool" class="nav-btn">轉圖檔</a>
+      <a href="#splitTool" class="nav-btn">切分</a>
+      <a href="#mergeTool" class="nav-btn">合併</a>
+      <a href="#encryptTool" class="nav-btn">加密</a>
+      <a href="#unlockTool" class="nav-btn">解密</a>
+      <a href="#compressTool" class="nav-btn">壓縮</a>
+      <a href="#watermarkTool" class="nav-btn">浮水印</a>
+      <a href="#rotateTool" class="nav-btn">旋轉</a>
+      <a href="#pdf2wordTool" class="nav-btn">轉Word</a>
+      <a href="#pdf2pptTool" class="nav-btn">轉PPT</a>
+    </nav>
+
+    <main class="app" id="imgTool">
+      <header class="app__header">
+        <h1 class="tool-title"><i class="bi bi-file-earmark-image"></i> PDF 轉圖檔</h1>
+        <p class="subtitle">將 PDF 每一頁轉換為獨立的 PNG, JPG 或 WebP 圖檔。</p>
+      </header>
+      <section class="app__body">
+        <div class="file-upload-wrapper">
+          <label for="imgPdfFile" class="file-upload-label">
+            <div class="icon"><i class="bi bi-file-earmark-pdf"></i></div>
+            <div class="text">點擊選擇 PDF 檔案</div>
+          </label>
+          <input type="file" id="imgPdfFile" accept="application/pdf">
+          <div class="file-name" id="fileNameImg"></div>
+        </div>
+        <div class="form-group">
+          <label for="imgFormat">選擇輸出圖檔格式：</label>
+          <select id="imgFormat" class="input">
+            <option value="png">PNG</option>
+            <option value="jpeg">JPG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button class="btn btn--primary" id="imgConvertBtn" onclick="convertPdfToImg()">轉換</button>
+          <button class="btn btn--secondary" id="imgDownloadAllBtn" onclick="downloadAllImages()">下載全部 (ZIP)</button>
+          <button class="btn btn--outline" onclick="resetAllImg()">重設</button>
+        </div>
+        <div class="results-area" id="resultsAreaImg"></div>
+      </section>
+    </main>
+
+    <main class="app" id="splitTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-scissors"></i> PDF 切分</h1>
+            <p class="subtitle">依據指定頁數或頁碼，將一個 PDF 拆分為多個檔案。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                <label for="slicePdfFile" class="file-upload-label">
+                    <div class="icon"><i class="bi bi-file-earmark-pdf"></i></div>
+                    <div class="text">點擊選擇 PDF 檔案</div>
+                </label>
+                <input type="file" id="slicePdfFile" accept="application/pdf">
+                <div class="file-name" id="fileNameSlice"></div>
+            </div>
+            <div class="form-group">
+                <label for="splitOption">切分方式：</label>
+                <select id="splitOption" class="input">
+                    <option value="every">每 N 頁一份</option>
+                    <option value="custom">指定單頁切出</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="splitNumber">頁數或頁碼：</label>
+                <input type="text" id="splitNumber" placeholder="例如: 2 或 1,3,5" class="input">
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="splitPdf()">開始切分</button>
+            </div>
+            <div class="results-area" id="resultsAreaSplit"></div>
+        </section>
+    </main>
+    
+    <main class="app" id="mergeTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-union"></i> PDF 合併</h1>
+            <p class="subtitle">將多個 PDF 檔案合併為一個單一檔案。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                <label for="mergePdfFiles" class="file-upload-label">
+                    <div class="icon"><i class="bi bi-files"></i></div>
+                    <div class="text">點擊選擇多個 PDF 檔案</div>
+                </label>
+                <input type="file" id="mergePdfFiles" accept="application/pdf" multiple>
+                <div class="file-name" id="fileNameMerge"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="mergePdfs()">開始合併</button>
+            </div>
+            <div class="results-area" id="resultsAreaMerge"></div>
+        </section>
+    </main>
+
+    <main class="app" id="encryptTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-lock-fill"></i> PDF 加密/防拷</h1>
+            <p class="subtitle">為 PDF 設定密碼，並限制列印、複製和修改。</p>
+        </header>
+        <section class="app__body">
+             <div class="file-upload-wrapper">
+                <label for="encryptPdfFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="encryptPdfFile" accept="application/pdf">
+                <div class="file-name" id="fileNameEncrypt"></div>
+            </div>
+            <div class="form-group">
+                <label for="encryptPassword">設定密碼：</label>
+                <input type="password" id="encryptPassword" placeholder="請輸入加密密碼" class="input">
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="encryptPdf()">加密/防拷</button>
+            </div>
+            <div class="results-area" id="resultsAreaEncrypt"></div>
+        </section>
+    </main>
+
+    <main class="app" id="unlockTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-unlock-fill"></i> PDF 解除防拷</h1>
+            <p class="subtitle">移除 PDF 的複製和編輯限制（可能需要所有者密碼）。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                <label for="unlockPdfFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="unlockPdfFile" accept="application/pdf">
+                <div class="file-name" id="fileNameUnlock"></div>
+            </div>
+            <div class="form-group">
+                <label for="unlockPassword">所有者密碼（若有）：</label>
+                <input type="password" id="unlockPassword" placeholder="若檔案有密碼，請在此輸入" class="input">
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="unlockPdf()">解除防拷</button>
+            </div>
+            <div class="results-area" id="resultsAreaUnlock"></div>
+        </section>
+    </main>
+
+    <main class="app" id="compressTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-file-earmark-zip-fill"></i> PDF 壓縮</h1>
+            <p class="subtitle">此為簡易壓縮，主要針對圖片品質進行調整以縮小檔案。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                <label for="compressPdfFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="compressPdfFile" accept="application/pdf">
+                <div class="file-name" id="fileNameCompress"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="compressPdf()">壓縮PDF</button>
+            </div>
+            <div class="results-area" id="resultsAreaCompress"></div>
+        </section>
+    </main>
+
+    <main class="app" id="watermarkTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-droplet-half"></i> PDF 浮水印</h1>
+            <p class="subtitle">在 PDF 頁面加上文字或圖片浮水印，支援多種自訂選項。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                 <label for="watermarkPdfFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="watermarkPdfFile" accept="application/pdf">
+
+<!-- ↓↓↓ Minimal watermark controls (text / opacity / angle) - keep original style ↓↓↓ -->
+<div class="form-group" id="wmControls" style="margin-top:8px">
+  <label for="wmText">浮水印文字：</label>
+  <input type="text" id="wmText" class="input" placeholder="例如：僅供內部使用" />
+</div>
+
+<div class="form-group" style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+  <label for="wmColor" style="white-space:nowrap;">顏色：</label>
+  <input type="color" id="wmColor" value="#FF0000" class="input" style="width:48px; padding:0; border:none; background:transparent;" />
+  <label for="wmFontSize" style="white-space:nowrap; margin-left:8px;">字級：</label>
+  <input type="number" id="wmFontSize" class="input" value="36" min="8" max="144" step="1" style="width:80px;" />
+  <label for="wmPosition" style="white-space:nowrap; margin-left:8px;">位置：</label>
+  <select id="wmPosition" class="input">
+    <option value="center" selected>置中</option>
+    <option value="topleft">左上</option>
+    <option value="topright">右上</option>
+    <option value="bottomleft">左下</option>
+    <option value="bottomright">右下</option>
+  </select>
+  <label for="wmRange" style="white-space:nowrap; margin-left:8px;">頁碼範圍：</label>
+  <input type="text" id="wmRange" class="input" placeholder="例如 5-12；留空=全部" style="width:160px;" />
+</div>
+
+<div class="form-group" style="display:flex; gap:8px; align-items:center;">
+  <label for="wmOpacity" style="white-space:nowrap;">透明度：</label>
+  <select id="wmOpacity" class="input">
+    <option value="0.10">10%</option>
+    <option value="0.15" selected>15%</option>
+    <option value="0.20">20%</option>
+    <option value="0.30">30%</option>
+    <option value="0.40">40%</option>
+  </select>
+
+  <label for="wmAngle" style="white-space:nowrap;margin-left:8px;">角度：</label>
+  <select id="wmAngle" class="input">
+    <option value="15">15°</option>
+    <option value="30" selected>30°</option>
+    <option value="45">45°</option>
+    <option value="60">60°</option>
+    <option value="330">-30°</option>
+  </select>
+</div>
+<!-- ↑↑↑ End watermark controls ↑↑↑ -->
+
+                <div class="file-name" id="fileNameWatermark"></div>
+            </div>
+            <div id="watermarkControls">
+                 </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="watermarkPdf()">加上浮水印</button>
+            </div>
+            <div class="results-area" id="resultsAreaWatermark"></div>
+        </section>
+    </main>
+
+    <main class="app" id="rotateTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-arrow-clockwise"></i> PDF 旋轉</h1>
+            <p class="subtitle">將 PDF 中指定的頁面進行旋轉。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                 <label for="rotatePdfFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="rotatePdfFile" accept="application/pdf">
+                <div class="file-name" id="fileNameRotate"></div>
+            </div>
+            <div class="form-group">
+                <label for="rotatePages">要旋轉的頁碼（以逗號分隔）：</label>
+                <input type="text" id="rotatePages" placeholder="例如: 1,3,5-7 或留空=全部" class="input">
+            </div>
+            <div class="form-group">
+                <label for="rotateDegree">旋轉角度：</label>
+                <select id="rotateDegree" class="input">
+                    <option value="90">順時針90度</option>
+                    <option value="180">180度</option>
+                    <option value="270">逆時針90度</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="rotatePdf()">旋轉頁面</button>
+            </div>
+            <div class="results-area" id="resultsAreaRotate"></div>
+        </section>
+    </main>
+
+    <main class="app" id="pdf2wordTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-file-earmark-word-fill"></i> PDF 轉 Word</h1>
+            <p class="subtitle">將 PDF 中的純文字內容提取出來，轉換為 DOC 檔案。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                 <label for="pdf2wordFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="pdf2wordFile" accept="application/pdf">
+                <div class="file-name" id="fileNamePdf2Word"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="pdf2word()">轉換為 Word</button>
+            </div>
+            <div class="results-area" id="resultsAreaPdf2Word"></div>
+        </section>
+    </main>
+
+    <main class="app" id="pdf2pptTool">
+        <header class="app__header">
+            <h1 class="tool-title"><i class="bi bi-file-earmark-ppt-fill"></i> PDF 轉 PowerPoint</h1>
+            <p class="subtitle">將 PDF 的每一頁轉換為一張 PPT 投影片（圖片格式）。</p>
+        </header>
+        <section class="app__body">
+            <div class="file-upload-wrapper">
+                <label for="pdf2pptFile" class="file-upload-label"><div class="icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="text">點擊選擇 PDF 檔案</div></label>
+                <input type="file" id="pdf2pptFile" accept="application/pdf">
+                <div class="file-name" id="fileNamePdf2Ppt"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn--primary" onclick="pdf2ppt()">轉換為 PPT</button>
+            </div>
+            <div class="results-area" id="resultsAreaPdf2Ppt"></div>
+        </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
+  <script>
+    // === 應用程式完整 JS 邏輯 ===
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+    
+    // --- Helper Functions ---
+    function createDownloadLink(url, downloadName, textContent, parentElement) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = downloadName;
+        link.className = 'btn btn--secondary';
+        link.innerHTML = `<i class="bi bi-download"></i> <span>${textContent}</span>`;
+        parentElement.appendChild(link);
+    }
+    function setupFileInput(inputId, textId) {
+        const input = document.getElementById(inputId);
+        const textDiv = document.getElementById(textId);
+        input.addEventListener('change', () => {
+            if (input.files.length > 1) {
+                textDiv.textContent = `已選擇 ${input.files.length} 個檔案。`;
+            } else if (input.files.length === 1) {
+                textDiv.textContent = `已選擇：${input.files[0].name}`;
+            } else {
+                textDiv.textContent = '';
+            }
+        });
+    }
+    
+    // --- Initialize all file inputs ---
+    ['Img', 'Slice', 'Merge', 'Encrypt', 'Unlock', 'Compress', 'Watermark', 'Rotate', 'Pdf2Word', 'Pdf2Ppt'].forEach(name => {
+        const fileInputId = name.charAt(0).toLowerCase() + name.slice(1) + (name === 'Merge' ? 'PdfFiles' : 'PdfFile');
+        if (document.getElementById(fileInputId)) {
+            setupFileInput(fileInputId, `fileName${name}`);
+        }
+    });
+
+    // --- Tool Functions ---
+
+    // 1. PDF 轉圖檔
+    let generatedCanvases = [];
+    async function convertPdfToImg() {
+        const fileInput = document.getElementById('imgPdfFile');
+        const preview = document.getElementById('resultsAreaImg');
+        if (!fileInput.files.length) { alert('請選擇 PDF 檔案！'); return; }
+        const convertBtn = document.getElementById('imgConvertBtn');
+        convertBtn.disabled = true;
+        convertBtn.innerHTML = `<i class="bi bi-hourglass-split"></i> <span>轉換中...</span>`;
+        const format = document.getElementById('imgFormat').value;
+        generatedCanvases = [];
+        preview.innerHTML = '';
+        try {
+            const file = fileInput.files[0];
+            const typedarray = new Uint8Array(await file.arrayBuffer());
+            const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2 });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width; canvas.height = viewport.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                generatedCanvases.push({ canvas, pageNum });
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                const img = new Image();
+                img.className = 'preview-image';
+                img.src = canvas.toDataURL(`image/${format}`);
+                card.appendChild(img);
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${format}`));
+                createDownloadLink(URL.createObjectURL(blob), `page_${pageNum}.${format}`, `下載第 ${pageNum} 頁`, card);
+                preview.appendChild(card);
+            }
+        } catch (e) {
+            preview.textContent = '轉換失敗，請確認檔案是否正確。';
+        } finally {
+            convertBtn.disabled = false;
+            convertBtn.innerHTML = `<i class="bi bi-stars"></i> <span>再次轉換</span>`;
+        }
+    }
+    function resetAllImg() {
+        document.getElementById('imgPdfFile').value = "";
+        document.getElementById('resultsAreaImg').innerHTML = "";
+        document.getElementById('fileNameImg').textContent = "";
+        generatedCanvases = [];
+    }
+    function downloadAllImages() {
+        const format = document.getElementById('imgFormat').value;
+        if (generatedCanvases.length === 0) { alert('尚未產生任何圖檔！'); return; }
+        const zip = new JSZip();
+        generatedCanvases.forEach(({ canvas, pageNum }) => {
+            const blob = dataURLToBlob(canvas.toDataURL(`image/${format}`));
+            zip.file(`page_${pageNum}.${format}`, blob);
+        });
+        zip.generateAsync({ type: 'blob' }).then(content => saveAs(content, "pdf_images.zip"));
+    }
+    function dataURLToBlob(dataurl) {
+        let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+        return new Blob([u8arr], {type:mime});
+    }
+
+    // 2. PDF 切分
+    async function splitPdf() {
+        const fileInput = document.getElementById('slicePdfFile');
+        const splitOption = document.getElementById('splitOption').value;
+        const splitValue = document.getElementById('splitNumber').value;
+        const preview = document.getElementById('resultsAreaSplit');
+        preview.innerHTML = '';
+        if (!fileInput.files.length) { alert('請選擇 PDF 檔案！'); return; }
+        const file = fileInput.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        const totalPages = pdfDoc.getPageCount();
+        if (splitOption === 'every') {
+            const pagesPerSplit = parseInt(splitValue);
+            if (isNaN(pagesPerSplit) || pagesPerSplit <= 0) { alert('請輸入有效的每份頁數！'); return; }
+            for (let i = 0; i < totalPages; i += pagesPerSplit) {
+                const newPdf = await PDFLib.PDFDocument.create();
+                const pagesToCopy = await newPdf.copyPages(pdfDoc, [...Array(pagesPerSplit).keys()].map(j => i + j).filter(p => p < totalPages));
+                pagesToCopy.forEach(p => newPdf.addPage(p));
+                const pdfBytes = await newPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                createDownloadLink(URL.createObjectURL(blob), `split_${Math.floor(i / pagesPerSplit) + 1}.pdf`, `下載第 ${i + 1} 至 ${Math.min(i + pagesPerSplit, totalPages)} 頁`, preview);
+            }
+        } else if (splitOption === 'custom') {
+            const pageNumbers = splitValue.split(',').map(n => parseInt(n.trim()) - 1).filter(n => !isNaN(n) && n >= 0 && n < totalPages);
+            if (pageNumbers.length === 0) { alert('請輸入有效的頁碼，例如：1,3,5'); return; }
+            for (let i = 0; i < pageNumbers.length; i++) {
+                const pageIndex = pageNumbers[i];
+                const newPdf = await PDFLib.PDFDocument.create();
+                const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageIndex]);
+                newPdf.addPage(copiedPage);
+                const pdfBytes = await newPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                createDownloadLink(URL.createObjectURL(blob), `page_${pageIndex + 1}.pdf`, `下載第 ${pageIndex + 1} 頁`, preview);
+            }
+        }
+    }
+
+    // 3. PDF 合併
+    async function mergePdfs() {
+      const fileInput = document.getElementById('mergePdfFiles');
+      const preview = document.getElementById('resultsAreaMerge');
+      preview.innerHTML = '';
+      if (!fileInput.files.length) { alert('請選擇至少一個 PDF 檔案！'); return; }
+      const mergedPdf = await PDFLib.PDFDocument.create();
+      for (let file of fileInput.files) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach(page => mergedPdf.addPage(page));
+      }
+      const mergedPdfBytes = await mergedPdf.save();
+      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+      createDownloadLink(URL.createObjectURL(blob), 'merged.pdf', '下載合併後的 PDF', preview);
+    }
+
+    // 4. PDF 加密
+    async function encryptPdf() {
+        const fileInput = document.getElementById('encryptPdfFile');
+        const pwdInput = document.getElementById('encryptPassword');
+        const preview = document.getElementById('resultsAreaEncrypt');
+        preview.innerHTML = '';
+        if (!fileInput.files.length) { alert('請選擇 PDF 檔案！'); return; }
+        const password = pwdInput.value.trim();
+        if (!password) { alert('請輸入加密密碼！'); return; }
+        try {
+            const file = fileInput.files[0];
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const pdfBytes = await pdfDoc.save({
+                permissions: { printing: false, modifying: false, copying: false, annotating: false },
+                userPassword: password,
+            });
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            createDownloadLink(URL.createObjectURL(blob), 'encrypted.pdf', '下載加密/防拷PDF', preview);
+        } catch (e) { preview.innerHTML = "加密過程發生錯誤"; }
+    }
+
+    // 5. PDF 解密
+    async function unlockPdf() {
+        const fileInput = document.getElementById('unlockPdfFile');
+        const pwdInput = document.getElementById('unlockPassword');
+        const preview = document.getElementById('resultsAreaUnlock');
+        preview.innerHTML = '';
+        if (!fileInput.files.length) { alert('請選擇PDF檔案'); return; }
+        try {
+            const password = pwdInput.value.trim() || undefined;
+            const file = fileInput.files[0];
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { password, ignoreEncryption: true });
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            createDownloadLink(URL.createObjectURL(blob), 'unlocked.pdf', '下載已解除防拷PDF', preview);
+        } catch { preview.innerHTML = "解除防拷失敗（可能需要正確密碼）"; }
+    }
+
+    // 6. PDF 壓縮
+    async function compressPdf() {
+        alert('此功能為簡易示意，前端壓縮PDF非常複雜，目前僅複製檔案。');
+        const fileInput = document.getElementById('compressPdfFile');
+        const preview = document.getElementById('resultsAreaCompress');
+        if (!fileInput.files.length) { return; }
+        const file = fileInput.files[0];
+        const blob = new Blob([file], { type: 'application/pdf' });
+        createDownloadLink(URL.createObjectURL(blob), 'compressed.pdf', '下載壓縮後PDF', preview);
+    }
+
+    // 7. PDF 浮水印 (此處省略以保持簡潔，實際功能與原始碼相同)
+    
+function watermarkPdf() {
+  const fileInput = document.getElementById('watermarkPdfFile');
+  const preview = document.getElementById('resultsAreaWatermark');
+  if (preview) preview.innerHTML = '';
+  if (!fileInput || !fileInput.files || !fileInput.files.length) { alert('請選擇PDF檔案'); return; }
+
+  const wmTextEl = document.getElementById('wmText');
+  const wmOpacityEl = document.getElementById('wmOpacity');
+  const wmAngleEl = document.getElementById('wmAngle');
+  const wmColorEl = document.getElementById('wmColor');
+  const wmFontSizeEl = document.getElementById('wmFontSize');
+  const wmPositionEl = document.getElementById('wmPosition');
+  const wmRangeEl = document.getElementById('wmRange');
+
+  const wmText = (wmTextEl && wmTextEl.value.trim()) ? wmTextEl.value.trim() : 'CONFIDENTIAL';
+  const opacity = wmOpacityEl ? parseFloat(wmOpacityEl.value) : 0.15;
+  const angle = wmAngleEl ? parseFloat(wmAngleEl.value) : 30;
+  const fontSize = wmFontSizeEl ? Math.min(Math.max(parseInt(wmFontSizeEl.value, 10) || 36, 8), 144) : 36;
+  const position = wmPositionEl ? wmPositionEl.value : 'center';
+  const rangeSpec = wmRangeEl ? wmRangeEl.value.trim() : '';
+
+  function hexToRgb01(hex) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '#FF0000');
+    const r = m ? parseInt(m[1], 16) : 255;
+    const g = m ? parseInt(m[2], 16) : 0;
+    const b = m ? parseInt(m[3], 16) : 0;
+    return { r: r/255, g: g/255, b: b/255 };
+  }
+  const colorObj = hexToRgb01(wmColorEl ? wmColorEl.value : '#FF0000');
+
+  function parseRange(spec, total) {
+    if (!spec) return [...Array(total).keys()];
+    let out = new Set();
+    // Support "N-M" or single "N"
+    spec.split(',').map(s => s.trim()).forEach(tok => {
+      if (!tok) return;
+      if (tok.includes('-')) {
+        const parts = tok.split('-');
+        const a = parseInt(parts[0].trim(), 10);
+        const b = parseInt(parts[1].trim(), 10);
+        if (Number.isInteger(a) && Number.isInteger(b)) {
+          const start = Math.max(1, Math.min(a, b));
+          const end   = Math.min(total, Math.max(a, b));
+          for (let i = start; i <= end; i++) out.add(i - 1);
+        }
+      } else {
+        const n = parseInt(tok, 10);
+        if (Number.isInteger(n) && n >= 1 && n <= total) out.add(n - 1);
+      }
+    });
+    return [...out].sort((x, y) => x - y);
+  }
+
+  (async () => {
+    try {
+      const arrayBuffer = await fileInput.files[0].arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+      const pages = pdfDoc.getPages();
+      const targets = parseRange(rangeSpec, pages.length);
+      const deg = PDFLib.degrees(angle);
+      const col = PDFLib.rgb(colorObj.r, colorObj.g, colorObj.b);
+      const alpha = isFinite(opacity) ? Math.min(Math.max(opacity, 0.05), 0.9) : 0.15;
+
+      pages.forEach((p, idx) => {
+        if (!targets.includes(idx)) return;
+        const { width, height } = p.getSize();
+        const approxHalfText = wmText.length * (fontSize * 0.33); // heuristic
+        const margin = 24;
+        let x = width/2 - approxHalfText;
+        let y = height/2;
+        switch (position) {
+          case 'topleft':
+            x = margin; y = height - margin - fontSize; break;
+          case 'topright':
+            x = width - margin - approxHalfText*2; y = height - margin - fontSize; break;
+          case 'bottomleft':
+            x = margin; y = margin; break;
+          case 'bottomright':
+            x = width - margin - approxHalfText*2; y = margin; break;
+          default:
+            // center
+            x = width/2 - approxHalfText;
+            y = height/2;
+        }
+        p.drawText(wmText, {
+          x, y,
+          size: fontSize,
+          color: col,
+          rotate: deg,
+          opacity: alpha,
+        });
+      });
+
+      const bytes = await pdfDoc.save();
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      if (typeof createDownloadLink === 'function') {
+        createDownloadLink(url, 'watermark.pdf', '下載含浮水印 PDF', preview || document.body);
+      } else {
+        const a = document.createElement('a');
+        a.href = url; a.download = 'watermark.pdf';
+        a.textContent = '下載含浮水印 PDF';
+        (preview || document.body).appendChild(a);
+      }
+    } catch (e) {
+      if (preview) {
+        preview.textContent = '加浮水印時發生錯誤：' + (e && e.message ? e.message : e);
+      } else {
+        alert('加浮水印時發生錯誤');
+      }
+    }
+  })();
+}
+
+
+  const wmTextEl = document.getElementById('wmText');
+  const wmOpacityEl = document.getElementById('wmOpacity');
+  const wmAngleEl = document.getElementById('wmAngle');
+
+  const wmText = (wmTextEl && wmTextEl.value.trim()) ? wmTextEl.value.trim() : 'CONFIDENTIAL';
+  const opacity = wmOpacityEl ? parseFloat(wmOpacityEl.value) : 0.15;
+  const angle = wmAngleEl ? parseFloat(wmAngleEl.value) : 30;
+
+  (async () => {
+    try {
+      const arrayBuffer = await fileInput.files[0].arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+      const pages = pdfDoc.getPages();
+
+      // Use first page dimensions as reference; each page uses its own width/height as well.
+      pages.forEach(p => {
+        const { width, height } = p.getSize();
+        // rough centering; avoid style changes
+        const approxHalfText = wmText.length * 6;
+        p.drawText(wmText, {
+          x: width / 2 - approxHalfText,
+          y: height / 2,
+          size: 36,
+          color: PDFLib.rgb(1, 0, 0),
+          rotate: PDFLib.degrees(angle),
+          opacity: isFinite(opacity) ? Math.min(Math.max(opacity, 0.05), 0.9) : 0.15,
+        });
+      });
+
+      const bytes = await pdfDoc.save();
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      if (typeof createDownloadLink === 'function') {
+        createDownloadLink(url, 'watermark.pdf', '下載含浮水印 PDF', preview || document.body);
+      } else {
+        const a = document.createElement('a');
+        a.href = url; a.download = 'watermark.pdf';
+        a.textContent = '下載含浮水印 PDF';
+        (preview || document.body).appendChild(a);
+      }
+    } catch (e) {
+      if (preview) {
+        preview.textContent = '加浮水印時發生錯誤：' + (e && e.message ? e.message : e);
+      } else {
+        alert('加浮水印時發生錯誤');
+      }
+    }
+  })();
+}
+
+    // 8. PDF 旋轉
+    async function rotatePdf() {
+        const fileInput = document.getElementById('rotatePdfFile');
+        const pageInput = document.getElementById('rotatePages');
+        const degreeInput = document.getElementById('rotateDegree');
+        const preview = document.getElementById('resultsAreaRotate');
+        preview.innerHTML = '';
+        if (!fileInput.files.length) { alert('請選擇PDF檔案'); return; }
+        const pagesToRotate = (pageInput.value || '').split(',').map(x=>parseInt(x.trim(),10)-1).filter(x=>x>=0);
+        const degree = parseInt(degreeInput.value);
+        const file = fileInput.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        const pages = pdfDoc.getPages();
+        (pagesToRotate.length > 0 ? pagesToRotate : pages.map((p, i) => i)).forEach(i => {
+            if (pages[i]) { pages[i].setRotation(PDFLib.degrees(degree)); }
+        });
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        createDownloadLink(URL.createObjectURL(blob), 'rotated.pdf', '下載旋轉後PDF', preview);
+    }
+    
+    // 9. PDF 轉 Word
+    async function pdf2word() {
+        const fileInput = document.getElementById('pdf2wordFile');
+        const preview = document.getElementById('resultsAreaPdf2Word');
+        preview.innerHTML = '';
+        if (!fileInput.files.length) { alert('請選擇PDF檔案'); return; }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async function () {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+            let fullText = '';
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const content = await page.getTextContent();
+                fullText += content.items.map(item=>item.str).join(' ') + '\n\n';
+            }
+            const blob = new Blob([`\ufeff${fullText}`], { type: 'application/msword' });
+            createDownloadLink(URL.createObjectURL(blob), 'converted.doc', '下載Word檔（僅純文字）', preview);
+        };
+        reader.readAsArrayBuffer(fileInput.files[0]);
+    }
+    
+    // 10. PDF 轉 PPT
+    async function pdf2ppt() {
+        const input = document.getElementById('pdf2pptFile');
+        const preview = document.getElementById('resultsAreaPdf2Ppt');
+        preview.innerHTML = '';
+        if (!input.files.length) { alert('請選擇PDF檔案！'); return; }
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async function () {
+            preview.innerHTML = '轉換中，請稍候...';
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+            const pptx = new PptxGenJS();
+            pptx.layout = "LAYOUT_16X9";
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width; canvas.height = viewport.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                const imgUrl = canvas.toDataURL('image/png');
+                pptx.addSlide().addImage({
+                    data: imgUrl, x: 0, y: 0, w: '100%', h: '100%'
+                });
+            }
+            pptx.writeFile({ fileName: 'pdf_to_pptx.pptx' });
+            preview.innerHTML = "<div style='color:#388e3c;font-weight:bold'>轉換完成！PPT檔案將自動下載</div>";
+        };
+        reader.readAsArrayBuffer(file);
+    }
+  </script>
+</body>
+</html>
