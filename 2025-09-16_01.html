@@ -1,0 +1,620 @@
+<!-- https://www.trinket-shell.com/3cd246a949e322f1/index.html -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n8n 可整合的 60 個開源軟體</title>
+    <!-- 引入 Tailwind CSS 以進行快速樣式設計 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts 的 Exo 2 字體 (科幻風格) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 自定義科幻風格樣式 */
+        body {
+            font-family: 'Exo 2', 'Noto Sans TC', sans-serif;
+            background-color: #0d0f1a; /* 深藍紫色背景 */
+            background-image: radial-gradient(circle at 15% 25%, rgba(36, 61, 132, 0.3) 0%, rgba(36, 61, 132, 0) 40%),
+                              radial-gradient(circle at 85% 75%, rgba(132, 36, 99, 0.3) 0%, rgba(132, 36, 99, 0) 40%);
+            min-height: 100vh;
+        }
+
+        .sci-fi-title {
+            color: #fff;
+            text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px #00aaff, 0 0 16px #00aaff, 0 0 20px #00aaff;
+        }
+
+        /* 基礎卡片樣式 */
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            background-color: rgba(18, 24, 45, 0.6);
+            border: 1px solid;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            border-radius: 0.75rem; /* 12px */
+        }
+        
+        /* 卡片顏色變化 */
+        .card-cyan {
+            border-color: #00ffff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4), inset 0 0 4px rgba(0, 255, 255, 0.2);
+        }
+        .card-cyan:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 0 18px rgba(0, 255, 255, 0.7), inset 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .card-magenta {
+            border-color: #ff00ff;
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.4), inset 0 0 4px rgba(255, 0, 255, 0.2);
+        }
+        .card-magenta:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 0 18px rgba(255, 0, 255, 0.7), inset 0 0 8px rgba(255, 0, 255, 0.4);
+        }
+
+        .card-lime {
+            border-color: #7fff00;
+            box-shadow: 0 0 8px rgba(127, 255, 0, 0.4), inset 0 0 4px rgba(127, 255, 0, 0.2);
+        }
+        .card-lime:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 0 18px rgba(127, 255, 0, 0.7), inset 0 0 8px rgba(127, 255, 0, 0.4);
+        }
+        
+        .card-yellow {
+            border-color: #ffff00;
+            box-shadow: 0 0 8px rgba(255, 255, 0, 0.4), inset 0 0 4px rgba(255, 255, 0, 0.2);
+        }
+        .card-yellow:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 0 18px rgba(255, 255, 0, 0.7), inset 0 0 8px rgba(255, 255, 0, 0.4);
+        }
+        
+        /* 彈出視窗樣式 */
+        #modal-content {
+            background-color: rgba(18, 24, 45, 0.9);
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* 彈出視窗動畫 */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 300ms ease-out; }
+        .modal-leave-active { opacity: 0; transform: scale(0.95); transition: all 300ms ease-in; }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto px-4 py-8 sm:py-12">
+        <!-- 頁面標題 -->
+        <header class="text-center mb-10">
+            <h1 class="sci-fi-title text-3xl sm:text-5xl font-bold">n8n 可整合的 60 個開源軟體</h1>
+            <p class="mt-4 text-lg text-gray-400">探索 n8n 自動化流程中可以連接的強大開源工具</p>
+        </header>
+
+        <!-- 卡片網格容器 -->
+        <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            
+            <div class="card p-6 card-cyan" data-id="1">
+                <div><h2 class="text-xl font-semibold text-white mb-2">1. Baserow</h2><p class="text-gray-400 text-sm">以 PostgreSQL 為基底的開源資料庫表格平台。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="2">
+                <div><h2 class="text-xl font-semibold text-white mb-2">2. Bitwarden</h2><p class="text-gray-400 text-sm">密碼管理工具，核心功能以開源模式提供。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="3">
+                <div><h2 class="text-xl font-semibold text-white mb-2">3. Cal.com</h2><p class="text-gray-400 text-sm">開源的行程預約日曆平台。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="4">
+                <div><h2 class="text-xl font-semibold text-white mb-2">4. Cockpit</h2><p class="text-gray-400 text-sm">Red Hat 主導的 Linux 伺服器網頁管理工具，GPLv2 授權。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="5">
+                <div><h2 class="text-xl font-semibold text-white mb-2">5. Cortex</h2><p class="text-gray-400 text-sm">TheHive 專案相關的開源事件分析與自動化平臺。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="6">
+                <div><h2 class="text-xl font-semibold text-white mb-2">6. CrateDB</h2><p class="text-gray-400 text-sm">分散式 SQL 資料庫，具備開源社群版本 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="7">
+                <div><h2 class="text-xl font-semibold text-white mb-2">7. crowd.dev</h2><p class="text-gray-400 text-sm">用於社群管理與洞察分析的開源平台。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="8">
+                <div><h2 class="text-xl font-semibold text-white mb-2">8. DFIR-IRIS</h2><p class="text-gray-400 text-sm">又稱 IRIS，開源數位鑑識 / 威脅情報平台。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="9">
+                <div><h2 class="text-xl font-semibold text-white mb-2">9. Discourse</h2><p class="text-gray-400 text-sm">由 Jeff Atwood 和 Robin Ward 創立的開源論壇 / 討論平臺 (GPLv2)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="10">
+                <div><h2 class="text-xl font-semibold text-white mb-2">10. ERPNext</h2><p class="text-gray-400 text-sm">一套涵蓋 ERP/CRM/HRM 等模組的開源系統 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="11">
+                <div><h2 class="text-xl font-semibold text-white mb-2">11. Ghost</h2><p class="text-gray-400 text-sm">Node.js 上的開源部落格與內容管理平台 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="12">
+                <div><h2 class="text-xl font-semibold text-white mb-2">12. GitLab (CE)</h2><p class="text-gray-400 text-sm">版本控管與 CI/CD 平台，社群版為開源 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="13">
+                <div><h2 class="text-xl font-semibold text-white mb-2">13. Gotify</h2><p class="text-gray-400 text-sm">Self-hosted 推播服務，開源 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="14">
+                <div><h2 class="text-xl font-semibold text-white mb-2">14. Grafana</h2><p class="text-gray-400 text-sm">可視化監控平台的核心部分開源 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="15">
+                <div><h2 class="text-xl font-semibold text-white mb-2">15. GraphQL</h2><p class="text-gray-400 text-sm">開放規範，其官方參考實作 (graphql-js 等) 為開源 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="16">
+                <div><h2 class="text-xl font-semibold text-white mb-2">16. Grist</h2><p class="text-gray-400 text-sm">開源線上資料庫/協作表格 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="17">
+                <div><h2 class="text-xl font-semibold text-white mb-2">17. Home Assistant</h2><p class="text-gray-400 text-sm">家居自動化平台，100% 開源 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="18">
+                <div><h2 class="text-xl font-semibold text-white mb-2">18. Invoice Ninja</h2><p class="text-gray-400 text-sm">開源發票與帳單管理系統，有社群版 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="19">
+                <div><h2 class="text-xl font-semibold text-white mb-2">19. Jenkins</h2><p class="text-gray-400 text-sm">著名的 CI/CD 自動化伺服器 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="20">
+                <div><h2 class="text-xl font-semibold text-white mb-2">20. Kafka</h2><p class="text-gray-400 text-sm">Apache Software Foundation 所屬的分散式串流平台 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="21">
+                <div><h2 class="text-xl font-semibold text-white mb-2">21. KoBoToolbox</h2><p class="text-gray-400 text-sm">用於線上/離線問卷、調查的開源工具集 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="22">
+                <div><h2 class="text-xl font-semibold text-white mb-2">22. Magento 2</h2><p class="text-gray-400 text-sm">Adobe 旗下的電商平台，有開源社群版本 (OSL 或 AFL)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="23">
+                <div><h2 class="text-xl font-semibold text-white mb-2">23. Matrix</h2><p class="text-gray-400 text-sm">即時通訊開放協定；主要實作 Synapse 等為開源 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="24">
+                <div><h2 class="text-xl font-semibold text-white mb-2">24. Mattermost</h2><p class="text-gray-400 text-sm">企業級即時通訊協作平台，開源社群版 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="25">
+                <div><h2 class="text-xl font-semibold text-white mb-2">25. Mautic</h2><p class="text-gray-400 text-sm">開源行銷自動化工具 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="26">
+                <div><h2 class="text-xl font-semibold text-white mb-2">26. Metabase</h2><p class="text-gray-400 text-sm">商業智慧 (BI) 與資料視覺化開源工具 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="27">
+                <div><h2 class="text-xl font-semibold text-white mb-2">27. MISP</h2><p class="text-gray-400 text-sm">威脅情報分享與事件管理平臺 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="28">
+                <div><h2 class="text-xl font-semibold text-white mb-2">28. Monica CRM</h2><p class="text-gray-400 text-sm">個人關係管理 (Personal CRM) 開源專案 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="29">
+                <div><h2 class="text-xl font-semibold text-white mb-2">29. MySQL</h2><p class="text-gray-400 text-sm">以 GPL 授權為主的知名開源關聯式資料庫。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="30">
+                <div><h2 class="text-xl font-semibold text-white mb-2">30. Nextcloud</h2><p class="text-gray-400 text-sm">自架式雲端檔案同步與協作平台 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="31">
+                <div><h2 class="text-xl font-semibold text-white mb-2">31. NocoDB</h2><p class="text-gray-400 text-sm">將任何 SQL 資料庫轉換成類 Airtable 介面之開源平台 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="32">
+                <div><h2 class="text-xl font-semibold text-white mb-2">32. npm</h2><p class="text-gray-400 text-sm">Node.js 的套件管理器，CLI 等部分在 GitHub 上開源。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="33">
+                <div><h2 class="text-xl font-semibold text-white mb-2">33. Odoo (CE)</h2><p class="text-gray-400 text-sm">ERP/CRM/電商一體化套件，開源社群版 (LGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="34">
+                <div><h2 class="text-xl font-semibold text-white mb-2">34. OpenCTI</h2><p class="text-gray-400 text-sm">開源的網路威脅情報平台 (GNU Affero GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="35">
+                <div><h2 class="text-xl font-semibold text-white mb-2">35. OpenThesaurus</h2><p class="text-gray-400 text-sm">一個開源的同義詞詞典專案 (AGPL 或類似開源授權)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="36">
+                <div><h2 class="text-xl font-semibold text-white mb-2">36. Postgres</h2><p class="text-gray-400 text-sm">老牌開源關聯式資料庫 (PostgreSQL License)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="37">
+                <div><h2 class="text-xl font-semibold text-white mb-2">37. PostHog</h2><p class="text-gray-400 text-sm">開源產品分析 (Product Analytics) 平臺 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="38">
+                <div><h2 class="text-xl font-semibold text-white mb-2">38. QuestDB</h2><p class="text-gray-400 text-sm">高性能時間序列資料庫，開源社群版 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="39">
+                <div><h2 class="text-xl font-semibold text-white mb-2">39. QuickChart</h2><p class="text-gray-400 text-sm">提供圖表生成的 API 工具，本身有開源後端 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="40">
+                <div><h2 class="text-xl font-semibold text-white mb-2">40. RabbitMQ</h2><p class="text-gray-400 text-sm">基於 Erlang/OTP 的 AMQP 佇列系統 (MPL)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="41">
+                <div><h2 class="text-xl font-semibold text-white mb-2">41. Redis</h2><p class="text-gray-400 text-sm">高速鍵值儲存資料庫 (BSD 3-Clause)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="42">
+                <div><h2 class="text-xl font-semibold text-white mb-2">42. Rocket.Chat</h2><p class="text-gray-400 text-sm">即時通訊與協作平台 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="43">
+                <div><h2 class="text-xl font-semibold text-white mb-2">43. Rundeck</h2><p class="text-gray-400 text-sm">運維編排與工作流自動化工具 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="44">
+                <div><h2 class="text-xl font-semibold text-white mb-2">44. SeaTable</h2><p class="text-gray-400 text-sm">以表格/看板介面為主的協作平台，有社群開源版。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="45">
+                <div><h2 class="text-xl font-semibold text-white mb-2">45. Sentry.io</h2><p class="text-gray-400 text-sm">程式錯誤追蹤與監控平台，核心部分為開源 (BSD 2-Clause)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="46">
+                <div><h2 class="text-xl font-semibold text-white mb-2">46. Stable Diffusion</h2><p class="text-gray-400 text-sm">深度學習生成式模型，由 Stability AI 等社群共同維護。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="47">
+                <div><h2 class="text-xl font-semibold text-white mb-2">47. Strapi</h2><p class="text-gray-400 text-sm">Node.js 上的開源 Headless CMS (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="48">
+                <div><h2 class="text-xl font-semibold text-white mb-2">48. Supabase</h2><p class="text-gray-400 text-sm">封裝 PostgreSQL 的後端即服務 (Apache 2.0)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="49">
+                <div><h2 class="text-xl font-semibold text-white mb-2">49. Sysdig</h2><p class="text-gray-400 text-sm">雲端原生可觀測性與安全工具，核心 sysdig 工具為開源 (GPLv2)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="50">
+                <div><h2 class="text-xl font-semibold text-white mb-2">50. Taiga</h2><p class="text-gray-400 text-sm">開源專案管理與敏捷開發平臺 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="51">
+                <div><h2 class="text-xl font-semibold text-white mb-2">51. TheHive</h2><p class="text-gray-400 text-sm">開源安全事件響應與威脅情報平台 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="52">
+                <div><h2 class="text-xl font-semibold text-white mb-2">52. TimescaleDB</h2><p class="text-gray-400 text-sm">以 PostgreSQL 為基礎的時間序列擴充，有社群開源部分。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="53">
+                <div><h2 class="text-xl font-semibold text-white mb-2">53. Twake</h2><p class="text-gray-400 text-sm">開源團隊協作平台 (AGPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="54">
+                <div><h2 class="text-xl font-semibold text-white mb-2">54. Wekan</h2><p class="text-gray-400 text-sm">類似 Trello 的看板式專案管理工具，開源 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="55">
+                <div><h2 class="text-xl font-semibold text-white mb-2">55. WooCommerce</h2><p class="text-gray-400 text-sm">WordPress 的開源電商外掛 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="56">
+                <div><h2 class="text-xl font-semibold text-white mb-2">56. WordPress</h2><p class="text-gray-400 text-sm">最廣泛使用的開源部落格/網站平台 (GPLv2)。</p></div>
+            </div>
+            <div class="card p-6 card-cyan" data-id="57">
+                <div><h2 class="text-xl font-semibold text-white mb-2">57. YOURLS</h2><p class="text-gray-400 text-sm">開源短網址服務 (MIT)。</p></div>
+            </div>
+            <div class="card p-6 card-magenta" data-id="58">
+                <div><h2 class="text-xl font-semibold text-white mb-2">58. Zabbix</h2><p class="text-gray-400 text-sm">開源監控軟體 (GPLv2)。</p></div>
+            </div>
+            <div class="card p-6 card-lime" data-id="59">
+                <div><h2 class="text-xl font-semibold text-white mb-2">59. Zammad</h2><p class="text-gray-400 text-sm">開源客服與工單管理系統 (GPLv3)。</p></div>
+            </div>
+            <div class="card p-6 card-yellow" data-id="60">
+                <div><h2 class="text-xl font-semibold text-white mb-2">60. Zulip</h2><p class="text-gray-400 text-sm">開源即時通訊平台 (Apache 2.0)。</p></div>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- 彈出視窗 (Modal) -->
+    <div id="n8n-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden p-4">
+        <div id="modal-content" class="rounded-lg shadow-2xl w-full max-w-lg mx-auto p-6 relative modal-enter">
+            <!-- 標題和關閉按鈕 -->
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-cyan-500/30">
+                <h3 id="modal-title" class="text-2xl font-bold text-white"></h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- 內容 -->
+            <div>
+                <h4 class="text-lg font-semibold text-cyan-300 mb-2">n8n 應用範例：</h4>
+                <p id="modal-body" class="text-gray-300"></p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-cyan-500/30">
+                <h4 class="text-lg font-semibold text-yellow-300 mb-2">學生/老師 生活應用：</h4>
+                <p id="modal-life-example" class="text-gray-300"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const appData = {
+                '1': { 
+                    n8nExample: '當 Baserow 的一個資料表新增一筆紀錄時，自動發送一封歡迎郵件給該紀錄中的 email。',
+                    lifeExample: '老師: 建立一個學生作業提交追蹤表，記錄每位學生的提交狀態和分數。學生: 製作一個個人專案進度管理表。'
+                },
+                '2': {
+                    n8nExample: '每天定時檢查 Bitwarden 中是否有密碼即將過期，若有，則透過 Mattermost 發送提醒通知。',
+                    lifeExample: '安全地儲存和管理所有學術網站、線上學習平台和個人帳號的密碼，避免使用重複密碼。'
+                },
+                '3': {
+                    n8nExample: '當有人透過 Cal.com 預約一個新的會議時，自動在 Google Calendar 建立事件，並將與會者資訊同步到一個 Notion 資料庫。',
+                    lifeExample: '老師: 設定可預約的Office Hours時間，讓學生可以方便地線上預約。學生: 與專題小組成員共享有空時間，快速找到開會時段。'
+                },
+                '4': {
+                    n8nExample: '監控 Cockpit 中的系統日誌，當出現 "error" 或 "failed" 等關鍵字時，立即透過 Gotify 發送推播通知給系統管理員。',
+                    lifeExample: '電腦科學相關科系的學生，用來學習Linux伺服器管理，透過網頁介面監控自己實驗用伺服器的狀態。'
+                },
+                '5': {
+                    n8nExample: '當 TheHive 建立一個新的 Alert 時，觸發 n8n 工作流程，自動使用 Cortex 分析器對 Alert 中的 observables (如 IP, domain) 進行分析，並將結果回寫到 TheHive 的 case 中。',
+                    lifeExample: '資安課程的學生或老師，用來自動化分析課堂作業中遇到的惡意軟體樣本或釣魚郵件特徵。'
+                },
+                 '6': {
+                    n8nExample: '定期從一個 API 抓取天氣數據，並將其整理後寫入 CrateDB 的時間序列資料表中以供後續分析。',
+                    lifeExample: '數據分析相關科系的學生，將大量的實驗數據存入CrateDB，進行高效能的查詢與分析。'
+                },
+                '7': {
+                    n8nExample: '當有新的社群成員在 Discord 加入時，自動將成員資訊同步到 crowd.dev 平台進行分析與標籤化。',
+                    lifeExample: '擔任校園社團幹部時，用來分析社群媒體上社員的互動情況，了解大家對哪些活動感興趣。'
+                },
+                '8': {
+                    n8nExample: '從郵件附件中提取可疑的檔案，自動上傳到 DFIR-IRIS 進行分析，並將分析報告的連結發送到指定的 Slack 頻道。',
+                    lifeExample: '在資安攻防演練課程中，用來記錄和管理模擬攻擊事件的調查過程和發現。'
+                },
+                '9': {
+                    n8nExample: '當 Discourse 論壇有新用戶註冊時，自動將用戶資訊新增到 Mailchimp 的郵件列表中，並發送一封歡迎信。',
+                    lifeExample: '老師: 為特定課程建立一個專屬的線上討論區，讓學生可以提問、討論課程內容。'
+                },
+                '10': {
+                    n8nExample: '當 WooCommerce 產生一筆新訂單時，自動在 ERPNext 中建立對應的銷售訂單與客戶資料。',
+                    lifeExample: '商管學院的學生，在模擬創業課程中，用來管理虛擬公司的庫存、銷售和客戶關係。'
+                },
+                '11': {
+                    n8nExample: '將 Google Sheets 中的文章草稿，定時發佈到 Ghost 部落格，並在發佈後自動分享到 Twitter。',
+                    lifeExample: '老師: 建立個人教學部落格。學生: 建立個人學習歷程部落格，記錄課堂筆記、專案心得。'
+                },
+                '12': {
+                    n8nExample: '當 GitLab 有一個新的 merge request 被合併到主分支時，自動觸發 Jenkins 進行部署，並在完成後發送通知到 Rocket.Chat。',
+                    lifeExample: '程式設計課程的學生，用來管理個人或小組的程式碼專案，進行版本控制與協作。'
+                },
+                '13': {
+                    n8nExample: '監控一個網站的 uptime，當網站無法訪問時，立即透過 n8n 呼叫 Gotify API，發送緊急推播通知到手機。',
+                    lifeExample: '當關注的課程網站有新公告時，自動發送推播通知到手機，不錯過任何重要訊息。'
+                },
+                '14': {
+                    n8nExample: '當 Grafana 的某個監控指標觸發警報 (Alert) 時，透過 webhook 觸發 n8n，自動在 Zammad 系統中建立一個新的客服工單。',
+                    lifeExample: '在物聯網(IoT)專題中，將感測器數據視覺化，建立一個即時監控儀表板。'
+                },
+                '15': {
+                    n8nExample: '每天定時透過 GraphQL API 查詢 GitHub 的專案數據 (如 stars, forks)，並將數據彙整成報告，存入 Google Sheets。',
+                    lifeExample: '資訊工程學生在開發App或網站專案時，用來更有效率地獲取所需的資料。'
+                },
+                '16': {
+                    n8nExample: '當用戶透過 Typeform 提交表單時，自動將表單數據解析並新增到 Grist 的一個特定表格中。',
+                    lifeExample: '製作一個比Excel更強大的書單或論文引用管理表格，可以輕鬆地對資料進行分類和篩選。'
+                },
+                '17': {
+                    n8nExample: '當 Home Assistant 偵測到室內溫度超過 28 度時，觸發 n8n 工作流程，自動開啟智慧插座上的電風扇，並發送通知到手機。',
+                    lifeExample: '住在校外或宿舍的學生，用來自動化管理居住空間，例如設定早上自動開燈、離開時自動關閉電器。'
+                },
+                '18': {
+                    n8nExample: '當 Stripe 成功處理一筆付款時，自動在 Invoice Ninja 中產生一張對應的發票並標記為已付款，然後將發票 PDF 寄給客戶。',
+                    lifeExample: '接案的設計或程式設計學生，用來專業地開立報價單和發票給案主，並追蹤付款狀況。'
+                },
+                '19': {
+                    n8nExample: '透過 n8n 的 Cron 節點，每週一凌晨定時觸發一個 Jenkins 的建置任務，用於執行數據庫備份。',
+                    lifeExample: '軟體工程課程的學生，設定自動化測試流程，每次提交程式碼時，自動檢查是否有錯誤。'
+                },
+                '20': {
+                    n8nExample: '監聽 Kafka 特定 topic 的訊息，當收到新訊息時，經過 n8n 的數據轉換與過濾後，將其存儲到 Elasticsearch 中。',
+                    lifeExample: '在開發需要處理大量即時數據流的專案(如社交媒體分析)時，用來處理和傳遞數據。'
+                },
+                '21': {
+                    n8nExample: '當 KoBoToolbox 收集到一份新的問卷提交時，自動提取問卷中的特定答案，並將其視覺化後發佈到一個內部儀表板。',
+                    lifeExample: '在做社會科學研究或畢業專題需要發放問卷時，用來設計、發放和收集問卷數據。'
+                },
+                '22': {
+                    n8nExample: '當客戶在 Magento 2 商店中放棄購物車超過 24 小時，自動觸發 n8n，發送一封提醒郵件給該客戶。',
+                    lifeExample: '電子商務課程的學生，用來架設一個模擬的線上商店，實際操作商品上架、訂單處理。'
+                },
+                '23': {
+                    n8nExample: '建立一個 n8n 聊天機器人，當在 Matrix 聊天室中輸入特定指令 (如 "!status")，機器人會去查詢伺服器狀態並回覆在聊天室中。',
+                    lifeExample: '建立一個注重隱私和安全的班級或小組討論群組，不受商業公司平台的廣告或數據追蹤干擾。'
+                },
+                '24': {
+                    n8nExample: '每天自動從 RSS feed 抓取最新的產業新聞，並將摘要發送到 Mattermost 的指定頻道中。',
+                    lifeExample: '老師: 為系上或研究室建立一個專屬的內部通訊平台，分頻道討論不同主題，取代混亂的LINE群組。'
+                },
+                '25': {
+                    n8nExample: '當有新的潛在客戶在 WordPress 網站上填寫聯絡表單時，自動將其資訊新增到 Mautic 中，並啟動一個歡迎系列的行銷活動。',
+                    lifeExample: '行銷科系的學生，在模擬行銷活動中，用來設計自動化的Email流程，根據用戶行為發送不同的內容。'
+                },
+                '26': {
+                    n8nExample: '每月一日自動觸發 n8n，透過 Metabase API 產生上個月的銷售報告，並將報告的公開連結透過 Email 發送給管理團隊。',
+                    lifeExample: '將一份複雜的Excel報告數據匯入，快速生成各種圖表，讓報告更具說服力。'
+                },
+                '27': {
+                    n8nExample: '當 MISP 平台有新的威脅指標 (Indicator of Compromise) 被新增時，自動將該指標 (如惡意 IP) 同步到防火牆的黑名單中。',
+                    lifeExample: '資安社團成員用來共享和學習最新的網路攻擊手法和威脅情報。'
+                },
+                '28': {
+                    n8nExample: '定期掃描你的 Google Contacts，如果發現有聯絡人超過三個月沒有互動，自動在 Monica CRM 中建立一個提醒事項，提示你該聯絡對方。',
+                    lifeExample: '用來記錄和管理自己的人脈，例如在研討會上認識的教授、業界前輩，並設定提醒定期聯繫。'
+                },
+                '29': {
+                    n8nExample: '接收 Webhook 傳來的 JSON 數據，經過 n8n 的資料格式整理後，將其寫入到 MySQL 資料庫的指定表格中。',
+                    lifeExample: '任何需要資料庫的課程(如網頁開發、資料分析)的基礎工具，用來儲存和管理結構化數據。'
+                },
+                '30': {
+                    n8nExample: '當 Nextcloud 的某個共享資料夾有新檔案上傳時，自動將該檔案的分享連結發送到相關的 Telegram 群組。',
+                    lifeExample: '建立一個私人的雲端硬碟，用來同步各科目的報告、筆記，並方便地分享給小組成員。'
+                },
+                '31': {
+                    n8nExample: '當 Trello 看板上有一個卡片被移動到 "完成" 列表時，自動在 NocoDB 中更新對應專案的狀態。',
+                    lifeExample: '將課程作業用的SQL資料庫，快速轉換成一個像Airtable一樣易於操作的介面，方便組員共同編輯。'
+                },
+                '32': {
+                    n8nExample: '監控 npm 上某個你關注的套件，當它發佈新版本時，自動在你的團隊 Discord 中發送一條更新通知。',
+                    lifeExample: '前端或Node.js相關課程的學生，用來安裝和管理專案所需的各種JavaScript工具庫。'
+                },
+                '33': {
+                    n8nExample: '當一個新的銷售線索 (lead) 進入 Odoo CRM 時，自動指派給一位銷售人員，並透過 n8n 發送一封 email 通知該銷售人員。',
+                    lifeExample: '在企管課程中，讓學生實際操作ERP系統，了解企業資源規劃的流程。'
+                },
+                '34': {
+                    n8nExample: '從 AlienVault OTX 等威脅情報源抓取數據，經過 n8n 處理後，匯入到 OpenCTI 平台進行關聯分析。',
+                    lifeExample: '在資安專題中，用來彙整和關聯從各種來源找到的網路威脅情資，建立知識圖譜。'
+                },
+                '35': {
+                    n8nExample: '在撰寫文章時，可以透過 n8n 建立一個 API 端點，輸入一個單字，n8n 會去查詢 OpenThesaurus 並返回同義詞列表，輔助寫作。',
+                    lifeExample: '寫英文報告或論文時，透過n8n整合到寫作工具中，快速查找單字的同義詞，豐富文章用字。'
+                },
+                '36': {
+                    n8nExample: '定時執行一個 Postgres SQL 查詢，計算每日的用戶註冊數，並將結果推送到一個 Slack 頻道，讓團隊了解成長趨勢。',
+                    lifeExample: '功能比MySQL更強大的資料庫，適合地理資訊系統(GIS)或需要更複雜數據類型的課程專案。'
+                },
+                '37': {
+                    n8nExample: '當 PostHog 捕獲到一個用戶觸發了 "註冊成功" 的自定義事件時，自動將該用戶加入到一個 MailerLite 的 "新用戶引導" 郵件序列中。',
+                    lifeExample: '自己開發的個人網站或App專案，用來分析使用者行為，了解大家最常使用哪些功能。'
+                },
+                '38': {
+                    n8nExample: '從 IoT 設備接收 MQTT 訊息，n8n 將訊息解析後，以高效率寫入 QuestDB 時間序列資料庫，用於後續的趨勢分析。',
+                    lifeExample: '在物理實驗或金融數據分析的專題中，用來儲存和快速查詢大量的時間序列數據。'
+                },
+                '39': {
+                    n8nExample: '從 Google Sheets 讀取銷售數據，透過 n8n 傳遞給 QuickChart API 產生一個長條圖，並將圖表圖片嵌入到每週的業務報告 Email 中。',
+                    lifeExample: '在寫好的報告程式碼中，自動根據最新數據產生圖表並插入報告中，無需手動截圖更新。'
+                },
+                '40': {
+                    n8nExample: '作為消費者，從 RabbitMQ 的一個隊列 (queue) 中讀取待處理的任務訊息，n8n 根據訊息內容執行相應的自動化操作 (如處理圖片、發送通知)。',
+                    lifeExample: '在開發需要非同步處理任務的應用時(例如上傳影片後需要時間轉檔)，用來管理這些背景任務。'
+                },
+                '41': {
+                    n8nExample: '當用戶請求一個需要複雜計算的報告時，n8n 先檢查 Redis 緩存中是否存在，如果存在則直接返回，如果不存在，則計算後將結果存入 Redis 並返回，以提高效能。',
+                    lifeExample: '在開發需要快速反應的網頁應用時，用來暫存常用數據，加快網頁載入速度。'
+                },
+                '42': {
+                    n8nExample: '建立一個簡單的 n8n Webhook，當 GitHub repo 有新的 commit 時，自動將 commit 的訊息和作者發送到 Rocket.Chat 的開發者頻道。',
+                    lifeExample: '老師: 建立一個安全的線上教室，可以進行直播教學、分組討論，並永久保存所有對話記錄。'
+                },
+                '43': {
+                    n8nExample: '當 Zabbix 監控到伺服器 CPU 使用率過高時，觸發 n8n 工作流程，自動執行 Rundeck 中的一個作業 (job) 來重啟相關服務。',
+                    lifeExample: '管理多台虛擬機的學生，可以設定一個按鈕就自動完成所有主機的更新或軟體安裝。'
+                },
+                '44': {
+                    n8nExample: '將一個 HTML 表單提交的數據，透過 n8n 接收並寫入到 SeaTable 的一個表格中，作為簡易的數據收集系統。',
+                    lifeExample: '小組報告時，用來共同規劃專案時程、分配任務和收集資料，功能比Google Sheets更豐富。'
+                },
+                '45': {
+                    n8nExample: '當 Sentry 捕獲到一個新的嚴重錯誤 (fatal error) 時，立即透過 n8n 觸發 PagerDuty 發出警報，通知值班工程師。',
+                    lifeExample: '在開發自己的程式專案時，用來自動捕捉和回報程式執行時發生的錯誤，方便快速修正。'
+                },
+                '46': {
+                    n8nExample: '建立一個 Discord 機器人，用戶可以發送 "畫一張貓" 的訊息，n8n 接收後呼叫 Stable Diffusion API 產生圖片，並將圖片回傳到 Discord 頻道。',
+                    lifeExample: '設計或藝術相關科系的學生，用來生成創作靈感、製作簡報配圖或輔助藝術作品的生成。'
+                },
+                '47': {
+                    n8nExample: '當 Ghost 部落格發佈新文章時，自動觸發 n8n，將文章標題、摘要和連結同步到 Strapi 的一個 "最新消息" 集合類型中，供 App 或其他前端調用。',
+                    lifeExample: '學習前端開發的學生，可以快速建立一個後台API，專心練習前端畫面的製作。'
+                },
+                '48': {
+                    n8nExample: '當一個新用戶在你的應用程式中註冊 (觸發 Supabase Auth trigger) 時，n8n 監聽到這個 webhook 事件，自動為該用戶在 Stripe 中建立一個客戶資料。',
+                    lifeExample: '想要快速開發一個帶有使用者登入功能和資料庫的App或網站的學生，Supabase提供了完整的後端服務。'
+                },
+                '49': {
+                    n8nExample: '當 Sysdig Falco 偵測到一個可疑的容器行為 (如在容器中執行 shell) 時，發出警報給 n8n，n8n 自動執行一個 Ansible playbook 來隔離該容器。',
+                    lifeExample: '在學習容器化技術(Docker, Kubernetes)時，用來深入觀察容器內部的運作情況和系統效能。'
+                },
+                '50': {
+                    n8nExample: '當客戶透過 email 回報一個問題時，n8n 自動解析郵件內容，並在 Taiga 專案管理工具中建立一個新的 User Story 或 Bug。',
+                    lifeExample: '進行敏捷開發的軟體工程專題時，用來管理待辦事項(backlog)、規劃衝刺(sprint)和追蹤進度。'
+                },
+                '51': {
+                    n8nExample: '當收到一個釣魚郵件報告時，自動在 TheHive 中建立一個 Case，並將郵件中的 URL、附件 hash 等資訊作為 observables 新增進去。',
+                    lifeExample: '老師: 在資安實務課程中，讓學生模擬資安分析師，分工合作調查一個模擬的駭客攻擊事件。'
+                },
+                '52': {
+                    n8nExample: '每分鐘從 CoinGecko API 抓取加密貨幣的價格，並將帶有時間戳的數據寫入 TimescaleDB，用於金融數據分析。',
+                    lifeExample: '在研究氣象數據、股票價格或任何隨時間變化的數據時，提供高效的儲存和分析能力。'
+                },
+                '53': {
+                    n8nExample: '整合 Google Calendar，當有新的會議安排時，自動在 Twake 的相關團隊頻道中發佈一個會議提醒。',
+                    lifeExample: '一個All-in-one的團隊協作平台，可以用來進行小組聊天、共享文件、視訊會議和任務管理。'
+                },
+                '54': {
+                    n8nExample: '當 GitLab 中有一個新的 issue 被建立時，自動在 Wekan 的 "待辦事項" 看板中建立一張對應的卡片。',
+                    lifeExample: '個人或小組用來管理待辦事項的數位看板，將任務分為「待處理」、「進行中」、「已完成」。'
+                },
+                '55': {
+                    n8nExample: '當 WooCommerce 訂單狀態更新為 "已完成" 時，自動觸發 n8n，向客戶發送一封邀請他們評價商品的郵件。',
+                    lifeExample: '行銷或設計科系的學生，可以快速在WordPress網站上架設自己的作品集商店，販售設計品。'
+                },
+                '56': {
+                    n8nExample: '當你在 YouTube 上傳一個新影片時，n8n 自動獲取影片標題、描述和連結，並在你的 WordPress 網站上發佈一篇新的部落格文章來介紹這個影片。',
+                    lifeExample: '最普及的網站架設平台，可以用來建立課程網站、個人作品集、社團網站等。'
+                },
+                '57': {
+                    n8nExample: '當你在 Notion 中寫完一篇新文章並公開分享時，n8n 自動抓取 Notion 的公開網址，透過 YOURLS 產生一個短網址，並將短網址回填到 Notion 頁面的屬性中。',
+                    lifeExample: '在做簡報或分享報告時，將冗長的參考資料網址縮短，讓版面更簡潔美觀。'
+                },
+                '58': {
+                    n8nExample: '建立一個 n8n 工作流程，讓你可以透過 Slack 指令查詢 Zabbix 中某個主機的最新數據 (如 CPU、記憶體使用率)。',
+                    lifeExample: '學習網路管理的學生，用來監控實驗室或個人專案中多台伺服器的健康狀況。'
+                },
+                '59': {
+                    n8nExample: '當 Twitter 上有人提到你的公司名稱並帶有 "問題" 或 "求助" 關鍵字時，n8n 自動捕捉該推文，並在 Zammad 中建立一個客服工單。',
+                    lifeExample: '擔任系學會或社團幹部時，可以用來建立一個服務信箱，系統化地處理同學們的各種問題和建議。'
+                },
+                '60': {
+                    n8nExample: '每天早上定時抓取 Google Tasks 中今天到期的任務，並將任務列表發送到 Zulip 的個人頻道中作為每日提醒。',
+                    lifeExample: '參與大型開源專案或有多個主題要討論的團隊，Zulip以主題為基礎的對話方式，讓討論更有條理。'
+                }
+            };
+
+            // 獲取 DOM 元素
+            const cards = document.querySelectorAll('.card');
+            const modal = document.getElementById('n8n-modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalLifeExample = document.getElementById('modal-life-example');
+            const closeModalButton = document.getElementById('close-modal');
+
+            // 顯示彈出視窗的函數
+            const openModal = (card) => {
+                const cardId = card.dataset.id;
+                const cardTitle = card.querySelector('h2').innerText;
+                const data = appData[cardId] || { n8nExample: '暫無範例。', lifeExample: '暫無範例。' };
+
+                modalTitle.innerText = cardTitle;
+                modalBody.innerText = data.n8nExample;
+                modalLifeExample.innerText = data.lifeExample;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('modal-enter');
+                    modalContent.classList.add('modal-enter-active');
+                }, 10);
+            };
+
+            // 隱藏彈出視窗的函數
+            const closeModal = () => {
+                modalContent.classList.remove('modal-enter-active');
+                modalContent.classList.add('modal-leave-active');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalContent.classList.remove('modal-leave-active');
+                    modalContent.classList.add('modal-enter');
+                }, 300);
+            };
+
+            // 為每張卡片添加點擊事件監聽器
+            cards.forEach(card => {
+                card.addEventListener('click', () => openModal(card));
+            });
+
+            // 關閉按鈕的點擊事件
+            closeModalButton.addEventListener('click', closeModal);
+
+            // 點擊背景遮罩關閉彈出視窗
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // 按下 Escape 鍵關閉彈出視窗
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
