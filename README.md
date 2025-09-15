@@ -29,3 +29,5 @@
 [阿貴校長的PDF整合工具](https://114000-maker.github.io/study/2025-09-14_01.html)
 ## Google 教育家基礎課程
 [Google 教育家基礎課程](https://114000-maker.github.io/study/2025-09-14_02.html)
+## n8n 可整合的 60 個開源軟體
+[n8n 可整合的 60 個開源軟體](https://114000-maker.github.io/study/2025-09-16_01.html)
