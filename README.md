@@ -31,3 +31,5 @@
 [Google 教育家基礎課程](https://114000-maker.github.io/study/2025-09-14_02.html)
 ## n8n 可整合的 60 個開源軟體
 [n8n 可整合的 60 個開源軟體](https://114000-maker.github.io/study/2025-09-16_01.html)
+## Google Gems 互動式介紹
+[Google Gems 互動式介紹](https://114000-maker.github.io/study/2025-09-20_01.html)
