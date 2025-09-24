@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍌 奈米大香蕉 專業人像修圖&貼圖 V5.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f0c29;
+            background-image: linear-gradient(to right top, #0c0a1e, #1d1948, #3c2378, #6627aa, #9a25db);
+            min-height: 100vh;
+            font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans CJK TC', sans-serif;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .option-card, .reaction-btn, .variation-btn, .theme-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .option-card:hover, .reaction-btn:hover, .variation-btn:hover, .theme-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .option-card.selected, .reaction-btn.selected, .variation-btn.selected, .mode-btn.selected, .theme-card.selected {
+            background: rgba(88, 80, 236, 0.5);
+            border-color: #5850ec;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(88, 80, 236, 0.2);
+        }
+        .preview-container {
+            max-height: 400px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .preview-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .processing {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.error {
+            background: rgba(239, 68, 68, 0.9);
+        }
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .upload-zone.dragover {
+            border-color: #5850ec;
+            background-color: rgba(88, 80, 236, 0.1);
+        }
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #f59e0b; /* yellow-500 */
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Notifications -->
+    <div id="notification" class="notification"></div>
+
+    <div class="min-h-screen p-4 sm:p-6 md:p-8">
+        <!-- Header -->
+        <div class="text-center mb-8 max-w-3xl mx-auto">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 whitespace-nowrap">
+                🍌 奈米大香蕉 專業人像修圖&貼圖 V5.0
+            </h1>
+            <p class="text-white opacity-80">
+                3A科技實驗室
+            </p>
+        </div>
+
+        <!-- Mode Switcher -->
+        <div class="flex justify-center flex-wrap gap-4 mb-8">
+            <button id="mode-btn-portrait" class="mode-btn selected px-6 py-3 rounded-lg font-semibold transition-all">
+                🎨 專業人像修圖
+            </button>
+            <button id="mode-btn-sticker" class="mode-btn px-6 py-3 rounded-lg font-semibold transition-all bg-white bg-opacity-10 hover:bg-opacity-20">
+                ✨ AI 貼圖製作
+            </button>
+             <button id="mode-btn-photo" class="mode-btn px-6 py-3 rounded-lg font-semibold transition-all bg-white bg-opacity-10 hover:bg-opacity-20">
+                🎭 人皮解憂號
+            </button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="max-w-7xl mx-auto">
+            <!-- Portrait Mode -->
+            <div id="portrait-mode">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Left: Upload & Variations -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="glass-effect rounded-2xl p-6 space-y-6">
+                           <div>
+                               <h3 class="text-lg font-semibold text-white mb-4">處理模式</h3>
+                               <div class="grid grid-cols-2 gap-3">
+                                   <button id="portrait-mode-single" class="p-3 rounded-lg text-sm font-medium transition-all bg-blue-500 text-white">單張處理</button>
+                                   <button id="portrait-mode-batch" class="p-3 rounded-lg text-sm font-medium transition-all bg-white bg-opacity-20 text-white hover:bg-opacity-30">批量處理</button>
+                               </div>
+                           </div>
+                           <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">上傳照片</h3>
+                                <div class="upload-zone rounded-lg p-6 text-center" id="upload-zone-portrait">
+                                    <input type="file" id="file-input-portrait" accept="image/*" multiple class="hidden"/>
+                                    <div class="text-4xl mb-3">📷</div>
+                                    <p class="text-white mb-2">拖拽照片到這裡或點擊上傳</p>
+                                    <button id="upload-btn-portrait" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all">選擇照片</button>
+                                    <p class="text-white opacity-70 text-sm mt-2" id="upload-status-portrait">尚未上傳照片</p>
+                                </div>
+                           </div>
+                           <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">變化張數</h3>
+                                <div class="flex space-x-2" id="variations-selector">
+                                    <button class="variation-btn w-10 h-10 rounded-lg font-medium transition-all selected" data-type="variation" data-value="1">1</button>
+                                    <button class="variation-btn w-10 h-10 rounded-lg font-medium transition-all" data-type="variation" data-value="2">2</button>
+                                    <button class="variation-btn w-10 h-10 rounded-lg font-medium transition-all" data-type="variation" data-value="3">3</button>
+                                    <button class="variation-btn w-10 h-10 rounded-lg font-medium transition-all" data-type="variation" data-value="4">4</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Middle: Style Options -->
+                    <div class="lg:col-span-1 space-y-6">
+                         <div class="glass-effect rounded-2xl p-6 space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">背景風格</h3>
+                                <div class="grid grid-cols-2 gap-3" id="background-options"></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">服裝風格</h3>
+                                <div class="space-y-2 max-h-48 overflow-y-auto" id="clothing-options"></div>
+                            </div>
+                         </div>
+                    </div>
+                    <!-- Right: Effects & Preview -->
+                    <div class="lg:col-span-1 space-y-6">
+                         <div class="glass-effect rounded-2xl p-6 space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">視覺效果</h3>
+                                <div class="grid grid-cols-2 gap-2" id="effect-options"></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-4">角度構圖</h3>
+                                <div class="space-y-2 max-h-48 overflow-y-auto" id="angle-options"></div>
+                            </div>
+                            <div id="preview-section-portrait" class="hidden">
+                                <h3 class="text-lg font-semibold text-white mb-4">原圖預覽</h3>
+                                <div class="preview-container">
+                                    <img id="preview-image-portrait" class="preview-image" alt="預覽" />
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticker Mode -->
+            <div id="sticker-mode" class="hidden">
+                 <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Left: Upload -->
+                    <div class="lg:col-span-1">
+                        <div class="glass-effect rounded-2xl p-6 space-y-6 h-full flex flex-col">
+                           <h3 class="text-lg font-semibold text-white">1. 您的照片</h3>
+                           <div class="upload-zone rounded-lg p-6 text-center flex-grow flex flex-col justify-center items-center" id="upload-zone-sticker">
+                                <input type="file" id="file-input-sticker" accept="image/*" class="hidden"/>
+                                <img id="preview-image-sticker" class="preview-image hidden max-h-64 mb-4 rounded-lg" alt="貼圖預覽" />
+                                <div id="upload-prompt-sticker">
+                                    <div class="text-6xl mb-4">🖼️</div>
+                                    <p class="text-white mb-4">點擊或拖拽照片到這裡</p>
+                                    <button id="upload-btn-sticker" class="px-5 py-2.5 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all">選擇照片</button>
+                                </div>
+                                <p class="text-white opacity-70 text-sm mt-4" id="upload-status-sticker">尚未上傳照片</p>
+                            </div>
+                        </div>
+                    </div>
+                     <!-- Right: Sticker Options -->
+                    <div class="lg:col-span-1">
+                        <div class="glass-effect rounded-2xl p-6 space-y-6">
+                            <h3 class="text-lg font-semibold text-white">2. 選擇貼圖</h3>
+                            <div class="space-y-4 p-4 bg-black bg-opacity-20 rounded-lg">
+                                <h4 class="font-semibold text-white">✨ AI 貼圖創意產生器</h4>
+                                <textarea id="sticker-idea-input" rows="2" class="w-full bg-black bg-opacity-30 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：我家愛搗蛋的橘貓、辦公室專用..."></textarea>
+                                 <button id="generate-idea-btn" class="w-full px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 font-bold transition-all">產生點子</button>
+                            </div>
+                             <div>
+                                <h4 class="text-md font-semibold text-white mb-3">選擇想生成的貼圖：</h4>
+                                <div class="grid grid-cols-3 gap-2" id="reaction-options">
+                                    <!-- Reactions will be dynamically inserted here -->
+                                </div>
+                            </div>
+                            <div class="border-t border-white/10 pt-4 mt-4 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <label for="toggle-cute-anime" class="font-medium text-white">可愛動漫</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="toggle-cute-anime">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label for="toggle-add-text" class="font-medium text-white">加上文字</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="toggle-add-text">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Photo Mode (人皮解憂號) -->
+            <div id="photo-mode" class="hidden">
+                 <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Left: Upload -->
+                    <div class="lg:col-span-1">
+                        <div class="glass-effect rounded-2xl p-6 space-y-6 h-full flex flex-col">
+                           <h3 class="text-lg font-semibold text-white">1. 上傳您的照片</h3>
+                           <p class="text-sm text-white/70">上傳您的照片或人物手稿，讓 AI 為您實現無限寫真可能。</p>
+                           <div class="upload-zone rounded-lg p-6 text-center flex-grow flex flex-col justify-center items-center" id="upload-zone-photo">
+                                <input type="file" id="file-input-photo" accept="image/*" class="hidden"/>
+                                <img id="preview-image-photo" class="preview-image hidden max-h-64 mb-4 rounded-lg" alt="寫真預覽" />
+                                <div id="upload-prompt-photo">
+                                    <div class="text-6xl mb-4">👤</div>
+                                    <p class="text-white mb-4">點擊或拖拽照片到這裡</p>
+                                    <button id="upload-btn-photo" class="px-5 py-2.5 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all">選擇照片</button>
+                                </div>
+                                <p class="text-white opacity-70 text-sm mt-4" id="upload-status-photo">尚未上傳照片</p>
+                            </div>
+                        </div>
+                    </div>
+                     <!-- Right: Photo Theme Options -->
+                    <div class="lg:col-span-1">
+                        <div class="glass-effect rounded-2xl p-6 space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">2. 選擇 AI 功能</h3>
+                                <div id="photo-theme-options" class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
+                                    <!-- Photo themes will be dynamically inserted here -->
+                                </div>
+                            </div>
+                            <div class="border-t border-white/10 pt-4 mt-4">
+                                <h3 class="text-lg font-semibold text-white mb-3">3. 多給一點解憂提示 (選填)</h3>
+                                <textarea id="photo-extra-prompt" rows="3" class="w-full bg-black bg-opacity-30 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：戴上太陽眼鏡、穿上紅色洋裝、背景改成下雪天..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+
+            <!-- Universal Generate Button and Results -->
+            <div class="mt-8">
+                 <button id="generate-btn" class="w-full max-w-2xl mx-auto block py-4 px-6 rounded-lg font-semibold text-lg transition-all bg-gray-600 text-gray-400 cursor-not-allowed" disabled>
+                    請先上傳照片
+                </button>
+            </div>
+
+            <div id="results-section" class="mt-8 hidden">
+                <div class="glass-effect rounded-2xl p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                        <h3 class="text-2xl font-bold text-white">生成結果</h3>
+                        <div class="flex gap-2">
+                             <button id="download-all-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all hidden">
+                                📦 下載 ZIP
+                            </button>
+                        </div>
+                    </div>
+                    <div id="processing-indicator" class="text-center py-12 hidden">
+                        <div class="processing text-6xl mb-4">🎨</div>
+                        <p class="text-white text-lg" id="processing-main-text">AI 正在生成您的作品...</p>
+                        <p class="text-white opacity-70 mt-2" id="processing-details">請稍候，這可能需要幾分鐘</p>
+                    </div>
+                    <div id="results-grid" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 hidden">
+                        <!-- Results will be dynamically generated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12">
+            <div class="glass-effect rounded-2xl p-4 max-w-md mx-auto inline-block">
+                <p class="text-white opacity-80 text-sm mb-2">🎓 阿亮老師 AI 工作室</p>
+                <div class="flex justify-center space-x-4 text-sm">
+                    <a href="https://www.facebook.com/iddmail" target="_blank" class="text-white opacity-70 hover:opacity-100 transition-opacity">📘 Facebook</a>
+                    <a href="https://www.youtube.com/@Liang-yt02" target="_blank" class="text-white opacity-70 hover:opacity-100 transition-opacity">📺 YouTube</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const CONFIG = {
+             photoThemes: [
+                { id: 'timeTravel', name: '歲月記憶', icon: '🕰️', description: '生成人物在不同年齡的關鍵照片，記錄人生重要時刻。', 
+                  prompts: [
+                    { id: '1歲生日', base: 'A photo of the person as a 1-year-old baby at their birthday party.' },
+                    { id: '大學畢業', base: 'A photo of the person graduating from university, wearing a cap and gown.' },
+                    { id: '婚禮當天', base: 'A wedding photo of the person with their partner.' },
+                    { id: '迎接新生兒', base: 'A heartwarming photo of the person holding their newborn baby.' },
+                    { id: '新家與愛車', base: 'A family photo of the person with their family in front of a new house and a car.' },
+                    { id: '含飴弄孫', base: 'A photo of the person as a grandparent, happily playing with their grandchild.' }
+                  ]
+                },
+                { id: 'styleMakeover', name: '風格造型', icon: '👕', description: '為照片中的人物設計一套完整的時尚造型。',
+                  prompts: [
+                    { id: '街頭潮流', base: 'A full-body fashion shot of the person in a stylish streetwear outfit in a city.' },
+                    { id: '優雅晚宴', base: 'The person dressed in an elegant evening gown or tuxedo for a formal event.' },
+                    { id: '波希米亞', base: 'The person in a bohemian style outfit at an outdoor music festival.' },
+                    { id: '復古搖滾', base: 'The person in a vintage rock-and-roll outfit with a leather jacket.' },
+                    { id: '商務精英', base: 'The person in a sharp, modern business suit, looking professional.' },
+                    { id: '運動休閒', base: 'The person in a high-end athleisure outfit.' }
+                  ]
+                },
+                 { id: 'sportsStar', name: '運動悍將', icon: '🏆', description: '生成穿搭運動服裝在各種運動競技場合中大展身手的寫實照片。',
+                  prompts: [
+                    { id: '籃球比賽', base: 'Action shot of the person dunking a basketball in a packed arena.' },
+                    { id: '足球場', base: 'Action shot of the person scoring a goal in a professional soccer match.' },
+                    { id: '網球場', base: 'Action shot of the person serving the ball on a professional tennis court like Wimbledon.' },
+                    { id: '奧運賽道', base: 'The person sprinting on an Olympic running track, crossing the finish line.' },
+                    { id: '健身房', base: 'The person lifting heavy weights in a modern, well-equipped gym.' },
+                    { id: '滑雪場', base: 'The person skiing down a snowy mountain slope at high speed.' }
+                  ]
+                },
+                { id: 'flowerSea', name: '花海遊記', icon: '🌸', description: '在各季節的(花海)的旅遊紀念照。',
+                   prompts: [
+                    { id: '薰衣草田', base: 'The person in a beautiful lavender field in Provence, France.' },
+                    { id: '向日葵花海', base: 'The person standing in a vast sunflower field under a bright sun.' },
+                    { id: '櫻花大道', base: 'The person walking under a canopy of blooming cherry blossoms in Japan.' },
+                    { id: '鬱金香花園', base: 'The person in the middle of colorful tulip gardens in the Netherlands.' },
+                    { id: '油菜花田', base: 'The person in a vibrant yellow rapeseed flower field.' },
+                    { id: '波斯菊花海', base: 'The person surrounded by a sea of colorful cosmos flowers.' }
+                  ]
+                },
+                { id: 'worldTour', name: '環遊世界', icon: '✈️', description: '生成您在世界各地著名景點的旅遊紀念照。',
+                  prompts: [
+                    { id: '巴黎鐵塔', base: 'In front of the Eiffel Tower in Paris on a sunny day.' },
+                    { id: '希臘聖托里尼', base: 'In Santorini, Greece, with the iconic white and blue buildings in the background.' },
+                    { id: '日本京都', base: 'In a traditional street in Kyoto, Japan, with cherry blossoms or autumn leaves.' },
+                    { id: '紐約時代廣場', base: 'At night in Times Square, New York, surrounded by bright neon signs.' },
+                    { id: '冰島極光', base: 'Under the magical Northern Lights (Aurora Borealis) in Iceland.' },
+                    { id: '威尼斯運河', base: 'On a gondola in a Venice canal, Italy.' }
+                  ]
+                },
+                 { id: 'lifestyle', name: '生活隨拍', icon: '☕', description: '創造在咖啡廳、街頭等場景的自然生活照。',
+                  prompts: [
+                    { id: '咖啡廳', base: 'The person enjoying a cup of coffee in a cozy, stylish cafe.' },
+                    { id: '街頭漫步', base: 'A candid shot of the person walking on a bustling city street.' },
+                    { id: '圖書館', base: 'The person reading a book in a large, quiet library.' },
+                    { id: '逛市集', base: 'The person exploring a vibrant local market.' },
+                    { id: '公園野餐', base: 'The person having a picnic in a beautiful park on a sunny day.' },
+                    { id: '看展覽', base: 'The person looking at artwork in a modern art gallery.' }
+                  ]
+                },
+                { id: 'proID', name: '專業證件照', icon: '🆔', description: '一鍵更換服裝與背景，製作專業證件照。',
+                   prompts: [
+                    { id: '藍底西裝', base: 'A professional ID photo of the person wearing a suit, with a blue background.' },
+                    { id: '白底西裝', base: 'A professional ID photo of the person wearing a suit, with a white background.' },
+                    { id: '藍底襯衫', base: 'A professional ID photo of the person wearing a formal shirt, with a blue background.' },
+                    { id: '白底襯衫', base: 'A professional ID photo of the person wearing a formal shirt, with a white background.' },
+                    { id: '韓式證件照', base: 'A Korean-style ID photo with soft lighting and a neutral background.' },
+                    { id: '專業形象照', base: 'A professional headshot for corporate or business use.' }
+                  ]
+                },
+                { id: 'superChef', name: '超型主廚', icon: '👨‍🍳', description: '生成穿搭主廚服裝在各種餐飲廚房場合中大展身手的寫實照片。',
+                   prompts: [
+                    { id: '米其林廚房', base: 'The person as a chef in a Michelin-starred restaurant kitchen, plating a dish.' },
+                    { id: '烘焙坊', base: 'The person as a baker, kneading dough in a rustic bakery.' },
+                    { id: '壽司吧台', base: 'The person as a sushi chef, skillfully preparing sushi at a counter.' },
+                    { id: '戶外燒烤', base: 'The person grilling food at an outdoor BBQ event.' },
+                    { id: '分子料理', base: 'The person as a chef creating a molecular gastronomy dish with smoke and foam.' },
+                    { id: '烹飪教室', base: 'The person teaching a cooking class to students.' }
+                  ]
+                },
+                { id: 'superIdol', name: '超級偶像', icon: '🎤', description: '在各種節目、舞台、簽唱會場合中的寫實照片。',
+                  prompts: [
+                    { id: '演唱會舞台', base: 'The person performing on a large concert stage with dramatic lighting.' },
+                    { id: '脫口秀嘉賓', base: 'The person as a guest on a late-night talk show, sitting on the couch.' },
+                    { id: '粉絲簽唱會', base: 'The person signing autographs for fans at a fan meet event.' },
+                    { id: '走紅地毯', base: 'The person walking the red carpet at a movie premiere or awards ceremony.' },
+                    { id: 'MV拍攝現場', base: 'The person in the middle of a dynamic music video shoot.' },
+                    { id: '音樂頒獎典禮', base: 'The person accepting an award on stage at a music awards ceremony.' }
+                  ]
+                },
+            ],
+            backgrounds: [
+                { value: '白底證件', label: '白底證件', desc: '標準純白，適合正式用途', color: 'bg-white' },
+                { value: '商務灰', label: '商務灰', desc: '淺灰中性，柔光專業', color: 'bg-gray-200' },
+                { value: '科技藍漸層', label: '科技藍漸層', desc: '深→淺藍，科技光暈', color: 'bg-gradient-to-b from-blue-600 to-blue-300' },
+                { value: '品牌色', label: '品牌色', desc: '單色乾淨，強調識別', color: 'bg-purple-400' },
+                { value: '溫暖米色', label: '溫暖米色', desc: '溫馨親和，適合服務業', color: 'bg-yellow-100' },
+                { value: '深邃黑色', label: '深邃黑色', desc: '高端奢華，藝術感強', color: 'bg-gray-900' }
+            ],
+            clothing: [
+                { value: '', label: '保留原圖服裝', desc: '不修改原有服裝' },
+                { value: '深色西裝外套＋白襯衫', label: '正式西裝', desc: '深色西裝外套＋白襯衫（正式）' },
+                { value: '深色西裝外套＋淺藍襯衫', label: '商務休閒', desc: '深色西裝外套＋淺藍襯衫（無領帶）' },
+                { value: '黑色高領毛衣', label: '簡約科技', desc: '黑色高領毛衣（簡約科技感）' },
+                { value: '淺藍襯衫', label: '清爽專業', desc: '淺藍襯衫（清爽專業）' },
+            ],
+            effects: [
+                { value: '無效果', label: '無效果' },
+                { value: '復古風格 (Vintage)', label: '復古風格' },
+                { value: '黑白 (Black and White)', label: '黑白' },
+                { value: '深褐色 (Sepia)', label: '深褐色' },
+            ],
+            angles: [
+                { value: '正面視角（胸上半身）', label: '正面標準' },
+                { value: '左側 45° 半側臉', label: '左側45°' },
+                { value: '右側 45° 半側臉', label: '右側45°' },
+            ],
+            reactions: ['開心', '傷心', '大笑', '生氣', '愛心', 'OK']
+        };
+
+        // --- APPLICATION STATE ---
+        const AppState = {
+            currentMode: 'portrait', // 'portrait', 'sticker', or 'photo'
+            portraitProcessMode: 'single', // 'single' or 'batch'
+            uploadedImages: [],
+            settings: {
+                portrait: {
+                    background: '白底證件', clothing: '', effect: '無效果',
+                    angle: '正面視角（胸上半身）', variations: 1
+                },
+                sticker: {
+                    reactions: ['開心'], isCuteAnime: false, addText: false
+                },
+                photo: {
+                    theme: 'timeTravel',
+                    additionalPrompt: ''
+                }
+            },
+            isProcessing: false,
+            results: []
+        };
+        
+        // --- NOTIFICATION SYSTEM ---
+        const NotificationSystem = {
+            show(message, isError = false, duration = 3000) {
+                const el = document.getElementById('notification');
+                if (el) {
+                    el.textContent = message;
+                    el.className = `notification show ${isError ? 'error' : ''}`;
+                    setTimeout(() => el.classList.remove('show'), duration);
+                }
+            }
+        };
+
+        // --- API MANAGER ---
+        const APIManager = {
+             async retryFetch(url, options, maxRetries = 3) {
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.error?.message || `HTTP 錯誤 ${response.status}`);
+                        }
+                        return response.json();
+                    } catch (error) {
+                        if (i === maxRetries - 1) throw error;
+                        await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+                    }
+                }
+            },
+            
+            async generate(imageData, settings) {
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+                const base64Data = imageData.split(',')[1];
+                const mimeType = imageData.match(/:(.*?);/)[1] || 'image/jpeg';
+                
+                let prompt;
+                if (AppState.currentMode === 'portrait') {
+                     prompt = `請根據這張照片，生成一張專業的商業肖像照。重要：請務必保持人物的臉部特徵、五官和身份與原圖完全一致，只對風格和背景進行調整。
+具體要求：- 背景風格: ${settings.background} - 服裝風格: ${settings.clothing || '保留原始服裝'} - 視覺效果: ${settings.effect} - 角度與構圖: ${settings.angle} - 整體風格: 專業頭像、高品質、演播室燈光、適合商業用途。`;
+                } else if (AppState.currentMode === 'sticker') {
+                    let stylePrompt = AppState.settings.sticker.isCuteAnime ? "風格改為可愛動漫Q版風格。" : "風格要生動活潑，引人注目。";
+                    let textPrompt = AppState.settings.sticker.addText ? `重要：請在貼圖上加上符合「${settings.reaction}」情緒的簡短英文單字或片語（例如 'OK', 'Cool', 'LOL'）。請務必使用風格化的字體，並且不要使用任何中文字元。` : "重要：請不要在圖片上添加任何文字。";
+                    prompt = `將這張照片中的人物變成一個有趣的數位聊天貼圖，用來表達「${settings.reaction}」的情緒或動作。${textPrompt} 請將人物去背（背景設為透明），並在人物周圍加上清晰、粗體的白色輪廓。${stylePrompt}`;
+                } else { // Photo Mode
+                    let basePrompt = `Take the provided photo of a person and realistically place them in the famous location or scenario described: ${settings.prompt}.`;
+                    const additionalPrompt = AppState.settings.photo.additionalPrompt.trim();
+                    if (additionalPrompt) {
+                        basePrompt += ` Also apply these modifications: ${additionalPrompt}.`;
+                    }
+                    prompt = basePrompt + ` Ensure the person's face and identity are perfectly preserved. The final image should be a high-quality, photorealistic shot.`;
+                }
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType, data: base64Data } }] }],
+                    generationConfig: { responseModalities: ['IMAGE'] },
+                };
+
+                const result = await this.retryFetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const generatedBase64 = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                if (!generatedBase64) throw new Error('API 回應中未找到圖片資料');
+                return `data:image/png;base64,${generatedBase64}`;
+            },
+
+            async generateIdea(theme) {
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const prompt = `針對「${theme}」這個主題，產生 8 個適合當作聊天貼圖的簡短創意點子或反應。點子應該是動詞片語或簡短描述，例如：「寫作業」、「舉手發問」、「打瞌睡」。`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: { type: "ARRAY", items: { type: "STRING" } }
+                    }
+                };
+                const result = await this.retryFetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonText) throw new Error('API 未返回有效的點子');
+                return JSON.parse(jsonText);
+            }
+        };
+        
+        // --- UI MANAGER ---
+        const UIManager = {
+            init() {
+                this.renderOptions('backgrounds', document.getElementById('background-options'), this.createBackgroundCard);
+                this.renderOptions('clothing', document.getElementById('clothing-options'), this.createSimpleCard);
+                this.renderOptions('effects', document.getElementById('effect-options'), this.createTinyCard);
+                this.renderOptions('angles', document.getElementById('angle-options'), this.createTinyCard);
+                this.renderOptions('reactions', document.getElementById('reaction-options'), this.createReactionCard);
+                this.renderPhotoThemes();
+                
+                this.updateSelected('background', AppState.settings.portrait.background);
+                this.updateSelected('clothing', AppState.settings.portrait.clothing);
+                this.updateSelected('effect', AppState.settings.portrait.effect);
+                this.updateSelected('angle', AppState.settings.portrait.angle);
+                this.updateSelected('reaction', AppState.settings.sticker.reactions);
+                this.updateSelected('theme', AppState.settings.photo.theme);
+                
+                this.updateUploadStatus();
+            },
+
+            renderOptions(configKey, container, cardCreator) {
+                if (!container) return;
+                const options = CONFIG[configKey];
+                container.innerHTML = options.map(option => cardCreator(option, configKey.slice(0, -1))).join('');
+            },
+            
+            renderPhotoThemes() {
+                const container = document.getElementById('photo-theme-options');
+                if(!container) return;
+                container.innerHTML = CONFIG.photoThemes.map(theme => `
+                    <div class="theme-card glass-effect p-4 rounded-lg flex flex-col items-center text-center h-full" data-type="theme" data-value="${theme.id}">
+                        <div class="text-4xl mb-2">${theme.icon}</div>
+                        <h4 class="font-semibold text-white mb-1 text-sm">${theme.name}</h4>
+                        <p class="text-xs text-white/70 flex-grow">${theme.description}</p>
+                    </div>
+                `).join('');
+            },
+
+            createBackgroundCard: (option, type) => `
+                <div class="option-card p-3 rounded-lg bg-white bg-opacity-10" data-type="${type}" data-value="${option.value}">
+                    <div class="${option.color} w-full h-8 rounded mb-2"></div>
+                    <p class="text-white text-sm font-medium">${option.label}</p>
+                    <p class="text-white opacity-70 text-xs">${option.desc}</p>
+                </div>`,
+            
+            createSimpleCard: (option, type) => `
+                <div class="option-card p-3 rounded-lg bg-white bg-opacity-10" data-type="${type}" data-value="${option.value}">
+                    <p class="text-white text-sm font-medium">${option.label}</p>
+                    <p class="text-white opacity-70 text-xs">${option.desc}</p>
+                </div>`,
+
+            createTinyCard: (option, type) => `
+                 <div class="option-card p-2 rounded-lg text-center bg-white bg-opacity-10" data-type="${type}" data-value="${option.value}">
+                    <p class="text-white text-xs font-medium">${option.label}</p>
+                 </div>`,
+            
+            createReactionCard: (option, type) => `
+                <button class="reaction-btn p-2 rounded-lg text-center bg-white bg-opacity-10" data-type="${type}" data-value="${option}">
+                    <span class="text-white text-sm font-medium">${option}</span>
+                </button>`,
+
+            updateReactionButtons(reactions) {
+                const container = document.getElementById('reaction-options');
+                if (!container || !reactions || reactions.length === 0) return;
+                container.innerHTML = reactions.map(reaction => this.createReactionCard(reaction, 'reaction')).join('');
+                const newSelection = reactions[0];
+                AppState.settings.sticker.reactions = [newSelection];
+                this.updateSelected('reaction', AppState.settings.sticker.reactions);
+            },
+
+            updateSelected(type, valueOrValues) {
+                document.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
+                    const elValue = el.dataset.value;
+                    let isSelected = Array.isArray(valueOrValues) ? valueOrValues.includes(elValue) : elValue === valueOrValues;
+                    el.classList.toggle('selected', isSelected);
+                });
+            },
+
+            setMode(mode) {
+                AppState.currentMode = mode;
+                ['portrait', 'sticker', 'photo'].forEach(m => {
+                    document.getElementById(`${m}-mode`).classList.toggle('hidden', mode !== m);
+                    const btn = document.getElementById(`mode-btn-${m}`);
+                    btn.classList.toggle('selected', mode === m);
+                    btn.classList.toggle('bg-white', mode !== m);
+                    btn.classList.toggle('bg-opacity-10', mode !== m);
+
+                });
+                this.updateUploadStatus();
+            },
+            
+            updateUploadStatus() {
+                const statusEl = document.getElementById(`upload-status-${AppState.currentMode}`);
+                const generateBtn = document.getElementById('generate-btn');
+                const hasImages = AppState.uploadedImages.length > 0;
+
+                if (statusEl) {
+                    statusEl.textContent = hasImages ? `已選擇 ${AppState.uploadedImages.length} 張照片` : `尚未上傳照片`;
+                }
+
+                if (generateBtn) {
+                    generateBtn.disabled = !hasImages || AppState.isProcessing;
+                    if (!hasImages) {
+                        generateBtn.textContent = '請先上傳照片';
+                        generateBtn.className = 'w-full max-w-2xl mx-auto block py-4 px-6 rounded-lg font-semibold text-lg transition-all bg-gray-600 text-gray-400 cursor-not-allowed';
+                    } else {
+                        generateBtn.textContent = '✨ 開始生成';
+                        generateBtn.className = 'w-full max-w-2xl mx-auto block py-4 px-6 rounded-lg font-semibold text-lg transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90';
+                    }
+                }
+            },
+
+            showPreview(imageData) {
+                const mode = AppState.currentMode;
+                const previewImage = document.getElementById(`preview-image-${mode}`);
+                const uploadPrompt = document.getElementById(`upload-prompt-${mode}`);
+
+                if (uploadPrompt) uploadPrompt.classList.add('hidden');
+                if(previewImage) {
+                    previewImage.src = imageData;
+                    previewImage.classList.remove('hidden');
+                }
+                
+                // Special case for portrait mode which has a wrapper section
+                if (mode === 'portrait') {
+                     const previewSection = document.getElementById(`preview-section-portrait`);
+                     if (previewSection) previewSection.classList.remove('hidden');
+                }
+            },
+
+            toggleProcessing(isProcessing, details = '') {
+                AppState.isProcessing = isProcessing;
+                document.getElementById('results-section').classList.toggle('hidden', !isProcessing && AppState.results.length === 0);
+                document.getElementById('processing-indicator').classList.toggle('hidden', !isProcessing);
+                document.getElementById('results-grid').classList.toggle('hidden', isProcessing || AppState.results.length === 0);
+
+                if (isProcessing) {
+                    const mainText = {
+                        portrait: 'AI 正在生成您的專業人像...',
+                        sticker: 'AI 正在製作您的專屬貼圖...',
+                        photo: 'AI 正在生成您的主題寫真...'
+                    }[AppState.currentMode];
+                    document.getElementById('processing-main-text').textContent = mainText;
+                    document.getElementById('processing-details').textContent = details;
+                    document.getElementById('results-grid').innerHTML = '';
+                    document.getElementById('download-all-btn').classList.add('hidden');
+                }
+                this.updateUploadStatus();
+            },
+
+            showResults(results) {
+                const resultsGrid = document.getElementById('results-grid');
+                if (!resultsGrid) return;
+
+                resultsGrid.innerHTML = results.map((result, index) => `
+                    <div class="result-card rounded-lg p-4">
+                        <img src="${result.url}" alt="生成結果 ${index + 1}" class="w-full h-48 object-cover rounded-lg mb-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white text-sm truncate pr-2">${result.originalName}</span>
+                            <button onclick="downloadImage('${result.url}', 'generated_${result.originalName.replace(/\s/g, '_')}.png')"
+                                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm transition-colors flex-shrink-0">
+                                下載
+                            </button>
+                        </div>
+                    </div>`).join('');
+                
+                if (results.length > 0) {
+                    document.getElementById('download-all-btn').classList.remove('hidden');
+                }
+            }
+        };
+
+        // --- FILE HANDLING ---
+        const FileHandler = {
+            handleFiles: async (files) => {
+                const imagePromises = Array.from(files).map(file => new Promise((resolve, reject) => {
+                    if (!file.type.startsWith('image/')) return reject();
+                    const reader = new FileReader();
+                    reader.onload = e => resolve({ dataUrl: e.target.result, name: file.name });
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                }));
+
+                const results = await Promise.allSettled(imagePromises);
+                const successful = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+
+                if (successful.length > 0) {
+                    if (AppState.currentMode === 'portrait' && AppState.portraitProcessMode === 'batch') {
+                         AppState.uploadedImages = successful;
+                    } else {
+                        AppState.uploadedImages = [successful[0]];
+                    }
+                    UIManager.updateUploadStatus();
+                    UIManager.showPreview(successful[0].dataUrl);
+                    NotificationSystem.show(`已成功載入 ${successful.length} 張照片`);
+                } else {
+                    NotificationSystem.show('未選擇有效的圖片檔案', true);
+                }
+            }
+        };
+
+        // --- CORE LOGIC ---
+        const App = {
+            async generate() {
+                if (AppState.uploadedImages.length === 0) return NotificationSystem.show('請先上傳照片', true);
+                if (AppState.isProcessing) return;
+
+                AppState.results = [];
+                const allResults = [];
+                UIManager.toggleProcessing(true, `準備開始生成...`);
+                
+                try {
+                    if (AppState.currentMode === 'portrait') {
+                        const settings = AppState.settings.portrait;
+                        for (let image of AppState.uploadedImages) {
+                            for (let v = 0; v < settings.variations; v++) {
+                                UIManager.toggleProcessing(true, `正在處理：${image.name} (第 ${v + 1} / ${settings.variations} 個變化)`);
+                                const url = await APIManager.generate(image.dataUrl, settings);
+                                allResults.push({ url, originalName: image.name.split('.')[0], variation: v + 1 });
+                            }
+                        }
+                    } else if (AppState.currentMode === 'sticker') {
+                        const image = AppState.uploadedImages[0];
+                        const selectedReactions = AppState.settings.sticker.reactions;
+                        for (let i = 0; i < selectedReactions.length; i++) {
+                            const reaction = selectedReactions[i];
+                            UIManager.toggleProcessing(true, `正在製作貼圖：${reaction} (${i + 1} / ${selectedReactions.length})`);
+                            const url = await APIManager.generate(image.dataUrl, { reaction });
+                            allResults.push({ url, originalName: reaction, variation: i + 1 });
+                        }
+                    } else if (AppState.currentMode === 'photo') {
+                        const image = AppState.uploadedImages[0];
+                        const selectedTheme = CONFIG.photoThemes.find(t => t.id === AppState.settings.photo.theme);
+                        if (!selectedTheme) throw new Error('請選擇一個有效的寫真主題');
+                        
+                        const promptsToRun = selectedTheme.prompts;
+                        UIManager.toggleProcessing(true, `準備生成 ${promptsToRun.length} 張「${selectedTheme.name}」寫真...`);
+
+                        for (let i = 0; i < promptsToRun.length; i++) {
+                            const p = promptsToRun[i];
+                            UIManager.toggleProcessing(true, `正在生成：${p.id} (${i + 1}/${promptsToRun.length})`);
+                            const url = await APIManager.generate(image.dataUrl, { prompt: p.base });
+                            allResults.push({ url, originalName: p.id, variation: i + 1 });
+                        }
+                    }
+
+                    AppState.results = allResults;
+                    if (allResults.length > 0) {
+                        NotificationSystem.show(`成功生成 ${allResults.length} 個作品！`);
+                    } else {
+                        throw new Error('所有生成任務均失敗');
+                    }
+                } catch (error) {
+                    console.error('生成失敗:', error);
+                    NotificationSystem.show(`生成失敗：${error.message}`, true);
+                } finally {
+                    UIManager.toggleProcessing(false);
+                    UIManager.showResults(allResults);
+                }
+            }
+        };
+
+        // --- HELPERS & EVENT LISTENERS ---
+        function downloadImage(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function setupEventListeners() {
+            // Mode Switcher
+            document.getElementById('mode-btn-portrait').addEventListener('click', () => UIManager.setMode('portrait'));
+            document.getElementById('mode-btn-sticker').addEventListener('click', () => UIManager.setMode('sticker'));
+            document.getElementById('mode-btn-photo').addEventListener('click', () => UIManager.setMode('photo'));
+
+            // File Uploads
+            ['portrait', 'sticker', 'photo'].forEach(mode => {
+                document.getElementById(`upload-btn-${mode}`).addEventListener('click', () => document.getElementById(`file-input-${mode}`).click());
+                document.getElementById(`file-input-${mode}`).addEventListener('change', e => e.target.files.length > 0 && FileHandler.handleFiles(e.target.files));
+                const zone = document.getElementById(`upload-zone-${mode}`);
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+                zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('dragover'); });
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('dragover');
+                    e.dataTransfer.files.length > 0 && FileHandler.handleFiles(e.dataTransfer.files);
+                });
+            });
+            
+            // Portrait settings
+            document.getElementById('portrait-mode-single').addEventListener('click', e => {
+                AppState.portraitProcessMode = 'single';
+                e.target.classList.add('bg-blue-500', 'text-white');
+                document.getElementById('portrait-mode-batch').classList.remove('bg-blue-500', 'text-white');
+            });
+             document.getElementById('portrait-mode-batch').addEventListener('click', e => {
+                AppState.portraitProcessMode = 'batch';
+                e.target.classList.add('bg-blue-500', 'text-white');
+                document.getElementById('portrait-mode-single').classList.remove('bg-blue-500', 'text-white');
+            });
+
+            // Universal Settings Click
+            document.body.addEventListener('click', e => {
+                const card = e.target.closest('[data-type]');
+                if (!card) return;
+                const { type, value } = card.dataset;
+
+                if (type === 'variation') {
+                    AppState.settings.portrait.variations = parseInt(value);
+                    UIManager.updateSelected('variation', value);
+                } else if (type === 'reaction') {
+                    const reactions = AppState.settings.sticker.reactions;
+                    const index = reactions.indexOf(value);
+                    if (index > -1) {
+                        if (reactions.length > 1) reactions.splice(index, 1);
+                    } else {
+                        reactions.push(value);
+                    }
+                    UIManager.updateSelected('reaction', reactions);
+                } else if (type === 'theme') {
+                    AppState.settings.photo.theme = value;
+                     UIManager.updateSelected('theme', value);
+                } else if (AppState.currentMode === 'portrait') {
+                   AppState.settings.portrait[type] = value;
+                   UIManager.updateSelected(type, value);
+                }
+            });
+            
+            // Photo Mode Extra Prompt
+            document.getElementById('photo-extra-prompt').addEventListener('input', e => {
+                AppState.settings.photo.additionalPrompt = e.target.value;
+            });
+
+            // Sticker idea generator
+            document.getElementById('generate-idea-btn').addEventListener('click', async () => {
+                const ideaInput = document.getElementById('sticker-idea-input');
+                const ideaBtn = document.getElementById('generate-idea-btn');
+                const theme = ideaInput.value.trim();
+                if (!theme) return NotificationSystem.show('請先輸入您的想法主題', true);
+                
+                const originalText = ideaBtn.innerHTML;
+                ideaBtn.innerHTML = '🧠 正在產生點子...';
+                ideaBtn.disabled = true;
+
+                try {
+                    const newReactions = await APIManager.generateIdea(theme);
+                    UIManager.updateReactionButtons(newReactions);
+                    NotificationSystem.show('已根據您的主題產生新點子！');
+                } catch (error) {
+                    NotificationSystem.show(`點子產生失敗: ${error.message}`, true);
+                } finally {
+                    ideaBtn.innerHTML = originalText;
+                    ideaBtn.disabled = false;
+                }
+            });
+            
+            // Sticker Toggles
+            document.getElementById('toggle-cute-anime').addEventListener('change', e => { AppState.settings.sticker.isCuteAnime = e.target.checked; });
+            document.getElementById('toggle-add-text').addEventListener('change', e => { AppState.settings.sticker.addText = e.target.checked; });
+
+            // Main Generate & Download Buttons
+            document.getElementById('generate-btn').addEventListener('click', App.generate);
+            document.getElementById('download-all-btn').addEventListener('click', () => {
+                 AppState.results.forEach((result, index) => {
+                    setTimeout(() => downloadImage(result.url, `generated_${result.originalName.replace(/\s/g, '_')}_${result.variation}.png`), index * 200);
+                });
+            });
+        }
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            UIManager.init();
+            setupEventListeners();
+            NotificationSystem.show('歡迎使用！請選擇模式並上傳照片', false, 4000);
+        });
+    </script>
+</body>
+</html>
+
