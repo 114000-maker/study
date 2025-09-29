@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 教育指南互動版 (完整版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 選擇的配色方案：溫暖中性色 -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4B4B4B;
+        }
+        .filter-btn, .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active, .tab-btn.active {
+            background-color: #8D6E63;
+            color: #FFFFFF;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tab-btn.active {
+            background-color: transparent;
+            color: #8D6E63;
+            border-color: #8D6E63;
+        }
+        .card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1.5rem;
+        }
+        .card.expanded .card-content {
+            max-height: 500px;
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-stone-50">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-800 mb-2">Gemini 教育指南互動版</h1>
+            <p class="text-lg text-stone-600 max-w-4xl mx-auto">這是一個將官方指南轉化為易於探索的互動工具，旨在協助教育工作者、教職員工和學生，快速找到在教育領域運用 AI 的實用方法。</p>
+            <p class="text-xs text-stone-400 mt-2">資料來源已整合自 <a href="https://docs.google.com/presentation/d/1MTyP-BBusYw2rHKE_lQ2QVDA7uT7ngYaGfBy9HypQdY/edit" target="_blank" class="underline hover:text-stone-500">100+ ways to use Gemini and NotebookLM in education [Shared]</a>。</p>
+        </header>
+
+        <main>
+            <!-- 產品概覽與提示詞最佳實踐 -->
+            <section id="product-overview" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">產品概覽與提示詞最佳實踐</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">本區塊涵蓋了 Gemini 及其在教育環境中的定位，以及撰寫優質提示詞的關鍵框架。瞭解如何正確使用工具是成功的第一步。</p>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 產品總結 -->
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold text-stone-700 mb-4 flex items-center">
+                            <span>🚀 Gemini 在教育中的價值</span>
+                        </h3>
+                        <ul class="list-disc list-inside space-y-2 text-stone-600">
+                            <li>**加速工作流程:** 自動化行政任務，縮短課程準備時間。</li>
+                            <li>**提升學習個性化:** 根據個別學生的需求和興趣，快速生成差異化材料。</li>
+                            <li>**深化理解:** 透過複雜概念的簡化、類比和蘇格拉底式對話，促進主動學習。</li>
+                            <li>**支援研究與寫作:** 協助學生和教職員工進行文獻回顧、精煉論點和程式碼偵錯。</li>
+                        </ul>
+                    </div>
+                    <!-- PARTS 框架 -->
+                    <div id="parts-framework" class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold text-stone-700 mb-4 flex items-center">
+                            <span>🔑 PARTS 框架：優秀提示詞的要素</span>
+                        </h3>
+                         <div class="flex flex-wrap justify-center gap-3 text-center mb-4">
+                            <div id="part-P" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-amber-100"><div class="text-3xl font-bold text-amber-600">P</div><div class="font-bold text-sm">角色</div></div>
+                            <div id="part-A" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-teal-100"><div class="text-3xl font-bold text-teal-600">A</div><div class="font-bold text-sm">行動</div></div>
+                            <div id="part-R" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-sky-100"><div class="text-3xl font-bold text-sky-600">R</div><div class="font-bold text-sm">收件人</div></div>
+                            <div id="part-T" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-indigo-100"><div class="text-3xl font-bold text-indigo-600">T</div><div class="font-bold text-sm">主題</div></div>
+                            <div id="part-S" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-rose-100"><div class="text-3xl font-bold text-rose-600">S</div><div class="font-bold text-sm">結構</div></div>
+                        </div>
+                        <div id="parts-explanation" class="mt-2 p-3 bg-stone-100 rounded-lg text-center text-stone-700 min-h-[50px] flex items-center justify-center transition-all duration-300 text-sm">
+                            點擊上方的字母，查看詳細說明。
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t border-stone-200 my-10" />
+
+            <!-- Workspace 中的 Gemini 使用方式 -->
+            <section id="workspace-gemini" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">Workspace 中的 Gemini 使用方式</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">Gemini 整合於您日常使用的 Google 文件、試算表和簡報中，讓您能直接在工作流程中獲得 AI 支援。</p>
+
+                <div class="flex border-b border-stone-200 mb-6 space-x-2 justify-center">
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent active" data-tab="docs">Google 文件</button>
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="sheets">Google 試算表</button>
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="slides">Google 簡報</button>
+                </div>
+
+                <div id="docs" class="tab-content active p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">文件中的應用：寫作和摘要</h3>
+                    <p class="mb-4 text-stone-600">Gemini 協助起草、改寫、總結和校對文本，非常適合行政通訊、課程大綱和學生寫作輔導。</p>
+                    <div class="bg-amber-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Draft a policy update on hybrid learning for K-12 staff, summarizing key changes from the previous year." (起草一份關於 K-12 教職員工混合學習的政策更新，總結去年的關鍵變動。)
+                    </div>
+                </div>
+
+                <div id="sheets" class="tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">試算表中的應用：數據分析</h3>
+                    <p class="mb-4 text-stone-600">Gemini 能處理數據、創建自訂公式、組織資訊並找出趨勢，是評估成績和預算規劃的利器。</p>
+                    <div class="bg-teal-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Analyze this column of student assessment scores (C2:C50) and calculate the mean, median, and highlight outliers." (分析這欄學生評估分數 (C2:C50)，計算平均值、中位數並標記異常值。)
+                    </div>
+                </div>
+
+                <div id="slides" class="tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">簡報中的應用：視覺設計和內容大綱</h3>
+                    <p class="mb-4 text-stone-600">快速創建簡報大綱、生成圖片或組織簡報內容，為教學或專業發展節省時間。</p>
+                    <div class="bg-sky-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Generate three visual concepts for the first slide of a presentation on the history of geometry, using a minimalist style." (為關於幾何學史的簡報首頁生成三個視覺概念，使用簡約風格。)
+                    </div>
+                </div>
+            </section>
+
+            <!-- NotebookLM 使用方式 -->
+            <section id="notebook-lm" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">NotebookLM：您的研究助理</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">NotebookLM 是一個由 AI 驅動的研究和寫作輔助工具，能整合您的文件、筆記和網路來源，提供**有根據的**摘要和見解。</p>
+
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">1</div>
+                        <h4 class="font-bold text-stone-700">上傳來源</h4>
+                        <p class="text-sm text-stone-600">整合課程材料、研究論文、會議記錄或學生的寫作草稿。</p>
+                    </div>
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">2</div>
+                        <h4 class="font-bold text-stone-700">提問並探索</h4>
+                        <p class="text-sm text-stone-600">向您的來源提問，AI 會提供帶有引用的答案，確保結果準確且具備根據。</p>
+                    </div>
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">3</div>
+                        <h4 class="font-bold text-stone-700">生成筆記和摘要</h4>
+                        <p class="text-sm text-stone-600">基於上傳的來源，自動生成學習指南、詞彙表或不同主題的摘要。</p>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-indigo-100 rounded-lg text-stone-700">
+                    **應用範例:** 一位教授可以上傳整個課程的閱讀清單，然後要求 NotebookLM 根據這些來源生成一個關於「後現代主義」的考試大綱。
+                </div>
+            </section>
+
+            <!-- AI 素養資源 -->
+            <section id="ai-literacy" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">AI 素養：教育工作者與學生的必備知識</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">負責任地使用 AI 需要對其能力和局限性有透徹的理解。以下是關鍵的素養領域。</p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">🎓 批判性評估</h3>
+                        <p class="text-sm text-stone-600">**核心:** 永遠將 AI 輸出視為初稿。學生和教職員工必須學會驗證事實、檢查引文並識別潛在的偏見或「幻覺」。</p>
+                    </div>
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">✍️ 負責任的寫作</h3>
+                        <p class="text-sm text-stone-600">**核心:** 學生需要知道何時、何處以及如何引用 AI 的協助。學校必須建立透明的政策來區分 AI 輔助與學術不端行為。</p>
+                    </div>
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">🛡️ 數據與隱私</h3>
+                        <p class="text-sm text-stone-600">**核心:** 教師應避免將敏感或個人身份資訊輸入給 AI 模型。理解數據是如何被使用的，以及教育帳號的數據保護措施。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 管理員設定與政策 -->
+            <section id="admin-settings" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">管理員設定：部署與政策控制</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">本節概述了管理員在 Google Workspace for Education 環境中管理 Gemini 存取和政策的關鍵領域。</p>
+
+                 <div class="flex border-b border-stone-200 mb-6 space-x-2 justify-center">
+                    <button class="tab-btn admin-tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent active" data-tab="access">存取與群組管理</button>
+                    <button class="tab-btn admin-tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="data-security">數據安全與隱私</button>
+                </div>
+
+                <div id="access" class="tab-content admin-tab-content active p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">存取與群組管理</h3>
+                    <ul class="list-disc list-inside space-y-2 text-stone-600">
+                        <li>**年齡控制:** 管理員可以根據使用者的年齡層（例如：18 歲以上教師/學生）來啟用或限制 Gemini 功能。</li>
+                        <li>**群組部署:** 透過組織單位 (OU) 或存取群組來精細控制誰可以使用 Gemini，確保分階段推出。</li>
+                        <li>**第三方應用程式:** 管理員應審查並管理與 Gemini 互動的任何第三方應用程式存取權限。</li>
+                    </ul>
+                </div>
+
+                <div id="data-security" class="tab-content admin-tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">數據安全與隱私</h3>
+                    <ul class="list-disc list-inside space-y-2 text-stone-600">
+                        <li>**核心原則:** 您的數據不會被用於訓練模型或與其他教育機構共享。</li>
+                        <li>**審計與日誌:** 管理員應利用內建的審計日誌功能，監控 Gemini 的使用情況並確保合規性。</li>
+                        <li>**內容過濾:** 啟用 Workspace 的內建安全功能，以確保 Gemini 的輸出符合學校內容標準。</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <hr class="border-t border-stone-200 my-10" />
+
+            <!-- 視覺概覽與互動式使用案例瀏覽器 -->
+            <section id="visual-overview" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-2">使用案例分佈總覽</h2>
+                 <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">這張圖表顯示了不同教育任務類別中的使用案例數量。您可以點擊圖表上的長條來快速篩選下方的內容。</p>
+                <div class="chart-container">
+                    <canvas id="useCasesChart"></canvas>
+                </div>
+            </section>
+
+            <section id="interactive-tool">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-8">互動式使用案例瀏覽器</h2>
+
+                <div id="filters" class="mb-8">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg text-center mb-3 text-stone-700">1. 選擇您的角色：</h3>
+                        <div id="audience-filters" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300 active" data-filter="all">全部角色</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="educator">教育工作者</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="staff">教職員工</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="student">學生</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-center mb-3 text-stone-700">2. 選擇任務類別：</h3>
+                        <div id="category-filters" class="flex flex-wrap justify-center gap-2 md:gap-3">
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 active" data-filter="all">全部類別</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="planning">📝 規劃</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="assessment">📊 評估</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="instructional">📚 教學材料</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="research">🔬 研究</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="admin">🏢 行政</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Use Case List Container -->
+                <div id="use-case-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="text-center col-span-full py-10 text-stone-500">
+                        <p id="loading-message">載入使用案例...</p>
+                        <p id="no-results" class="hidden">沒有找到符合條件的使用案例。請嘗試調整您的篩選條件。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-12 pt-8 border-t border-stone-200 text-center text-sm text-stone-500">
+            <p>&copy; 2024 Gemini 教育指南 | 互動式工具</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Use Case Data (精簡範例，用於演示互動功能)
+        const useCases = [
+            { id: 1, title: "生成差異化學習單", audience: ["educator"], category: "instructional", tool: "Gemini", description: "根據學生的閱讀水平，為同一主題（例如：太陽系）生成不同複雜度的文章與習題。", prompt: "Act as a 5th grade teacher. Generate a simplified reading passage and 3 multiple-choice questions about the solar system for an ESL student." },
+            { id: 2, title: "課程大綱草稿", audience: ["educator", "staff"], category: "planning", tool: "Gemini", description: "快速創建一門新課程（例如：高中電腦科學入門）的單元結構和大綱，節省規劃時間。", prompt: "Draft a 12-week syllabus for an introductory high school Computer Science course, focusing on Python basics and 3 major projects." },
+            { id: 3, title: "研究資料總結", audience: ["student", "educator"], category: "research", tool: "NotebookLM", description: "上傳多篇學術論文，請 NotebookLM 找出所有文章中關於特定理論的共識與分歧點。", prompt: "Using the uploaded research papers, synthesize the main arguments regarding the impact of climate change on arctic ecosystems. Highlight three main points." },
+            { id: 4, title: "行政溝通郵件草擬", audience: ["staff"], category: "admin", tool: "Gemini", description: "根據學校的最新防疫規定，起草一封通知家長的正式郵件。", prompt: "Draft a formal email to parents announcing the new school policy on late pick-ups. The tone should be firm but polite." },
+            { id: 5, title: "客製化練習題生成", audience: ["student"], category: "assessment", tool: "Gemini", description: "請 AI 根據我在課堂筆記中提到的內容，生成更多相似的數學練習題。", prompt: "Based on the concept of 'Quadratic Equations' we learned today, generate 5 new word problems of increasing difficulty for practice." },
+            { id: 6, title: "簡報內容視覺化", audience: ["educator", "student"], category: "instructional", tool: "Gemini in Slides", description: "將文字大綱輸入 Google 簡報，讓 Gemini 自動建議設計模板和相關圖片。", prompt: "Create a 6-slide presentation outline covering the causes and effects of the French Revolution. Suggest visual themes for each slide." },
+            { id: 7, title: "數據趨勢分析", audience: ["staff", "educator"], category: "assessment", tool: "Gemini in Sheets", description: "上傳學生成績試算表，請 AI 找出高分群與低分群之間的共同科目弱點。", prompt: "Analyze the 'Science' and 'Math' scores in the sheet. Identify if students scoring below 60% in one subject also perform poorly in the other." },
+            { id: 8, title: "文獻回顧輔助", audience: ["educator", "student"], category: "research", tool: "NotebookLM", description: "利用 NotebookLM 上傳所有參考資料，並自動生成註釋書目 (Annotated Bibliography)。", prompt: "Generate an annotated bibliography based on the four uploaded source documents on 'Renewable Energy Policy in Asia'." },
+            { id: 9, title: "即時詞彙解釋", audience: ["student"], category: "instructional", tool: "Gemini", description: "在學習複雜文本時，讓 Gemini 以更簡單的語言和生活化類比來解釋難懂的詞彙。", prompt: "Explain the term 'photosynthesis' to a 10-year-old using an analogy involving baking a cake." },
+            { id: 10, title: "問答集 (FAQ) 製作", audience: ["admin"], category: "admin", tool: "Gemini", description: "整理學校政策文件，自動提取常見問題並生成官方問答集。", prompt: "Review the 'Student Code of Conduct' document and extract the top 10 most common student questions, providing concise, policy-compliant answers for each." },
+        ];
+
+        // 狀態管理
+        let currentAudienceFilter = 'all';
+        let currentCategoryFilter = 'all';
+        let useCasesChart;
+
+        // 1. PARTS 框架互動
+        const partsData = {
+            'P': { color: 'amber-600', title: '角色 (Persona)', detail: '讓 AI 扮演特定角色（例如：高中歷史老師、大學入學顧問），以確保語氣和知識背景的準確性。' },
+            'A': { color: 'teal-600', title: '行動 (Action)', detail: '明確指示 AI 執行什麼任務（例如：總結、翻譯、起草、偵錯）。' },
+            'R': { color: 'sky-600', title: '收件人 (Recipient)', detail: '指定輸出的目標讀者（例如：五年級學生、學術期刊讀者、家長），這會影響詞彙和複雜度。' },
+            'T': { color: 'indigo-600', title: '主題 (Topic)', detail: '提供具體的內容主題或資料（例如：牛頓第二運動定律、預算試算表 C2:C50 欄位）。' },
+            'S': { color: 'rose-600', title: '結構 (Structure)', detail: '定義輸出的格式（例如：列點清單、表格、蘇格拉底式對話、500 字文章）。' },
+        };
+
+        document.querySelectorAll('.parts-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const part = this.id.split('-')[1];
+                const data = partsData[part];
+                const explanationDiv = document.getElementById('parts-explanation');
+                explanationDiv.innerHTML = `<span class="font-bold text-${data.color}">${data.title}:</span> ${data.detail}`;
+                
+                // Reset colors and highlight current one
+                document.querySelectorAll('.parts-item').forEach(i => {
+                    i.classList.remove('bg-amber-200', 'bg-teal-200', 'bg-sky-200', 'bg-indigo-200', 'bg-rose-200');
+                    i.classList.remove('ring-2', 'ring-offset-2');
+                });
+                this.classList.add(`bg-${data.color.split('-')[0]}-200`, 'ring-2', 'ring-offset-2', `ring-${data.color}`);
+            });
+        });
+        
+        // 2. Tab 互動功能 (Workspace and Admin)
+        function setupTabs(containerSelector) {
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTabId = this.getAttribute('data-tab');
+                    
+                    // Deactivate all buttons and contents in the same section
+                    container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Activate clicked button and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(targetTabId).classList.add('active');
+                });
+            });
+        }
+
+        setupTabs('#workspace-gemini');
+        setupTabs('#admin-settings');
+
+
+        // 3. 圖表初始化與互動 (Chart.js)
+        function initChart() {
+            const categoryCounts = useCases.reduce((acc, uc) => {
+                acc[uc.category] = (acc[uc.category] || 0) + 1;
+                return acc;
+            }, {});
+
+            const labelsMap = {
+                planning: '規劃', assessment: '評估', instructional: '教學材料', 
+                research: '研究', admin: '行政'
+            };
+            
+            // 獲取圖表標籤和數據
+            const labels = Object.keys(labelsMap).map(key => labelsMap[key]);
+            const data = Object.keys(labelsMap).map(key => categoryCounts[key] || 0);
+            
+            const ctx = document.getElementById('useCasesChart').getContext('2d');
+            useCasesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '使用案例數量',
+                        data: data,
+                        backgroundColor: ['#A0522D', '#CD853F', '#F4A460', '#D2B48C', '#8B4513'], // 棕色系
+                        borderColor: '#8D6E63',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const firstElement = elements[0];
+                            const index = firstElement.index;
+                            const categoryKey = Object.keys(labelsMap)[index];
+                            applyFilter('category', categoryKey);
+                        } else {
+                            // 點擊空白處，取消篩選
+                            applyFilter('category', 'all');
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '案例數'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '任務類別'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (context) => context[0].label,
+                                label: (context) => `案例數量: ${context.parsed.y}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. 篩選與渲染功能
+        function renderUseCases() {
+            const listContainer = document.getElementById('use-case-list');
+            const noResults = document.getElementById('no-results');
+            listContainer.innerHTML = ''; // 清空列表
+
+            const filteredCases = useCases.filter(uc => {
+                const audienceMatch = currentAudienceFilter === 'all' || uc.audience.includes(currentAudienceFilter);
+                const categoryMatch = currentCategoryFilter === 'all' || uc.category === currentCategoryFilter;
+                return audienceMatch && categoryMatch;
+            });
+
+            if (filteredCases.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            const categoryLabels = {
+                planning: '📝 規劃', assessment: '📊 評估', instructional: '📚 教學材料', 
+                research: '🔬 研究', admin: '🏢 行政'
+            };
+            const audienceColors = {
+                educator: 'bg-green-100 text-green-700',
+                staff: 'bg-blue-100 text-blue-700',
+                student: 'bg-purple-100 text-purple-700',
+            };
+
+            filteredCases.forEach(uc => {
+                const audiencesHtml = uc.audience.map(aud => 
+                    `<span class="text-xs font-semibold px-2 py-1 rounded-full ${audienceColors[aud]}">${
+                        aud === 'educator' ? '教育工作者' : aud === 'staff' ? '教職員工' : '學生'
+                    }</span>`
+                ).join(' ');
+
+                const cardHtml = `
+                    <div class="card bg-white rounded-xl shadow-md border border-stone-200" data-id="${uc.id}">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl text-stone-800 mb-2 flex justify-between items-start">
+                                <span>${uc.title}</span>
+                                <span class="text-xl text-stone-400 ml-2 transform transition-transform duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </h3>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                ${audiencesHtml}
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">${categoryLabels[uc.category]}</span>
+                            </div>
+                            <p class="text-sm text-stone-600 mb-0">${uc.description}</p>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="font-semibold text-md text-stone-700 mb-2">使用提示詞：</h4>
+                            <code class="block bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">${uc.prompt}</code>
+                            <p class="text-xs text-stone-500 mt-2">**工具:** ${uc.tool}</p>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            // 重新綁定卡片點擊事件
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                    const icon = this.querySelector('svg');
+                    if (this.classList.contains('expanded')) {
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+        }
+
+        // 5. 統一的篩選邏輯
+        function applyFilter(type, filterValue) {
+            // 更新狀態
+            if (type === 'audience') {
+                currentAudienceFilter = filterValue;
+            } else if (type === 'category') {
+                currentCategoryFilter = filterValue;
+            }
+
+            // 更新按鈕樣式
+            document.querySelectorAll(`.${type}-btn`).forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-filter') === filterValue) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 重新渲染
+            renderUseCases();
+        }
+
+        // 6. 監聽篩選器按鈕
+        document.querySelectorAll('.audience-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyFilter('audience', btn.getAttribute('data-filter')));
+        });
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyFilter('category', btn.getAttribute('data-filter')));
+        });
+
+        // 初始化
+        window.onload = function() {
+            document.getElementById('loading-message').classList.add('hidden');
+            initChart();
+            renderUseCases();
+            
+            // 初始化 PARTS 框架的預設顯示
+            document.getElementById('part-P').click();
+        };
+
+    </script>
+</body>
+</html>
