@@ -19,15 +19,18 @@
         .filter-btn, .tab-btn {
             transition: all 0.3s ease;
         }
-        .filter-btn.active, .tab-btn.active {
-            background-color: #8D6E63;
-            color: #FFFFFF;
+        /* 篩選按鈕被點擊或選中時的樣式 */
+        .filter-btn.active {
+            background-color: #8D6E63 !important; /* Stone/Brown color for active state */
+            color: #FFFFFF !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        /* 標籤頁按鈕的活躍樣式 */
         .tab-btn.active {
-            background-color: transparent;
-            color: #8D6E63;
-            border-color: #8D6E63;
+            background-color: transparent !important;
+            color: #8D6E63 !important;
+            border-color: #8D6E63 !important;
+            font-weight: 700;
         }
         .card {
             transition: all 0.3s ease;
@@ -45,7 +48,7 @@
             padding: 0 1.5rem;
         }
         .card.expanded .card-content {
-            max-height: 500px;
+            max-height: 500px; /* 足夠展示內容 */
             padding: 1rem 1.5rem 1.5rem 1.5rem;
         }
         .chart-container {
@@ -67,6 +70,14 @@
         }
         .tab-content.active {
             display: block;
+        }
+        /* PARTS 框架項目的動畫 */
+        .parts-item:hover {
+            transform: scale(1.05);
+        }
+        .parts-item.highlighted {
+            background-color: rgba(255, 237, 213, 1); /* Light amber/stone background for highlighted */
+            box-shadow: 0 0 0 3px #8D6E63;
         }
     </style>
 </head>
@@ -104,11 +115,11 @@
                             <span>🔑 PARTS 框架：優秀提示詞的要素</span>
                         </h3>
                          <div class="flex flex-wrap justify-center gap-3 text-center mb-4">
-                            <div id="part-P" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-amber-100"><div class="text-3xl font-bold text-amber-600">P</div><div class="font-bold text-sm">角色</div></div>
-                            <div id="part-A" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-teal-100"><div class="text-3xl font-bold text-teal-600">A</div><div class="font-bold text-sm">行動</div></div>
-                            <div id="part-R" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-sky-100"><div class="text-3xl font-bold text-sky-600">R</div><div class="font-bold text-sm">收件人</div></div>
-                            <div id="part-T" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-indigo-100"><div class="text-3xl font-bold text-indigo-600">T</div><div class="font-bold text-sm">主題</div></div>
-                            <div id="part-S" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-rose-100"><div class="text-3xl font-bold text-rose-600">S</div><div class="font-bold text-sm">結構</div></div>
+                            <div id="part-P" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-amber-100" data-part="P"><div class="text-3xl font-bold text-amber-600">P</div><div class="font-bold text-sm">角色</div></div>
+                            <div id="part-A" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-teal-100" data-part="A"><div class="text-3xl font-bold text-teal-600">A</div><div class="font-bold text-sm">行動</div></div>
+                            <div id="part-R" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-sky-100" data-part="R"><div class="text-3xl font-bold text-sky-600">R</div><div class="font-bold text-sm">收件人</div></div>
+                            <div id="part-T" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-indigo-100" data-part="T"><div class="text-3xl font-bold text-indigo-600">T</div><div class="font-bold text-sm">主題</div></div>
+                            <div id="part-S" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-rose-100" data-part="S"><div class="text-3xl font-bold text-rose-600">S</div><div class="font-bold text-sm">結構</div></div>
                         </div>
                         <div id="parts-explanation" class="mt-2 p-3 bg-stone-100 rounded-lg text-center text-stone-700 min-h-[50px] flex items-center justify-center transition-all duration-300 text-sm">
                             點擊上方的字母，查看詳細說明。
@@ -133,7 +144,7 @@
                 <div id="docs" class="tab-content active p-4 bg-stone-50 rounded-lg">
                     <h3 class="font-bold text-lg text-stone-800 mb-3">文件中的應用：寫作和摘要</h3>
                     <p class="mb-4 text-stone-600">Gemini 協助起草、改寫、總結和校對文本，非常適合行政通訊、課程大綱和學生寫作輔導。</p>
-                    <div class="bg-amber-100 p-3 rounded-md text-stone-700 text-sm">
+                    <div class="bg-amber-100 p-3 rounded-md text-stone-700 text-sm border border-amber-200">
                         **範例提示:** "Draft a policy update on hybrid learning for K-12 staff, summarizing key changes from the previous year." (起草一份關於 K-12 教職員工混合學習的政策更新，總結去年的關鍵變動。)
                     </div>
                 </div>
@@ -141,7 +152,7 @@
                 <div id="sheets" class="tab-content p-4 bg-stone-50 rounded-lg">
                     <h3 class="font-bold text-lg text-stone-800 mb-3">試算表中的應用：數據分析</h3>
                     <p class="mb-4 text-stone-600">Gemini 能處理數據、創建自訂公式、組織資訊並找出趨勢，是評估成績和預算規劃的利器。</p>
-                    <div class="bg-teal-100 p-3 rounded-md text-stone-700 text-sm">
+                    <div class="bg-teal-100 p-3 rounded-md text-stone-700 text-sm border border-teal-200">
                         **範例提示:** "Analyze this column of student assessment scores (C2:C50) and calculate the mean, median, and highlight outliers." (分析這欄學生評估分數 (C2:C50)，計算平均值、中位數並標記異常值。)
                     </div>
                 </div>
@@ -149,7 +160,7 @@
                 <div id="slides" class="tab-content p-4 bg-stone-50 rounded-lg">
                     <h3 class="font-bold text-lg text-stone-800 mb-3">簡報中的應用：視覺設計和內容大綱</h3>
                     <p class="mb-4 text-stone-600">快速創建簡報大綱、生成圖片或組織簡報內容，為教學或專業發展節省時間。</p>
-                    <div class="bg-sky-100 p-3 rounded-md text-stone-700 text-sm">
+                    <div class="bg-sky-100 p-3 rounded-md text-stone-700 text-sm border border-sky-200">
                         **範例提示:** "Generate three visual concepts for the first slide of a presentation on the history of geometry, using a minimalist style." (為關於幾何學史的簡報首頁生成三個視覺概念，使用簡約風格。)
                     </div>
                 </div>
@@ -161,23 +172,23 @@
                 <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">NotebookLM 是一個由 AI 驅動的研究和寫作輔助工具，能整合您的文件、筆記和網路來源，提供**有根據的**摘要和見解。</p>
 
                 <div class="grid md:grid-cols-3 gap-6 text-center">
-                    <div class="p-4 bg-indigo-50 rounded-lg">
+                    <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
                         <div class="text-4xl mb-2 text-indigo-600">1</div>
                         <h4 class="font-bold text-stone-700">上傳來源</h4>
                         <p class="text-sm text-stone-600">整合課程材料、研究論文、會議記錄或學生的寫作草稿。</p>
                     </div>
-                    <div class="p-4 bg-indigo-50 rounded-lg">
+                    <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
                         <div class="text-4xl mb-2 text-indigo-600">2</div>
                         <h4 class="font-bold text-stone-700">提問並探索</h4>
                         <p class="text-sm text-stone-600">向您的來源提問，AI 會提供帶有引用的答案，確保結果準確且具備根據。</p>
                     </div>
-                    <div class="p-4 bg-indigo-50 rounded-lg">
+                    <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
                         <div class="text-4xl mb-2 text-indigo-600">3</div>
                         <h4 class="font-bold text-stone-700">生成筆記和摘要</h4>
                         <p class="text-sm text-stone-600">基於上傳的來源，自動生成學習指南、詞彙表或不同主題的摘要。</p>
                     </div>
                 </div>
-                <div class="mt-6 p-4 bg-indigo-100 rounded-lg text-stone-700">
+                <div class="mt-6 p-4 bg-indigo-100 rounded-lg text-stone-700 border border-indigo-200">
                     **應用範例:** 一位教授可以上傳整個課程的閱讀清單，然後要求 NotebookLM 根據這些來源生成一個關於「後現代主義」的考試大綱。
                 </div>
             </section>
@@ -237,7 +248,7 @@
             <!-- 視覺概覽與互動式使用案例瀏覽器 -->
             <section id="visual-overview" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
                 <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-2">使用案例分佈總覽</h2>
-                 <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">這張圖表顯示了不同教育任務類別中的使用案例數量。您可以點擊圖表上的長條來快速篩選下方的內容。</p>
+                 <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">這張圖表顯示了不同教育任務類別中的使用案例數量。您可以**點擊圖表上的長條**來快速篩選下方的內容。</p>
                 <div class="chart-container">
                     <canvas id="useCasesChart"></canvas>
                 </div>
@@ -296,7 +307,9 @@
             { id: 7, title: "數據趨勢分析", audience: ["staff", "educator"], category: "assessment", tool: "Gemini in Sheets", description: "上傳學生成績試算表，請 AI 找出高分群與低分群之間的共同科目弱點。", prompt: "Analyze the 'Science' and 'Math' scores in the sheet. Identify if students scoring below 60% in one subject also perform poorly in the other." },
             { id: 8, title: "文獻回顧輔助", audience: ["educator", "student"], category: "research", tool: "NotebookLM", description: "利用 NotebookLM 上傳所有參考資料，並自動生成註釋書目 (Annotated Bibliography)。", prompt: "Generate an annotated bibliography based on the four uploaded source documents on 'Renewable Energy Policy in Asia'." },
             { id: 9, title: "即時詞彙解釋", audience: ["student"], category: "instructional", tool: "Gemini", description: "在學習複雜文本時，讓 Gemini 以更簡單的語言和生活化類比來解釋難懂的詞彙。", prompt: "Explain the term 'photosynthesis' to a 10-year-old using an analogy involving baking a cake." },
-            { id: 10, title: "問答集 (FAQ) 製作", audience: ["admin"], category: "admin", tool: "Gemini", description: "整理學校政策文件，自動提取常見問題並生成官方問答集。", prompt: "Review the 'Student Code of Conduct' document and extract the top 10 most common student questions, providing concise, policy-compliant answers for each." },
+            { id: 10, title: "問答集 (FAQ) 製作", audience: ["staff"], category: "admin", tool: "Gemini", description: "整理學校政策文件，自動提取常見問題並生成官方問答集。", prompt: "Review the 'Student Code of Conduct' document and extract the top 10 most common student questions, providing concise, policy-compliant answers for each." },
+            { id: 11, title: "學生寫作反饋草稿", audience: ["educator"], category: "assessment", tool: "Gemini", description: "根據學生的文章草稿和評分標準，生成建設性的反饋意見。", prompt: "Provide feedback on this student's essay (attached), focusing on argument structure and citation consistency. Suggest areas for improvement based on AP English rubrics." },
+            { id: 12, title: "專業發展主題規劃", audience: ["staff"], category: "planning", tool: "Gemini", description: "為教師規劃一個關於「AI 倫理與教學整合」的半日專業發展活動議程。", prompt: "Outline a 4-hour professional development agenda on integrating AI ethics into high school teaching. Include a breakout session and a final Q&A." },
         ];
 
         // 狀態管理
@@ -315,43 +328,51 @@
 
         document.querySelectorAll('.parts-item').forEach(item => {
             item.addEventListener('click', function() {
-                const part = this.id.split('-')[1];
+                const part = this.getAttribute('data-part');
                 const data = partsData[part];
                 const explanationDiv = document.getElementById('parts-explanation');
+
+                // 移除所有高亮
+                document.querySelectorAll('.parts-item').forEach(i => i.classList.remove('highlighted'));
+
+                // 添加當前高亮
+                this.classList.add('highlighted');
+
                 explanationDiv.innerHTML = `<span class="font-bold text-${data.color}">${data.title}:</span> ${data.detail}`;
-                
-                // Reset colors and highlight current one
-                document.querySelectorAll('.parts-item').forEach(i => {
-                    i.classList.remove('bg-amber-200', 'bg-teal-200', 'bg-sky-200', 'bg-indigo-200', 'bg-rose-200');
-                    i.classList.remove('ring-2', 'ring-offset-2');
-                });
-                this.classList.add(`bg-${data.color.split('-')[0]}-200`, 'ring-2', 'ring-offset-2', `ring-${data.color}`);
             });
         });
         
-        // 2. Tab 互動功能 (Workspace and Admin)
-        function setupTabs(containerSelector) {
-            const container = document.querySelector(containerSelector);
-            if (!container) return;
+        // 初始化 PARTS 框架的預設顯示
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelector('.parts-item[data-part="P"]').click();
+        });
 
-            const tabButtons = container.querySelectorAll('.tab-btn');
+        // 2. Tab 互動功能 (Workspace and Admin)
+        function setupTabs(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (!section) return;
+
+            const tabButtons = section.querySelectorAll('.tab-btn');
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const targetTabId = this.getAttribute('data-tab');
                     
                     // Deactivate all buttons and contents in the same section
-                    container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                    container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    section.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
                     
                     // Activate clicked button and corresponding content
                     this.classList.add('active');
-                    document.getElementById(targetTabId).classList.add('active');
+                    const targetContent = section.querySelector(`#${targetTabId}`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
                 });
             });
         }
 
-        setupTabs('#workspace-gemini');
-        setupTabs('#admin-settings');
+        setupTabs('workspace-gemini');
+        setupTabs('admin-settings');
 
 
         // 3. 圖表初始化與互動 (Chart.js)
@@ -362,13 +383,13 @@
             }, {});
 
             const labelsMap = {
-                planning: '規劃', assessment: '評估', instructional: '教學材料', 
-                research: '研究', admin: '行政'
+                planning: '📝 規劃', assessment: '📊 評估', instructional: '📚 教學材料', 
+                research: '🔬 研究', admin: '🏢 行政'
             };
             
             // 獲取圖表標籤和數據
             const labels = Object.keys(labelsMap).map(key => labelsMap[key]);
-            const data = Object.keys(labelsMap).map(key => categoryCounts[key] || 0);
+            const data = Object.keys(labelsMap).map(key => categoryCounts[Object.keys(labelsMap).find(k => labelsMap[k] === labels[key])] || 0); // 確保數據和標籤匹配
             
             const ctx = document.getElementById('useCasesChart').getContext('2d');
             useCasesChart = new Chart(ctx, {
@@ -391,8 +412,15 @@
                         if (elements.length > 0) {
                             const firstElement = elements[0];
                             const index = firstElement.index;
-                            const categoryKey = Object.keys(labelsMap)[index];
-                            applyFilter('category', categoryKey);
+                            // 根據索引獲取原始 category key
+                            const categoryKey = Object.keys(labelsMap).find(k => labelsMap[k] === labels[index]);
+                            
+                            // 判斷是否需要取消選擇
+                            let newFilter = categoryKey;
+                            if (currentCategoryFilter === categoryKey) {
+                                newFilter = 'all'; // 取消選中
+                            }
+                            applyFilter('category', newFilter);
                         } else {
                             // 點擊空白處，取消篩選
                             applyFilter('category', 'all');
@@ -445,6 +473,9 @@
 
             if (filteredCases.length === 0) {
                 noResults.classList.remove('hidden');
+                // 確保列表容器中只有 no-results 訊息
+                listContainer.innerHTML = `<div class="text-center col-span-full py-10 text-stone-500">${noResults.outerHTML}</div>`;
+                noResults.classList.remove('hidden'); // 重新顯示
                 return;
             } else {
                 noResults.classList.add('hidden');
@@ -455,14 +486,14 @@
                 research: '🔬 研究', admin: '🏢 行政'
             };
             const audienceColors = {
-                educator: 'bg-green-100 text-green-700',
-                staff: 'bg-blue-100 text-blue-700',
-                student: 'bg-purple-100 text-purple-700',
+                educator: 'bg-green-100 text-green-700 border-green-300',
+                staff: 'bg-blue-100 text-blue-700 border-blue-300',
+                student: 'bg-purple-100 text-purple-700 border-purple-300',
             };
 
             filteredCases.forEach(uc => {
                 const audiencesHtml = uc.audience.map(aud => 
-                    `<span class="text-xs font-semibold px-2 py-1 rounded-full ${audienceColors[aud]}">${
+                    `<span class="text-xs font-semibold px-2 py-1 rounded-full border ${audienceColors[aud]}">${
                         aud === 'educator' ? '教育工作者' : aud === 'staff' ? '教職員工' : '學生'
                     }</span>`
                 ).join(' ');
@@ -472,19 +503,19 @@
                         <div class="p-6">
                             <h3 class="font-bold text-xl text-stone-800 mb-2 flex justify-between items-start">
                                 <span>${uc.title}</span>
-                                <span class="text-xl text-stone-400 ml-2 transform transition-transform duration-300">
+                                <span class="text-xl text-stone-400 ml-2 transform transition-transform duration-300 card-icon">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </span>
                             </h3>
                             <div class="flex flex-wrap gap-2 mb-3">
                                 ${audiencesHtml}
-                                <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">${categoryLabels[uc.category]}</span>
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300">${categoryLabels[uc.category]}</span>
                             </div>
                             <p class="text-sm text-stone-600 mb-0">${uc.description}</p>
                         </div>
                         <div class="card-content">
                             <h4 class="font-semibold text-md text-stone-700 mb-2">使用提示詞：</h4>
-                            <code class="block bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">${uc.prompt}</code>
+                            <code class="block bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap border border-gray-200">${uc.prompt}</code>
                             <p class="text-xs text-stone-500 mt-2">**工具:** ${uc.tool}</p>
                         </div>
                     </div>
@@ -496,7 +527,7 @@
             document.querySelectorAll('.card').forEach(card => {
                 card.addEventListener('click', function() {
                     this.classList.toggle('expanded');
-                    const icon = this.querySelector('svg');
+                    const icon = this.querySelector('.card-icon svg');
                     if (this.classList.contains('expanded')) {
                         icon.style.transform = 'rotate(180deg)';
                     } else {
@@ -541,9 +572,6 @@
             document.getElementById('loading-message').classList.add('hidden');
             initChart();
             renderUseCases();
-            
-            // 初始化 PARTS 框架的預設顯示
-            document.getElementById('part-P').click();
         };
 
     </script>
