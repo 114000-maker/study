@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 教育指南互動版 (完整版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: 擴展後的結構採用了儀表板/概覽方法。頂部是高層次導航（新加入的五個章節），下方是互動式提示詞瀏覽器。新的五個章節（產品概覽、Workspace、NotebookLM、AI素養、管理員設定）全部採用互動式元件（標籤頁、折疊面板、卡片）來呈現，以防止頁面過長，並讓使用者在單頁內快速跳轉到他們感興趣的特定領域，實現高效率的資訊探索。 -->
+    <!-- Visualization & Content Choices: PARTS框架保持為互動式展開元件。Workspace和管理員設定內容現在使用**標籤頁**來呈現不同的應用程式和政策類別，避免滾動，提供清晰的資訊層級。AI素養資源以**卡片**列表呈現。使用案例數量圖表 (Chart.js) 仍作為視覺化導航工具，連接到下方的篩選器。所有內容皆透過 JS 動態控制顯示和互動，確保單一文件架構和高度互動性。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4B4B4B;
+        }
+        .filter-btn, .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active, .tab-btn.active {
+            background-color: #8D6E63;
+            color: #FFFFFF;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1.5rem;
+        }
+        .card.expanded .card-content {
+            max-height: 500px;
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-stone-50">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-800 mb-2">Gemini 教育指南互動版</h1>
+            <p class="text-lg text-stone-600 max-w-4xl mx-auto">這是一個將官方指南轉化為易於探索的互動工具，旨在協助教育工作者、教職員工和學生，快速找到在教育領域運用 AI 的實用方法。</p>
+            <!-- NEW CITATION/SOURCE ACKNOWLEDGEMENT -->
+            <p class="text-xs text-stone-400 mt-2">資料來源已整合自 <a href="https://docs.google.com/presentation/d/1MTyP-BBusYw2rHKE_lQ2QVDA7uT7ngYaGfBy9HypQdY/edit" target="_blank" class="underline hover:text-stone-500">100+ ways to use Gemini and NotebookLM in education [Shared]</a>。</p>
+        </header>
+
+        <main>
+            <!-- 產品概覽與提示詞最佳實踐 -->
+            <section id="product-overview" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">產品概覽與提示詞最佳實踐</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">本區塊涵蓋了 Gemini 及其在教育環境中的定位，以及撰寫優質提示詞的關鍵框架。瞭解如何正確使用工具是成功的第一步。</p>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 產品總結 -->
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold text-stone-700 mb-4 flex items-center">
+                            <span>🚀 Gemini 在教育中的價值</span>
+                        </h3>
+                        <ul class="list-disc list-inside space-y-2 text-stone-600">
+                            <li>**加速工作流程:** 自動化行政任務，縮短課程準備時間。</li>
+                            <li>**提升學習個性化:** 根據個別學生的需求和興趣，快速生成差異化材料。</li>
+                            <li>**深化理解:** 透過複雜概念的簡化、類比和蘇格拉底式對話，促進主動學習。</li>
+                            <li>**支援研究與寫作:** 協助學生和教職員工進行文獻回顧、精煉論點和程式碼偵錯。</li>
+                        </ul>
+                    </div>
+                    <!-- PARTS 框架 -->
+                    <div id="parts-framework" class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold text-stone-700 mb-4 flex items-center">
+                            <span>🔑 PARTS 框架：優秀提示詞的要素</span>
+                        </h3>
+                         <div class="flex flex-wrap justify-center gap-3 text-center mb-4">
+                            <div id="part-P" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-amber-100"><div class="text-3xl font-bold text-amber-600">P</div><div class="font-bold text-sm">角色</div></div>
+                            <div id="part-A" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-teal-100"><div class="text-3xl font-bold text-teal-600">A</div><div class="font-bold text-sm">行動</div></div>
+                            <div id="part-R" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-sky-100"><div class="text-3xl font-bold text-sm">收件人</div></div>
+                            <div id="part-T" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-indigo-100"><div class="text-3xl font-bold text-indigo-600">T</div><div class="font-bold text-sm">主題</div></div>
+                            <div id="part-S" class="parts-item cursor-pointer p-2 rounded-md transition-all duration-300 hover:bg-rose-100"><div class="text-3xl font-bold text-rose-600">S</div><div class="font-bold text-sm">結構</div></div>
+                        </div>
+                        <div id="parts-explanation" class="mt-2 p-3 bg-stone-100 rounded-lg text-center text-stone-700 min-h-[50px] flex items-center justify-center transition-all duration-300 text-sm">
+                            點擊上方的字母，查看詳細說明。
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t border-stone-200 my-10" />
+
+            <!-- Workspace 中的 Gemini 使用方式 -->
+            <section id="workspace-gemini" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">Workspace 中的 Gemini 使用方式</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">Gemini 整合於您日常使用的 Google 文件、試算表和簡報中，讓您能直接在工作流程中獲得 AI 支援。</p>
+
+                <div class="flex border-b border-stone-200 mb-6">
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent active" data-tab="docs">Google 文件</button>
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="sheets">Google 試算表</button>
+                    <button class="tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="slides">Google 簡報</button>
+                </div>
+
+                <div id="docs" class="tab-content active p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">文件中的應用：寫作和摘要</h3>
+                    <p class="mb-4 text-stone-600">Gemini 協助起草、改寫、總結和校對文本，非常適合行政通訊、課程大綱和學生寫作輔導。</p>
+                    <div class="bg-amber-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Draft a policy update on hybrid learning for K-12 staff, summarizing key changes from the previous year." (起草一份關於 K-12 教職員工混合學習的政策更新，總結去年的關鍵變動。)
+                    </div>
+                </div>
+
+                <div id="sheets" class="tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">試算表中的應用：數據分析</h3>
+                    <p class="mb-4 text-stone-600">Gemini 能處理數據、創建自訂公式、組織資訊並找出趨勢，是評估成績和預算規劃的利器。</p>
+                    <div class="bg-teal-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Analyze this column of student assessment scores (C2:C50) and calculate the mean, median, and highlight outliers." (分析這欄學生評估分數 (C2:C50)，計算平均值、中位數並標記異常值。)
+                    </div>
+                </div>
+
+                <div id="slides" class="tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">簡報中的應用：視覺設計和內容大綱</h3>
+                    <p class="mb-4 text-stone-600">快速創建簡報大綱、生成圖片或組織簡報內容，為教學或專業發展節省時間。</p>
+                    <div class="bg-sky-100 p-3 rounded-md text-stone-700 text-sm">
+                        **範例提示:** "Generate three visual concepts for the first slide of a presentation on the history of geometry, using a minimalist style." (為關於幾何學史的簡報首頁生成三個視覺概念，使用簡約風格。)
+                    </div>
+                </div>
+            </section>
+
+            <!-- NotebookLM 使用方式 -->
+            <section id="notebook-lm" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">NotebookLM：您的研究助理</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">NotebookLM 是一個由 AI 驅動的研究和寫作輔助工具，能整合您的文件、筆記和網路來源，提供**有根據的**摘要和見解。</p>
+
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">1</div>
+                        <h4 class="font-bold text-stone-700">上傳來源</h4>
+                        <p class="text-sm text-stone-600">整合課程材料、研究論文、會議記錄或學生的寫作草稿。</p>
+                    </div>
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">2</div>
+                        <h4 class="font-bold text-stone-700">提問並探索</h4>
+                        <p class="text-sm text-stone-600">向您的來源提問，AI 會提供帶有引用的答案，確保結果準確且具備根據。</p>
+                    </div>
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-4xl mb-2 text-indigo-600">3</div>
+                        <h4 class="font-bold text-stone-700">生成筆記和摘要</h4>
+                        <p class="text-sm text-stone-600">基於上傳的來源，自動生成學習指南、詞彙表或不同主題的摘要。</p>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-indigo-100 rounded-lg text-stone-700">
+                    **應用範例:** 一位教授可以上傳整個課程的閱讀清單，然後要求 NotebookLM 根據這些來源生成一個關於「後現代主義」的考試大綱。
+                </div>
+            </section>
+
+            <!-- AI 素養資源 -->
+            <section id="ai-literacy" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md::text-3xl font-bold text-center text-stone-800 mb-6">AI 素養：教育工作者與學生的必備知識</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">負責任地使用 AI 需要對其能力和局限性有透徹的理解。以下是關鍵的素養領域。</p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">🎓 批判性評估</h3>
+                        <p class="text-sm text-stone-600">**核心:** 永遠將 AI 輸出視為初稿。學生和教職員工必須學會驗證事實、檢查引文並識別潛在的偏見或「幻覺」。</p>
+                    </div>
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">✍️ 負責任的寫作</h3>
+                        <p class="text-sm text-stone-600">**核心:** 學生需要知道何時、何處以及如何引用 AI 的協助。學校必須建立透明的政策來區分 AI 輔助與學術不端行為。</p>
+                    </div>
+                    <div class="p-5 rounded-xl border border-rose-300 bg-rose-50">
+                        <h3 class="font-bold text-lg text-rose-700 mb-2">🛡️ 數據與隱私</h3>
+                        <p class="text-sm text-stone-600">**核心:** 教師應避免將敏感或個人身份資訊輸入給 AI 模型。理解數據是如何被使用的，以及教育帳號的數據保護措施。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 管理員設定與政策 -->
+            <section id="admin-settings" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">管理員設定：部署與政策控制</h2>
+                <p class="text-center text-stone-600 mb-8 max-w-3xl mx-auto">本節概述了管理員在 Google Workspace for Education 環境中管理 Gemini 存取和政策的關鍵領域。</p>
+
+                 <div class="flex border-b border-stone-200 mb-6">
+                    <button class="tab-btn admin-tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent active" data-tab="access">存取與群組管理</button>
+                    <button class="tab-btn admin-tab-btn px-4 py-2 text-stone-600 border-b-2 border-transparent" data-tab="data-security">數據安全與隱私</button>
+                </div>
+
+                <div id="access" class="tab-content admin-tab-content active p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">存取與群組管理</h3>
+                    <ul class="list-disc list-inside space-y-2 text-stone-600">
+                        <li>**年齡控制:** 管理員可以根據使用者的年齡層（例如：18 歲以上教師/學生）來啟用或限制 Gemini 功能。</li>
+                        <li>**群組部署:** 透過組織單位 (OU) 或存取群組來精細控制誰可以使用 Gemini，確保分階段推出。</li>
+                        <li>**第三方應用程式:** 管理員應審查並管理與 Gemini 互動的任何第三方應用程式存取權限。</li>
+                    </ul>
+                </div>
+
+                <div id="data-security" class="tab-content admin-tab-content p-4 bg-stone-50 rounded-lg">
+                    <h3 class="font-bold text-lg text-stone-800 mb-3">數據安全與隱私</h3>
+                    <ul class="list-disc list-inside space-y-2 text-stone-600">
+                        <li>**核心原則:** 您的數據不會被用於訓練模型或與其他教育機構共享。</li>
+                        <li>**審計與日誌:** 管理員應利用內建的審計日誌功能，監控 Gemini 的使用情況並確保合規性。</li>
+                        <li>**內容過濾:** 啟用 Workspace 的內建安全功能，以確保 Gemini 的輸出符合學校內容標準。</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <hr class="border-t border-stone-200 my-10" />
+
+            <!-- 視覺概覽與互動式使用案例瀏覽器 -->
+            <section id="visual-overview" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-stone-200">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-2">使用案例分佈總覽</h2>
+                 <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">這張圖表顯示了不同教育任務類別中的使用案例數量。您可以點擊圖表上的長條來快速篩選下方的內容。</p>
+                <div class="chart-container">
+                    <canvas id="useCasesChart"></canvas>
+                </div>
+            </section>
+
+            <section id="interactive-tool">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-8">互動式使用案例瀏覽器</h2>
+
+                <div id="filters" class="mb-8">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg text-center mb-3 text-stone-700">1. 選擇您的角色：</h3>
+                        <div id="audience-filters" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300 active" data-filter="all">全部角色</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="educator">教育工作者</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="staff">教職員工</button>
+                            <button class="filter-btn audience-btn px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300" data-filter="student">學生</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-center mb-3 text-stone-700">2. 選擇任務類別：</h3>
+                        <div id="category-filters" class="flex flex-wrap justify-center gap-2 md:gap-3">
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 active" data-filter="all">全部類別</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="planning">規劃</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="assessment">評估</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="instructional">教學材料</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="differentiation">差異化教學</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="administrative">行政任務</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="research">研究</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="student_use">學生使用</button>
+                             <button class="filter-btn category-btn px-4 py-2 rounded-full bg-white border border-stone-300 text-stone-700 hover:bg-stone-100" data-filter="advanced">進階功能</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const useCasesData = [
+            { id: 1, category: 'planning', audience: ['educator', 'staff'], useCase: '起草課程計畫', prompt: 'P：扮演一位中學數學老師。\nA：起草一份 50 分鐘的課程計畫。\nR：七年級學生。\nT：關於代數的線性方程式。\nS：使用 5E 模式（Engage, Explore, Explain, Elaborate, Evaluate）。', tip: '如果您不喜歡某個部分，請說：「請只重寫『Exploration (探索)』部分，並加入一個技術整合活動。」' },
+            { id: 2, category: 'planning', audience: ['educator', 'staff'], useCase: '設計課程大綱/單元計畫', prompt: 'P：扮演一位大學教授。\nA：為期末專案設計一份詳細的課程大綱。\nR：大學一年級的寫作入門課程。\nT：專注於論證性寫作。\nS：包含評分標準、截止日期和建議的寫作技巧資源連結。', tip: '要求將每個單元與特定的學習成果連結起來，以確保對準度。' },
+            { id: 3, category: 'planning', audience: ['educator', 'staff'], useCase: '生成學習目標和標準', prompt: 'P：扮演一位課程專家。\nA：為一個單元創建三個 SMART 學習目標。\nR：五年級學生。\nT：關於北美殖民地的建立。\nS：將目標格式化為子彈清單。', tip: '納入布魯姆分類法（Bloom’s Taxonomy）的特定級別（例如：分析、應用）。' },
+            { id: 4, category: 'planning', audience: ['educator'], useCase: '根據主題集思廣益', prompt: 'P：扮演一位創意寫作教練。\nA：生成 10 個讓學生在 30 分鐘內可以寫作的主題。\nR：九年級學生。\nT：與「挑戰現狀」有關。\nS：以編號清單列出主題。', tip: '要求 Gemini 將主題與特定的文學類型（例如：詩歌、短篇小說、戲劇）連結起來。' },
+            { id: 5, category: 'planning', audience: ['educator', 'staff'], useCase: '課程材料組織', prompt: 'P：扮演一位學習資源圖書管理員。\nA：將我現有的關於「氣候變遷」單元的材料，組織成一份供學生使用的 Google 文件。\nT：單元主題為「氣候變遷的在地影響」。\nS：包括標題、子標題、關鍵問題和推薦資源連結。', tip: '要求 Gemini 創建一個帶有待辦事項清單的「教師指南」版本，以追蹤準備步驟。' },
+            { id: 6, category: 'planning', audience: ['educator', 'staff'], useCase: '創建時間表', prompt: 'P：扮演一位專案經理。\nA：為期四週的單元計畫創建一個時間表。\nT：高中歷史單元「冷戰」。\nS：將時間表組織成一個表格，列出每週的重點、主要的作業和估計的課堂時間。', tip: '詢問時間表是否可行，並要求針對學生參與度低的點提出替代方案。' },
+            { id: 7, category: 'assessment', audience: ['educator'], useCase: '設計測驗與考題', prompt: 'P：扮演一位考試設計者。\nA：創建 10 題多選題和 5 題簡答題。\nR：高中化學學生。\nT：關於酸鹼平衡。\nS：包含所有題目的答案鍵。', tip: '提示 Gemini 納入陷阱選項，以測試常見的誤解。' },
+            { id: 8, category: 'assessment', audience: ['educator', 'staff'], useCase: '創建評分標準 (Rubrics)', prompt: 'P：扮演一位高等教育課程協調員。\nA：為一個專案創建一個四點式分析評分標準。\nR：學習第二語言的學生。\nT：專注於口頭演示技能。\nS：納入「流利度」、「詞彙」和「文化理解」等標準。', tip: '要求 Gemini 根據評分標準為每個分數（1-4）提供一個簡短的範例。' },
+            { id: 9, category: 'assessment', audience: ['educator'], useCase: '生成作業單 (Worksheets)', prompt: 'P：扮演一位三年級老師。\nA：創建一個作業單。\nR：三年級學生。\nT：關於兩位數減法。\nS：包含 15 個練習題、一個挑戰題和一個自我反思部分。', tip: '為了確保與您的課程對齊，請複製並貼上您的教學目標到提示詞中。' },
+            { id: 10, category: 'assessment', audience: ['educator'], useCase: '起草課前提問 / 出口票', prompt: 'P：扮演一位中學英語教師。\nA：創建三個課前提問 (Bell Ringer) 和一個出口票 (Exit Ticket)。\nR：九年級學生。\nT：閱讀莎士比亞的《馬克白》。\nS：課前提問應涵蓋預測、單字和歷史背景。出口票應為一個簡答題。', tip: '在您發佈到 Google Classroom 之前，請要求 Gemini 將輸出格式化為一個表格，以便於複製和貼上。' },
+            { id: 11, category: 'assessment', audience: ['educator', 'staff'], useCase: '分析評估數據', prompt: 'A：分析這份表格中的測驗成績數據。\nT：尋找學生普遍表現不佳的領域或概念，並解釋可能的教學差距。\nS：以一個摘要段落呈現結果，並建議兩個補救活動。（表格數據需要複製/貼上到提示中）', tip: '複製並貼上一個關於您班級學生錯誤答案的 Google Sheets 或 Excel 表格。' },
+            { id: 12, category: 'assessment', audience: ['educator', 'student'], useCase: '為同儕審查創建範本', prompt: 'P：扮演一位寫作中心導師。\nA：為學生提供一份同儕審查清單。\nR：大學歷史系學生。\nT：針對一篇研究論文。\nS：包含 10 個「是/否」問題和 3 個開放式問題，以指導他們的回饋。', tip: '要求 Gemini 根據您希望同儕審查員關注的特定標準來生成問題。' },
+            { id: 13, category: 'instructional', audience: ['educator', 'staff'], useCase: '總結閱讀材料', prompt: 'P：扮演一位閱讀專家。\nA：將這份關於工業革命的冗長學術文章總結。\nR：七年級學生。\nT：工業革命。\nS：使用五個主要子彈點，確保語言簡單易懂。', tip: '要求 Gemini 專注於特定的細節，例如「只摘要影響童工的部分」。' },
+            { id: 14, category: 'instructional', audience: ['educator', 'staff'], useCase: '重寫內容以簡化概念', prompt: 'P：扮演一位課程設計師。\nA：將這段關於光合作用的複雜科學文本重寫。\nR：五年級學生。\nT：光合作用。\nS：以對話的語氣重寫文本，並使用日常生活中常見的類比。', tip: '使用不同的詞彙來要求簡單化，例如：「請用費曼技巧解釋這個概念。」' },
+            { id: 15, category: 'instructional', audience: ['educator'], useCase: '創建圖形整理工具', prompt: 'P：扮演一位視覺化專家。\nA：創建一個圖形整理工具。\nR：八年級學生。\nT：針對關於美國憲法中三權分立的單元。\nS：使用思維導圖 (Mind Map) 的格式，並為每個分支提供兩個例子。', tip: '要求 Gemini 將輸出格式化為 Markdown 表格，以便於複製/貼上到 Google 文件或 Slides 中。' },
+            { id: 16, category: 'instructional', audience: ['educator'], useCase: '生成類比和比喻', prompt: 'P：扮演一位比喻專家。\nA：為以下概念產生三個不同的類比。\nR：高中經濟學學生。\nT：機會成本。\nS：每個類比應少於兩句話，並與日常生活情境相關。', tip: '如果學生對特定主題感興趣，請在提示中包含該主題，例如：「為機會成本產生三個與足球相關的類比。」' },
+            { id: 17, category: 'instructional', audience: ['educator'], useCase: '生成詞彙表與閃卡', prompt: 'P：扮演一位語言專家。\nA：從以下文章中提取 15 個關鍵詞彙。\nR：成人 ESL (英語作為第二語言) 學習者。\nT：關於可持續發展的文本。\nS：將輸出格式化為兩列表格，包括單詞和其簡單定義。', tip: '要求 Gemini 在定義中包含一個例句或同義詞。' },
+            { id: 18, category: 'instructional', audience: ['educator', 'staff'], useCase: '創建練習案例研究', prompt: 'P：扮演一位醫學倫理教授。\nA：創建一個簡短的案例研究。\nR：大學生。\nT：探索安樂死的倫理困境。\nS：案例研究應以問題結尾，引導學生進行討論和論證。', tip: '要求案例研究以特定的角色（例如：醫生、家屬、醫院行政人員）為中心。' },
+            { id: 19, category: 'differentiation', audience: ['educator'], useCase: '調整閱讀級別', prompt: 'P：扮演一位課程專家。\nA：調整這段文字的閱讀級別。\nR：調整到四年級的水平。\nT：關於司法部門的文本（將文本貼於此處）。\nS：在保留所有原始事實的同時重寫文本。', tip: '要求 Gemini 使用特定的指標，例如 Flesch-Kincaid 分數，來指導內容複雜度。' },
+            { id: 20, category: 'differentiation', audience: ['educator'], useCase: '區分寫作提示', prompt: 'P：扮演一位中學 ELA (英語語言藝術) 教師。\nA：將這個寫作提示區分為三個分級版本（A：基礎、B：標準、C：進階）。\nR：八年級學生。\nT：關於《記憶傳承人》(The Giver) 中角色動機的提示。\nS：使用表格格式呈現這三個版本。', tip: '您可以要求針對英語學習者 (ELLs) 或有特定學習調適需求的學生量身定制的版本。' },
+            { id: 21, category: 'differentiation', audience: ['educator'], useCase: '修改分組活動', prompt: 'P：扮演一位差異化教學教練。\nA：將這個全班活動修改為三種小組設置。\nR：混合能力組的十年級班級。\nT：關於解二次方程式的活動。\nS：第 1 組：補救支援。第 2 組：標準練習。第 3 組：進階挑戰。', tip: '向 Gemini 提供有關每個小組的先備知識細節。' },
+            { id: 22, category: 'differentiation', audience: ['educator'], useCase: '創建輔助鷹架', prompt: 'P：扮演一位特殊教育資源教師。\nA：創建一個循序漸進的圖形整理工具/檢查清單。\nR：有執行功能挑戰的六年級學生。\nT：完成一個多步驟的科學展覽專案。\nS：使用簡短、清晰的項目符號和簡單的語言。', tip: '要求 Gemini 將最終輸出轉換為一個社交故事 (social story) 或一個視覺化時間表。' },
+            { id: 23, category: 'differentiation', audience: ['educator'], useCase: '根據學生興趣定制內容', prompt: 'P：扮演一位個人化學習教練。\nA：生成兩個真實世界的範例來解釋這個概念。\nR：十一年級學生。\nT：供需的概念。\nS：其中一個範例應該是關於運動鞋/時尚，另一個關於電動遊戲。', tip: '使用深度研究 (Deep Research) 工具來尋找與學生興趣相符的當前趨勢和主題。' },
+            { id: 24, category: 'differentiation', audience: ['educator'], useCase: '將文本轉換為不同模式', prompt: 'P：扮演一位無障礙專家。\nA：轉換這段文本。\nR：所有學生。\nT：關於美國內戰原因的文本。\nS：轉換為一個簡短、易懂的 60 秒動畫影片腳本。', tip: '要求其他格式，例如「Podcast 腳本」、「資訊圖表大綱」或「角色扮演對話」。' },
+            { id: 25, category: 'administrative', audience: ['staff'], useCase: '起草給家長的通訊', prompt: 'P：扮演一位學校行政人員。\nA：為即將到來的家長教師會議 (PTC) 起草一封電子郵件。\nR：所有家長。\nT：PTC 日期、預約連結和議程要點。\nS：使用溫和、專業的語氣，並保持在 150 字以內。', tip: '要求 Gemini 創建一個多語言版本（例如：西班牙語或越南語），以服務不同的家庭。' },
+            { id: 26, category: 'administrative', audience: ['staff', 'educator'], useCase: '生成專業發展(PD)大綱', prompt: 'P：扮演一位 PD 協調員。\nA：創建一個為期兩小時的教職員工研討會大綱。\nR：所有 K-12 教師。\nT：關於在課堂中整合生成式 AI 的最佳實踐。\nS：包含學習目標、活動和討論問題。', tip: '要求 Gemini 專注於特定的年級或學科，以使其更具體和實用。' },
+            { id: 27, category: 'administrative', audience: ['staff'], useCase: '撰寫公告和新聞稿', prompt: 'P：扮演一位公共關係專家。\nA：起草一份關於學校年度募款活動的新聞稿。\nR：當地媒體。\nT：活動日期、目標和成功故事。\nS：使用正式的語氣，並包含一個引人注目的標題。', tip: '提示 Gemini 針對不同的受眾（例如：家長、校友）重寫這份新聞稿。' },
+            { id: 28, category: 'administrative', audience: ['staff'], useCase: '制定政策和程序草案', prompt: 'P：扮演一位政策分析師。\nA：為學區起草一份關於學生使用電子設備的政策草案。\nR：校董事會。\nT：手機使用規定。\nS：包含「目的」、「範圍」和「執法」等部分。', tip: '要求 Gemini 比較這份政策與附近學區或州級指南的常見做法。' },
+            { id: 29, category: 'administrative', audience: ['staff', 'educator'], useCase: '總結會議記錄', prompt: 'A：總結這份上個月教職員會議的冗長記錄（將記錄貼於此處）。\nT：識別三個關鍵的行動項目和負責人。\nS：將行動項目格式化為一個表格，並附上一個簡短的總結段落。', tip: '如果記錄包含很多討論，請要求 Gemini 專注於最終的決定或投票結果。' },
+            { id: 30, category: 'administrative', audience: ['staff'], useCase: '創建預算提案範本', prompt: 'P：扮演一位財務規劃師。\nA：創建一個預算提案範本。\nR：部門主管。\nT：用於申請新技術資源的資金。\nS：包含「項目描述」、「成本估算」和「預期影響」等部分。', tip: '要求 Gemini 提供常見的資金來源或補助金清單，以供參考。' },
+            { id: 31, category: 'research', audience: ['educator', 'staff', 'student'], useCase: '進行文獻回顧', prompt: 'P：扮演一位教育學博士研究員。\nA：總結這四篇文章的關鍵發現。\nT：專注於混合學習模式對學生學習成果的影響。\nS：將發現呈現在一個比較表格中。', tip: '要求 Gemini 突出來源之間達成共識或存在衝突的領域。' },
+            { id: 32, category: 'research', audience: ['educator', 'student'], useCase: '總結複雜的學術文本', prompt: 'P：扮演一位學習專家。\nA：總結這章關於量子物理學的章節。\nR：具有物理學先備知識的高中生。\nT：量子物理學。\nS：使用五個簡潔的項目符號，並專注於關鍵詞彙。', tip: '將文件上傳到 NotebookLM，以進行更深入、有根據的總結。' },
+            { id: 33, category: 'research', audience: ['educator', 'staff', 'student'], useCase: '精煉研究問題', prompt: 'P：扮演一位研究方法學家。\nA：針對這個研究問題提供建設性的回饋：「科技如何影響學習？」\nT：行動研究。\nS：建議三種使問題更集中、可衡量且與 K-12 環境相關的方法。', tip: '詢問與精煉後問題相關的潛在倫理考量。' },
+            { id: 34, category: 'research', audience: ['educator', 'staff', 'student'], useCase: '生成研究想法', prompt: 'P：扮演一位教育未來學家。\nA：為碩士論文生成三個新穎的研究想法。\nT：人工智慧、評估和社會情感學習 (SEL) 的交集。\nS：對於每個想法，包含一個理由和潛在的研究方法（例如：定性、定量）。', tip: '要求 Gemini 建議潛在的資助機會或相關期刊清單。' },
+            { id: 35, category: 'research', audience: ['staff', 'educator'], useCase: '起草撥款提案', prompt: 'P：扮演一位撥款寫作專家。\nA：起草撥款提案的「需求聲明」部分。\nT：資助一個針對服務不足的國中生群體的新機器人計畫。\nS：使用引人注目的、數據驅動的語言並引用關鍵統計數據（在此處插入相關統計數據）。', tip: '要求將提案改編為適合不同的資助來源（例如：聯邦與地方私人基金會）。' },
+            { id: 36, category: 'research', audience: ['educator', 'student'], useCase: '創建帶註釋的參考書目', prompt: 'A：為這篇文章創建一個帶註釋的參考書目條目（貼上文章細節）。\nT：文章必須是關於標準化測驗的歷史。\nS：註釋應在 100 字以內，並包含主要論點及其與我課程的相關性。', tip: '指定所需的引用格式（例如：APA 第七版）。' },
+            { id: 37, category: 'student_use', audience: ['student'], useCase: '解釋難懂概念', prompt: 'P：扮演一位友善、有耐心的導師。\nA：向我解釋 [插入概念] 的概念。\nR：十年級學生。\nT：[插入科目/主題]。\nS：使用一個相關的真實世界類比。', tip: '要求分步細節或一個簡單的類比，如果第一次解釋對您來說仍然太複雜。' },
+            { id: 38, category: 'student_use', audience: ['student'], useCase: '透過個人化測驗準備考試', prompt: 'A：根據以下筆記生成一個 10 題多選題測驗。\nT：[在此處貼上筆記]。\nS：在結尾包含答案鍵和每個答案的簡短解釋。', tip: '要求模型專注於您感到不自信的筆記的特定部分。' },
+            { id: 39, category: 'student_use', audience: ['student'], useCase: '寫作支援與回饋', prompt: 'P：扮演一位編輯。\nA：審查以下段落的清晰度、流暢度和語法錯誤。\R：[插入您的寫作片段]。\nT：[插入主題]。\nS：使用項目符號清單提供建議。', tip: '要求模型根據特定的寫作風格指南檢查，例如 APA 或 MLA。' },
+            { id: 40, category: 'student_use', audience: ['student'], useCase: '集思廣益與大綱生成', prompt: 'A：為一篇研究論文生成一個大綱。\nT：再生能源在減少城市污染中的作用。\nS：包括 4 個主要部分、每個部分 3 個子點和一個有力的論述句 (Thesis Statement)。', tip: '收到大綱後，要求三種不同的論證結構方式（例如：時間順序、主題式、主題）。' },
+            { id: 41, category: 'student_use', audience: ['student'], useCase: '程式碼偵錯與解釋', prompt: 'P：扮演一位程式設計教練。\nA：解釋為什麼這段 Python 程式碼無法運作並修復錯誤。\R：[在此處貼上程式碼]。\nT：[插入程式碼的功能]。\nS：在修復後的程式碼中使用簡單的註釋來解釋修復內容。', tip: '要求解釋為什麼類似的程式碼片段在更大的程式中會是必要的。' },
+            { id: 42, category: 'student_use', audience: ['student'], useCase: '職業探索與面試準備', prompt: 'P：扮演一位職涯教練。\nA：為一個入門級的數據分析師職位生成 5 個常見的面試問題。\nT：數據分析師。\nS：對我起草的答案提供建設性回饋：[在此處貼上您的答案]。', tip: '要求教練提供一個挑戰您前一個答案的後續問題。' },
+            { id: 43, category: 'advanced', audience: ['educator', 'staff', 'student'], useCase: '深度研究：全面主題概述', prompt: 'A：提供一份關於圍繞自動駕駛汽車演算法倫理的當前爭論的全面概述。\nT：自動駕駛汽車倫理。\nS：引用至少 5 個可靠、最新的來源，並包括對關鍵利益相關者的概述。', tip: '在提示中添加「使用 Google 搜尋以確保資訊是最新的」，來利用搜尋功能。' },
+            { id: 44, category: 'advanced', audience: ['educator', 'staff', 'student'], useCase: '深度研究：總結最新趨勢', prompt: 'A：總結過去 12 個月內 CRISPR 基因編輯技術的最新突破。\nT：CRISPR 技術。\nS：專注於與人類治療應用相關的突破。', tip: '要求 Gemini 以時間軸或時間順序呈現結果。' },
+            { id: 45, category: 'advanced', audience: ['educator', 'staff'], useCase: '導向式學習：模擬蘇格拉底式對話', prompt: 'P：扮演一位專攻柏拉圖的哲學教授。\nA：引導我進行一場關於正義本質的蘇格拉底式對話，只問問題來引導我的思考。\nT：《理想國》(The Republic)。\nS：從一個定義挑戰開始。', tip: '使用回覆來挑戰您自己的假設或要求教授推薦相關讀物。' },
+            { id: 46, category: 'advanced', audience: ['educator', 'student'], useCase: '導向式學習：分步解決問題', prompt: 'P：扮演一位問題解決教練。\nA：引導我解決一個物理運動學問題。\nT：運動學 (Kinematics)。\nS：要求我在計算答案之前，先定義每個變量和公式。', tip: '要求模型故意在下一步中插入一個常見錯誤，然後讓它考驗您如何找出錯誤。' },
+            { id: 47, category: 'advanced', audience: ['educator', 'staff'], useCase: 'Gemini Canvas：創建視覺化學習指南', prompt: 'A：創建一個視覺化學習指南（心智圖風格），繪製出小說《大亨小傳》(The Great Gatsby) 中所有角色及其關係。\nT：《大亨小傳》。\nS：為不同的家庭或社會階層使用不同的顏色或節點樣式。', tip: '要求 Canvas 轉而生成一個流程圖，顯示情節的時間順序事件。' },
+            { id: 48, category: 'advanced', audience: ['educator', 'staff', 'student'], useCase: 'Gems：創建「評估設計師」寶石', prompt: 'A：創建一個 Gem，充當我的個人化測驗生成器。它在生成帶有答案鍵的混合評估（多選題和簡答題）之前，必須總是詢問我的目標年級、主題和所需的題目數量。\nT：評估創建。\nS：測驗生成器。', tip: '重複使用 Gem 來精煉其語氣和輸出結構，直到它完美符合您的需求。' },
+            
+            <!-- START OF NEW USE CASES (ID 49 - 60) FROM SOURCE DOCUMENT -->
+            { id: 49, category: 'planning', audience: ['educator', 'staff'], useCase: '創建課程銜接指南', prompt: 'P：扮演一位課程主任。\nA：為六年級學生從國小到國中的過渡創建一份家長指南。\nT：著重於數學和科學。\nS：包含常見的挑戰和支持資源清單。', tip: '要求指南納入關於新學校行政人員和輔導員的聯絡資訊。' },
+            { id: 50, category: 'assessment', audience: ['educator'], useCase: '創建差異化出口票', prompt: 'P：扮演一位老師。\nA：為今天的課程創建 3 個分級出口票。\nT：關於牛頓第一運動定律。\nS：1 級：簡答題。2 級：應用題。3 級：批判性思考題。', tip: '要求 Gemini 針對每張票提供期望的學生回應範例。' },
+            { id: 51, category: 'instructional', audience: ['educator'], useCase: '轉換為視覺化影片腳本', prompt: 'P：扮演一位動畫腳本家。\nA：將這段關於生物學細胞核的文本轉換為一個 90 秒的教學影片腳本。\nS：為旁白和動畫動作提供詳細說明。', tip: '提示 Gemini 使用對話或幽默的語氣來吸引年輕學生。' },
+            { id: 52, category: 'differentiation', audience: ['educator'], useCase: '語言學習角色扮演情境', prompt: 'P：扮演一位西班牙語老師。\nA：為二年級的學生生成 5 個簡短的角色扮演情境。\nT：練習食物和餐廳詞彙。\nS：包括提示和所需詞彙清單。', tip: '要求 Gemini 專注於特定的語言功能，例如「提出請求」或「表達不喜歡」。' },
+            { id: 53, category: 'administrative', audience: ['staff'], useCase: '總結專業文獻', prompt: 'A：總結這篇關於教育領導力中變革管理理論的文章。\nT：變革管理。\nS：列出 3 個可以立即應用於我們學校的關鍵收穫。', tip: '將收穫改編為一個教職員工專題研討會的議程大綱。' },
+            { id: 54, category: 'research', audience: ['student'], useCase: '建議論文架構', prompt: 'A：根據我的論述句，建議一個大學論文的架構。\nT：論述句：社交媒體的使用與青少年焦慮之間存在顯著相關性，且學校必須實施新的指導方針來應對。\nS：使用標準的五段式結構並納入文獻回顧的建議位置。', tip: '要求 Gemini 建議一個可以挑戰此論述句的反論點。' },
+            { id: 55, category: 'student_use', audience: ['student'], useCase: '創建助記工具', prompt: 'A：為記住 [插入元素清單，例如：行星名稱] 的順序創建一個有趣的助記句。\nT：太陽系行星。\nS：要求助記句是一個容易記住的短語。', tip: '要求模型將助記句與一個視覺圖像連結起來，使其更容易記憶。' },
+            { id: 56, category: 'advanced', audience: ['educator', 'student'], useCase: '程式碼解釋', prompt: 'A：解釋這段 Python 程式碼如何使用遞歸來解決迷宮。\nT：程式碼：[在此處貼上程式碼]。\nS：將解釋分解為初學者可以理解的行。', tip: '詢問是否有更有效率的方法來編寫相同的程式碼。' },
+            { id: 57, category: 'planning', audience: ['educator'], useCase: '創建道德困境', prompt: 'P：扮演一位公民學教授。\nA：創建一個關於隱私權和國家安全之間的道德困境的案例研究。\nT：公民學。\nS：以三個需要學生選擇立場的具體問題作結。', tip: '要求 Gemini 根據美國憲法的特定修正案來引導討論。' },
+            { id: 58, category: 'administrative', audience: ['staff'], useCase: '撰寫募資感謝信', prompt: 'P：扮演一位校長。\nA：起草一封給最近捐贈 $5000 給圖書館翻新專案的社區成員的感謝信。\nT：感謝信。\nS：使用正式但真誠的語氣，並提及對學生的具體影響。', tip: '請 Gemini 將信件調整為適用於捐贈物品（例如：書籍、電腦）而非現金的範本。' },
+            { id: 59, category: 'instructional', audience: ['student'], useCase: '創建辯論論點', prompt: 'A：為一場關於是否應該在學校實施強制性社區服務的辯論創建支持論點和反對論點。\nT：社區服務。\nS：以兩欄表格呈現論點，每邊有四個要點。', tip: '要求模型專注於與學生生活最相關的社會經濟影響。' },
+            { id: 60, category: 'research', audience: ['educator', 'staff'], useCase: '比較研究工具', prompt: 'A：比較定性研究中的紮根理論 (Grounded Theory) 和現象學 (Phenomenology) 兩種方法的優缺點。\nT：定性研究方法。\nS：以一個比較表格呈現，並說明它們適合的研究問題類型。', tip: '要求 Gemini 根據您的研究興趣（例如：教育科技）推薦一個最佳方法。' }
+            <!-- END OF NEW USE CASES -->
+        ];
+
+        let currentFilters = {
+            audience: 'all',
+            category: 'all'
+        };
+
+        const cardsContainer = document.getElementById('cards-container');
+        const audienceFilters = document.getElementById('audience-filters');
+        const categoryFilters = document.getElementById('category-filters');
+        
+        function updateTabContent(tabGroupId, targetId) {
+            document.querySelectorAll(`#${tabGroupId} .tab-content`).forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(targetId).classList.add('active');
+
+            document.querySelectorAll(`#${tabGroupId} .tab-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`#${tabGroupId} button[data-tab="${targetId}"]`).classList.add('active');
+        }
+
+        // Workspace Tab Setup
+        document.querySelectorAll('#workspace-gemini .tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetTab = e.target.getAttribute('data-tab');
+                updateTabContent('workspace-gemini', targetTab);
+            });
+        });
+        
+        // Admin Tab Setup
+        document.querySelectorAll('#admin-settings .admin-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetTab = e.target.getAttribute('data-tab');
+                updateTabContent('admin-settings', targetTab);
+            });
+        });
+
+
+        function renderCards() {
+            cardsContainer.innerHTML = '';
+            const filteredData = useCasesData.filter(item => {
+                const audienceMatch = currentFilters.audience === 'all' || item.audience.includes(currentFilters.audience);
+                const categoryMatch = currentFilters.category === 'all' || item.category === currentFilters.category;
+                return audienceMatch && categoryMatch;
+            });
+
+            if (filteredData.length === 0) {
+                cardsContainer.innerHTML = `<p class="text-center text-stone-500 col-span-full">找不到符合條件的使用案例。請嘗試調整您的篩選條件。</p>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card bg-white rounded-xl shadow-md border border-stone-200 cursor-pointer';
+                card.innerHTML = `
+                    <div class="card-header p-6">
+                        <h3 class="font-bold text-lg text-stone-800">${item.useCase}</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-4">
+                            <h4 class="font-semibold text-stone-700 mb-2 border-b pb-1">💡 提示詞 (Prompt)</h4>
+                            <p class="text-stone-600 whitespace-pre-wrap text-sm">${item.prompt}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-stone-700 mb-2 border-b pb-1">⭐ 秘訣 (Tip)</h4>
+                            <p class="text-stone-600 text-sm">${item.tip}</p>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('expanded');
+                });
+                cardsContainer.appendChild(card);
+            });
+        }
+        
+        function updateFilterButtons(filterGroup, newFilter) {
+            filterGroup.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === newFilter) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        audienceFilters.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-btn')) {
+                currentFilters.audience = e.target.dataset.filter;
+                updateFilterButtons(audienceFilters, currentFilters.audience);
+                renderCards();
+            }
+        });
+
+        categoryFilters.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-btn')) {
+                currentFilters.category = e.target.dataset.filter;
+                updateFilterButtons(categoryFilters, currentFilters.category);
+                renderCards();
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+
+            // PARTS Framework Logic
+            const partsExplanations = {
+                P: { text: "設定 Gemini 的角色。幫助 Gemini 以正確的語氣、專業知識和行為回應。", color: "amber" },
+                A: { text: "清晰地要求任務。使用動詞（例如，創建、重寫、解釋）以獲得特定結果。", color: "teal" },
+                R: { text: "說明對象。幫助為學生群體、教職員工或社區成員量身定制輸出。", color: "sky" },
+                T: { text: "添加您的主題或概念。用上下文指導內容，例如「DNA 結構」。", color: "indigo" },
+                S: { text: "說出您想要的格式或模型。幫助 Gemini 將其輸出量身定制為特定的格式。", color: "rose" }
+            };
+
+            const explanationBox = document.getElementById('parts-explanation');
+            document.querySelectorAll('.parts-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const part = item.id.split('-')[1];
+                    const data = partsExplanations[part];
+                    explanationBox.innerHTML = data.text;
+                    explanationBox.className = `mt-2 p-3 rounded-lg text-center min-h-[50px] flex items-center justify-center transition-all duration-300 text-sm bg-${data.color}-100 text-${data.color}-800`;
+                });
+            });
+
+            // Chart.js Logic
+            const categories = ['planning', 'assessment', 'instructional', 'differentiation', 'administrative', 'research', 'student_use', 'advanced'];
+            const categoryLabels = {
+                planning: '規劃',
+                assessment: '評估',
+                instructional: '教學材料',
+                differentiation: '差異化教學',
+                administrative: '行政任務',
+                research: '研究',
+                student_use: '學生使用',
+                advanced: '進階功能'
+            };
+
+            // Recalculate counts based on the expanded data
+            const categoryCounts = categories.map(cat => useCasesData.filter(d => d.category === cat).length);
+            const chartLabels = categories.map(cat => categoryLabels[cat]);
+
+            const ctx = document.getElementById('useCasesChart').getContext('2d');
+            const useCasesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '使用案例數量',
+                        data: categoryCounts,
+                        backgroundColor: 'rgba(141, 110, 99, 0.7)',
+                        borderColor: 'rgba(141, 110, 99, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        y: {
+                           grid: {
+                                display: false
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#4B4B4B',
+                            titleFont: {
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} 個使用案例`;
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const category = categories[clickedIndex];
+                            currentFilters.category = category;
+                            updateFilterButtons(categoryFilters, category);
+                            renderCards();
+                            document.getElementById('interactive-tool').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
