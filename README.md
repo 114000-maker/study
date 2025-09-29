@@ -36,4 +36,5 @@
 ## 2025-09-24
 [2025-09-24_01](https://114000-maker.github.io/study/2025-09-24_01.html)
 [2025-09-24_02](https://114000-maker.github.io/study/2025-09-24_02.html)
-
+# Gemini 教育指南互動版
+[Gemini 教育指南互動版](https://114000-maker.github.io/study/2025-09-29_01.html)
