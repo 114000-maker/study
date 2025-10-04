@@ -40,3 +40,5 @@
 [Gemini 教育指南互動版](https://114000-maker.github.io/study/2025-09-29_01.html)
 # Gemini 教育指南互動版 (完整版)
 [Gemini 教育指南互動版 (完整版)](https://114000-maker.github.io/study/2025-09-29_02.html)
+# 校園閱讀打卡牆 - 記錄你的閱讀旅程
+[校園閱讀打卡牆 - 記錄你的閱讀旅程](https://114000-maker.github.io/study/2025-10-04_01.html)
