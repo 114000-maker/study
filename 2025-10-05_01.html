@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高鐵到屏東？一個超級任務！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Soft Greens -->
+    <!-- Application Structure Plan: A tab-based SPA design is chosen for optimal usability for elementary school students. It breaks down a complex issue into three understandable, thematic sections (Transportation, Environment, Culture) plus a summary. This structure avoids overwhelming the user with a long scroll. Navigation is handled by prominent buttons at the top, allowing users to explore topics non-linearly. Each section uses a side-by-side card layout to clearly present pro/con arguments, facilitating direct comparison. Interactive charts are used to visualize key data points (like travel time), making abstract numbers concrete and engaging. The final "reflection" part encourages critical thinking. This design prioritizes clarity, comparison, and engagement over a simple linear presentation of the source text. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Travel time differences. -> Goal: Compare. -> Viz: Bar Chart (Chart.js). -> Interaction: Visual comparison of bars. -> Justification: Clearly shows the primary benefit of HSR in a simple, quantifiable way for kids. -> Library: Chart.js.
+        2. Report Info: Economic impact (tourism, jobs). -> Goal: Inform about proportions. -> Viz: Donut Chart (Chart.js). -> Interaction: Hover to see labels, visual animation on load. -> Justification: A friendly way to show how development might benefit different areas, making the concept of "economic benefits" less abstract. -> Library: Chart.js.
+        3. Report Info: Environmental pros/cons. -> Goal: Compare qualitative arguments. -> Viz: Styled HTML/CSS cards with icons (Unicode). -> Interaction: N/A, focus on clear textual comparison. -> Justification: Environmental impacts are complex and less suited for a simple chart. A clear, icon-supported text comparison is more effective for explaining concepts like construction impact vs. reduced carbon emissions. -> Method: HTML/Tailwind.
+        4. Report Info: Overall summary. -> Goal: Organize & Conclude. -> Viz: Interactive buttons for reflection. -> Interaction: Clicking a button reveals a concluding message. -> Justification: Engages the student to form an opinion, making the learning process active rather than passive. -> Method: Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8; /* Warm neutral background */
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #4A5568; /* Darker Slate */
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .content-card {
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">高鐵到屏東？一個超級任務！🚄</h1>
+            <p class="text-lg text-gray-600">嗨！各位同學，我們來當小偵探，一起研究蓋高鐵到屏東的好處與壞處吧！</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <button data-target="transport" class="nav-btn active text-base md:text-lg font-semibold py-3 px-6 bg-white rounded-full shadow-md hover:bg-gray-100">🚦 交通變方便了嗎？</button>
+            <button data-target="environment" class="nav-btn text-base md:text-lg font-semibold py-3 px-6 bg-white rounded-full shadow-md hover:bg-gray-100">🌳 對環境有影響嗎？</button>
+            <button data-target="culture" class="nav-btn text-base md:text-lg font-semibold py-3 px-6 bg-white rounded-full shadow-md hover:bg-gray-100">🏘️ 在地文化會改變嗎？</button>
+            <button data-target="summary" class="nav-btn text-base md:text-lg font-semibold py-3 px-6 bg-white rounded-full shadow-md hover:bg-gray-100">🤔 總結與思考</button>
+        </nav>
+
+        <main>
+            <!-- 交通 Section -->
+            <section id="transport" class="content-section">
+                <div class="text-center mb-8 p-6 bg-amber-50 rounded-2xl">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-2">交通大比拼</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">蓋高鐵最大的好處，就是讓大家去屏東玩或回家的時間變短了！但真的是這樣嗎？有些人覺得，蓋高鐵要花好多錢，而且可能不是每個人都需要搭，讓我們來看看大家怎麼說。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <article class="content-card p-6 border-t-4 border-green-400">
+                        <h3 class="text-2xl font-bold mb-4 text-green-700">👍 贊成方 (覺得很棒！)</h3>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">⏱️</span><div><strong class="font-semibold">時間就是金錢：</strong>從台北到屏東，現在最快也要4個多小時。如果高鐵直達，可能2個小時就到了！可以省下一半的時間，就像看兩集卡通的時間就到家了！</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🎉</span><div><strong class="font-semibold">觀光大加分：</strong>交通方便了，就會有更多人願意來屏東玩，像是去墾丁看海、去東港吃海鮮，對屏東的觀光業是很大的幫助。</div></li>
+                             <li class="flex items-start"><span class="text-2xl mr-3">🤝</span><div><strong class="font-semibold">平衡南北發展：</strong>台灣的發展大多集中在北部，如果屏東有高鐵，可以吸引更多公司和人才來南部，讓台灣的發展更平均。</div></li>
+                        </ul>
+                    </article>
+                    <article class="content-card p-6 border-t-4 border-red-400">
+                        <h3 class="text-2xl font-bold mb-4 text-red-700">👎 反對方 (有點擔心...)</h3>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">💰</span><div><strong class="font-semibold">超級貴的車票和建設費：</strong>蓋高鐵要花好幾千億，這些都是大家的錢。而且高鐵票價不便宜，對有些家庭來說可能是個負擔。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🤔</span><div><strong class="font-semibold">真的有這麼多人搭嗎：</strong>有人擔心，平常日搭高鐵到屏東的人可能不多，如果車站空空的，那就浪費了。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🚌</span><div><strong class="font-semibold">轉車還是很麻煩：</strong>高鐵站通常離市區比較遠，下車後還是要轉公車或計程車，其實沒有想像中方便。</div></li>
+                        </ul>
+                    </article>
+                </div>
+                <div class="content-card p-6">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">從台北到屏東要多久？</h3>
+                    <div class="chart-container">
+                        <canvas id="travelTimeChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 環境 Section -->
+            <section id="environment" class="content-section hidden">
+                <div class="text-center mb-8 p-6 bg-teal-50 rounded-2xl">
+                    <h2 class="text-3xl font-bold text-teal-800 mb-2">地球的悄悄話</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">蓋一條長長的高鐵軌道，就像在地球媽媽的臉上畫一條線。這條線會經過農田、森林，可能會影響到住在裡面的小動物和植物。我們要怎麼做才是對環境最好的選擇呢？</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <article class="content-card p-6 border-t-4 border-green-400">
+                        <h3 class="text-2xl font-bold mb-4 text-green-700">👍 贊成方 (對環境好？)</h3>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">💨</span><div><strong class="font-semibold">減少空氣污染：</strong>如果大家都去搭高鐵，開車的人就會變少。這樣可以減少汽車排放的廢氣，讓空氣變得更清新！</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🌍</span><div><strong class="font-semibold">節省能源：</strong>高鐵是電力驅動的，而且一次可以載很多人，平均下來比每個人都開車還要省能源，是一種比較環保的交通方式。</div></li>
+                        </ul>
+                    </article>
+                    <article class="content-card p-6 border-t-4 border-red-400">
+                        <h3 class="text-2xl font-bold mb-4 text-red-700">👎 反對方 (會傷害大自然？)</h3>
+                         <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">🏗️</span><div><strong class="font-semibold">施工破壞：</strong>蓋高鐵需要開挖土地、蓋高架橋，這會破壞原本的農田和綠地。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🐦</span><div><strong class="font-semibold">動物的家不見了：</strong>高鐵路線可能會切斷動物們原來的家，讓牠們找不到路回家或覓食。而且高鐵行駛的噪音也可能會嚇到牠們。</div></li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 文化 Section -->
+            <section id="culture" class="content-section hidden">
+                 <div class="text-center mb-8 p-6 bg-indigo-50 rounded-2xl">
+                    <h2 class="text-3xl font-bold text-indigo-800 mb-2">家鄉的新風貌</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">高鐵就像一個魔法棒，可能會讓屏東變得更熱鬧、更現代化。但也有人擔心，這種改變會不會讓屏東失去原本純樸、有人情味的樣子？這是一個值得我們好好思考的問題。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <article class="content-card p-6 border-t-4 border-green-400">
+                        <h3 class="text-2xl font-bold mb-4 text-green-700">👍 贊成方 (帶來新活力！)</h3>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">💼</span><div><strong class="font-semibold">創造工作機會：</strong>蓋車站、開店都需要人手，可以為屏東的叔叔阿姨們創造更多工作機會。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🏠</span><div><strong class="font-semibold">讓家鄉更進步：</strong>高鐵站附近通常會發展得很快，會有新的商店、新的房子，讓屏東看起來更現代化，生活更方便。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🌟</span><div><strong class="font-semibold">文化交流：</strong>更多外地遊客來，可以把屏東的文化，像是黑鮪魚季、萬巒豬腳介紹給更多人認識，也帶來新的想法。</div></li>
+                        </ul>
+                    </article>
+                    <article class="content-card p-6 border-t-4 border-red-400">
+                        <h3 class="text-2xl font-bold mb-4 text-red-700">👎 反對方 (擔心舊的回憶消失...)</h3>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start"><span class="text-2xl mr-3">📈</span><div><strong class="font-semibold">房價物價變貴：</strong>人變多了，土地和房子的價格可能會上漲，東西也可能變貴，對原本住在當地的人來說，生活壓力會變大。</div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🎭</span><div><strong class="font-semibold">失去在地特色：</strong>為了迎接觀光客，很多地方可能會變得一模一樣，都是賣紀念品的店，反而失去了屏東獨特的味道。</div></li>
+                             <li class="flex items-start"><span class="text-2xl mr-3">👴</span><div><strong class="font-semibold">改變生活步調：</strong>屏東的生活比較悠閒，高鐵帶來的快速和熱鬧，可能會改變大家原本習慣的生活方式。</div></li>
+                        </ul>
+                    </article>
+                </div>
+                <div class="content-card p-6">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">高鐵可能帶來哪些改變？</h3>
+                    <div class="chart-container">
+                        <canvas id="economicImpactChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 總結 Section -->
+            <section id="summary" class="content-section hidden">
+                <div class="text-center mb-8 p-6 bg-rose-50 rounded-2xl">
+                    <h2 class="text-3xl font-bold text-rose-800 mb-2">我們的思考時間</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">哇！原來蓋高鐵有這麼多事情要考慮。它不只是一條鐵路，還關係到我們的時間、金錢、環境和家鄉的未來。這沒有絕對的對或錯，需要很多人一起討論，找出對大家最好的方法。</p>
+                </div>
+                <div class="content-card p-8 text-center">
+                    <h3 class="text-2xl font-bold mb-4">聽完大家的說法，你的想法是什麼呢？</h3>
+                    <p class="mb-6">這是一個很複雜的問題，每個選項都有它的道理。</p>
+                    <div id="reflection-buttons" class="flex flex-wrap justify-center gap-4">
+                        <button class="reflect-btn text-lg font-semibold py-3 px-6 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transform hover:scale-105 transition-all">我覺得好處比較多！</button>
+                        <button class="reflect-btn text-lg font-semibold py-3 px-6 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transform hover:scale-105 transition-all">我覺得壞處比較多...</button>
+                        <button class="reflect-btn text-lg font-semibold py-3 px-6 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all">嗯...我需要再想想！</button>
+                    </div>
+                    <div id="reflection-message" class="mt-6 text-xl font-semibold text-gray-700 hidden h-12"></div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+            const reflectionButtons = document.querySelectorAll('.reflect-btn');
+            const reflectionMessage = document.getElementById('reflection-message');
+
+            const appData = {
+                travelTime: {
+                    labels: ['自己開車', '搭火車', '高鐵(到左營)+轉乘', '高鐵(未來直達)'],
+                    data: [300, 270, 240, 120],
+                },
+                economicImpact: {
+                    labels: ['觀光收入增加', '新的工作機會', '在地商店生意變好', '房地產發展'],
+                    data: [40, 25, 20, 15],
+                }
+            };
+            
+            let travelTimeChart, economicImpactChart;
+
+            function showSection(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.toggle('hidden', section.id !== targetId);
+                });
+                navButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.target === targetId);
+                });
+
+                if (targetId === 'transport' && !travelTimeChart) {
+                   createTravelTimeChart();
+                }
+                if (targetId === 'culture' && !economicImpactChart) {
+                    createEconomicImpactChart();
+                }
+            }
+            
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    showSection(button.dataset.target);
+                });
+            });
+            
+            reflectionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    reflectionMessage.classList.remove('hidden');
+                    reflectionMessage.textContent = '謝謝你的想法！持續關心公共議題，就是最棒的公民表現喔！👏';
+                    document.getElementById('reflection-buttons').classList.add('hidden');
+                });
+            });
+
+            function createTravelTimeChart() {
+                const ctx = document.getElementById('travelTimeChart').getContext('2d');
+                travelTimeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: appData.travelTime.labels,
+                        datasets: [{
+                            label: '旅行時間 (分鐘)',
+                            data: appData.travelTime.data,
+                            backgroundColor: [
+                                'rgba(255, 159, 64, 0.5)',
+                                'rgba(255, 205, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(54, 162, 235, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgb(255, 159, 64)',
+                                'rgb(255, 205, 86)',
+                                'rgb(75, 192, 192)',
+                                'rgb(54, 162, 235)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '分鐘'
+                                }
+                            }
+                        },
+                        plugins: {
+                           legend: {
+                                display: false
+                           },
+                           tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + ' 分鐘';
+                                        }
+                                        return label;
+                                    }
+                                }
+                           }
+                        }
+                    }
+                });
+            }
+
+            function createEconomicImpactChart() {
+                const ctx = document.getElementById('economicImpactChart').getContext('2d');
+                economicImpactChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: appData.economicImpact.labels,
+                        datasets: [{
+                            label: '可能的改變',
+                            data: appData.economicImpact.data,
+                            backgroundColor: [
+                                'rgba(153, 102, 255, 0.5)',
+                                'rgba(255, 159, 64, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(255, 99, 132, 0.5)',
+                            ],
+                            borderColor: [
+                                'rgb(153, 102, 255)',
+                                'rgb(255, 159, 64)',
+                                'rgb(75, 192, 192)',
+                                'rgb(255, 99, 132)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                        }
+                    }
+                });
+            }
+
+            showSection('transport');
+        });
+    </script>
+
+</body>
+</html>
