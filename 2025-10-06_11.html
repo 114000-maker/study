@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google AI 教育應用指南 (NotebookLM 篇)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: The application is structured as a task-oriented dashboard instead of a linear slide deck. The top-level navigation divides content into two main tools: "NotebookLM" and "Gemini in Workspace". This allows users to immediately select their area of interest. Within the "Gemini in Workspace" section, content is further organized by application (Docs, Slides, Sheets) using sub-navigation tabs. Use cases for each tool/application are presented as interactive, expandable cards. This hierarchical and interactive structure was chosen to reduce cognitive load, facilitate quick navigation to relevant information, and encourage exploration over passive reading, making the guide a more practical and user-friendly resource for educators. -->
+    <!-- Visualization & Content Choices: Given the source material is entirely text-based (describing use cases and prompts), traditional data visualizations like charts were not applicable. The core goal is to organize and present qualitative information effectively. To achieve this, I chose interactive UI components: 1) Navigation Tabs (HTML/JS) to switch between the main tool sections (NotebookLM vs. Workspace). 2) Filter Buttons (HTML/JS) to sort Workspace use cases by application. 3) Accordion Cards (HTML/CSS/JS) to present each use case concisely, with details like prompts and tips revealed on click. This approach transforms static text into an engaging, explorable interface without needing any data visualization libraries, thus confirming NO SVG/Mermaid usage. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4;
+            color: #333;
+        }
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .nav-btn.active {
+            background-color: #4285F4;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-btn:not(.active) {
+            background-color: #ffffff;
+            color: #4285F4;
+            border-color: #4285F4;
+        }
+        .nav-btn:not(.active):hover {
+            background-color: #e8f0fe;
+        }
+        .sub-nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #dadce0;
+        }
+        .sub-nav-btn.active {
+            background-color: #34A853;
+            color: #ffffff;
+            border-color: #34A853;
+        }
+        .sub-nav-btn:not(.active):hover {
+            background-color: #f1f3f4;
+        }
+        .use-case-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .use-case-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .card-header {
+            cursor: pointer;
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .card-content.open {
+            max-height: 1000px;
+            padding-top: 1rem;
+            padding-bottom: 1.5rem;
+        }
+        .pro-tip {
+            background-color: #e8f0fe;
+            border-left: 4px solid #4285F4;
+        }
+        .best-for {
+            background-color: #e6f4ea;
+            border-left: 4px solid #34A853;
+        }
+        .prompt-text {
+            background-color: #f1f3f4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-bold text-gray-800 mb-2">Google AI 教育應用指南</h1>
+            <p class="text-lg text-gray-600">探索 Gemini 如何革新教育工作者的研究、協作與內容創作</p>
+        </header>
+
+        <nav class="flex justify-center items-center space-x-2 sm:space-x-4 mb-12">
+            <button id="nav-notebooklm" class="nav-btn active">🚀 NotebookLM</button>
+            <button id="nav-workspace" class="nav-btn">🎨 Gemini in Workspace</button>
+        </nav>
+
+        <main>
+            <section id="content-notebooklm">
+                <div class="text-center mb-10 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">NotebookLM：您的智慧研究助理</h2>
+                    <p class="text-gray-600">NotebookLM 是一個專為您的資料來源設計的 AI 協作夥伴。您可以上傳研究論文、課程標準、訪談逐字稿等文件，NotebookLM 會立即成為這些資料的專家。它不僅能摘要內容，更能綜合跨文件的見解、生成新想法，並為您提供精準、附有引用的答覆，大幅提升學術研究與行政工作的效率和深度。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <div class="use-case-card">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">課程圖譜設計</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">我是一位學區課程協調員。根據我上傳的《五年戰略計劃》和《本年度教師專業發展 (PD) 報告》，繪製一個課程圖譜，說明我們的 PD 內容如何與學區的長期目標保持一致。請為我建立一份重點摘要，指出一致性高的領域和潛在的差距。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 請 Gemini 將輸出結果格式化為一個包含「目標」、「PD 活動」和「一致性評級（高/中/低）」的表格。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 將行政目標與教學實踐連接起來，並為下一年的策略規劃提供資訊。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="use-case-card">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">生成考試題庫</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**扮演一位大學入學考試設計師。** 我已上傳一份長達 200 頁的歷史教科書章節（關於冷戰）。請根據這份材料生成 30 個高階的多項選擇題，這些問題必須評估學生分析能力而非記憶力，並附上答案鍵和每個錯誤選項的解釋。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 要求 Gemini 根據布魯姆分類學 (Bloom's Taxonomy) 等框架來校準問題的難度等級。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 在確保準確性的前提下，從特定教材中快速生成高質量、以概念為基礎的評估工具。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">跨語言資源分析</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">我是一位全球研究教授。我上傳了三份關於全球氣候政策的文件，其中一份是法語，兩份是英語。請綜合這三份文件，並用繁體中文總結其關鍵的政策分歧點。請務必在總結中引用這三份文件。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 強調你需要「內嵌引用」來驗證資訊來源。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 處理多語種文獻回顧、國際研究或協助多語言學習者理解複雜資源。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">學生研究與指導</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**扮演一位學生研究導師。** 這是我學生針對其關於太陽能技術的報告所上傳的五個來源。請為這位學生起草一份回饋信，內容應建議她如何將來源 A 和來源 C 進行綜合比較，並提出一個縮小報告範圍的研究問題。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 請 Gemini 在回饋中建議一個新的 AI 提問，讓學生在筆記本中進行嘗試。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 為學生提供個性化、有針對性的研究指導，並在不親自閱讀所有來源的情況下提供方向。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="use-case-card md:col-span-2">
+                         <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">協作研究與學習</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="p-4 border-b font-semibold">功能</th>
+                                            <th class="p-4 border-b font-semibold">描述</th>
+                                            <th class="p-4 border-b font-semibold">對教育者的益處</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-4 border-b border-gray-200 font-medium">協作筆記本</td>
+                                            <td class="p-4 border-b border-gray-200">與同事或學生分享整個筆記本，以便他們可以存取來源並提出問題。</td>
+                                            <td class="p-4 border-b border-gray-200">團隊規劃、集體課程設計、或用於指導學生研究小組。</td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-4 border-b border-gray-200 font-medium">共享引用</td>
+                                            <td class="p-4 border-b border-gray-200">筆記本的 AI 輸出結果始終包含來源文件的內嵌引用。</td>
+                                            <td class="p-4 border-b border-gray-200">促進學術誠信、示範研究習慣並讓學生驗證所有見解。</td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-4 border-b border-gray-200 font-medium">專案工作區</td>
+                                            <td class="p-4 border-b border-gray-200">學生可以為其大型專案（例如畢業論文或學期報告）建立專屬筆記本。</td>
+                                            <td class="p-4 border-b border-gray-200">幫助學生組織大量的研究文件，並讓教師可以追蹤他們的資料分析過程。</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="content-workspace" class="hidden">
+                <div class="text-center mb-10 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Google Workspace 中的 Gemini</h2>
+                    <p class="text-gray-600">Gemini 深度整合於您日常使用的 Google Workspace 工具中，成為您的創意夥伴與效率助推器。無論是在 Google 文件中起草文稿、在簡報中生成視覺化內容，還是在試算表中分析數據，Gemini 都能幫助您無縫地將想法轉化為精美的成果，節省寶貴時間，讓您專注於更具創造性的教學與管理工作。</p>
+                </div>
+                <div class="flex justify-center items-center space-x-2 sm:space-x-4 mb-10" id="workspace-filter">
+                    <button class="sub-nav-btn active" data-filter="all">全部</button>
+                    <button class="sub-nav-btn" data-filter="docs">📄 文件</button>
+                    <button class="sub-nav-btn" data-filter="slides">🖼️ 簡報</button>
+                    <button class="sub-nav-btn" data-filter="sheets">📊 試算表</button>
+                </div>
+                <div id="workspace-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <div class="use-case-card" data-app="docs">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">文件：起草與摘要</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                             <p class="prompt-text">**請為我起草**一封電子郵件，通知所有教職員本週五下午的專業發展課程已取消。請保持專業且簡潔的語氣。在郵件結尾附上新的會議連結。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 請 Gemini **從我上傳的文件中提取** 5 個關鍵要點，並將其重新編寫為一份 150 字的週報摘要。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 從零開始起草內容，或快速將長篇文件濃縮成易於消化的格式。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="docs">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">文件：調整語氣</h3>
+                             <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請重寫**這段關於新圖書館政策的內容。請將語氣從『正式』調整為『**友好且易於理解**』，以適用於小學五年級的學生。請確保所有關鍵細節都得到保留。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 突出顯示您想要更改的內容，然後選擇「協助我寫作」並選擇「重寫」選項。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 對同一份通訊稿進行分級，以適應不同的受眾（家長、學生、教育者），同時保持資訊一致性。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="docs">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">文件：結構化內容</h3>
+                             <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請幫我創建**一份空白的工作表，用於新學期教師進行『學生興趣調查』。工作表應包含**『問題』**和**『回覆空間』**的表格，以及一個關於如何將興趣融入課程的**『行動計畫』**部分。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 請 Gemini 將輸出結果格式化為一個包含三個欄位的 Markdown 表格，例如：`姓名 / 最喜歡的科目 / 學習目標`。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 快速從提示中建立結構化內容，例如會議記錄範本、待辦事項清單或用於收集意見的回饋表單。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="slides">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">簡報：內容創作</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請為我創建**一份關於『AI 倫理在 K-12 教育中的應用』的簡報。這份簡報應包含 10 張投影片，涵蓋簡介、三個核心倫理原則，以及教師可採取的實際步驟。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 上傳一份文件或貼上一個大綱，然後要求 Gemini 將其轉換為一份包含投影片標題和主要要點的簡報草稿。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 在幾秒鐘內為課程、專業發展或家長之夜活動建立視覺化的簡報基礎。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="slides">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">簡報：生成視覺效果</h3>
+                             <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請為我生成一張**圖片，內容是一隻正在給樹澆水的機器人，用於我關於永續發展的簡報中。請使用 **水彩畫風格**，並確保它具有鼓舞人心的色調。</p>
+                            <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 使用詳細的描述來指導 AI 圖像生成器，包括風格（例如，卡通、寫實、水彩）和情緒（例如，嚴肅、有趣）。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 為簡報新增引人入勝、且與內容相關的獨特視覺效果，無需花時間搜索圖庫。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="sheets">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">試算表：公式建立</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                           <p class="prompt-text">**請為我建立**一個公式：計算 'C' 欄（考試成績）的平均值，但**排除**所有在 'D' 欄（缺考）中標記為「是」的行。</p>
+                           <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 明確指出你希望公式檢查的欄位名稱和條件。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 快速建立複雜的、基於條件的數據計算公式。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card" data-app="sheets">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">試算表：資料清理</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請幫我清理**這個名單。請檢查『學生姓名』欄位中的所有單元格，並確保所有名稱都使用**首字母大寫**，且**沒有多餘的空格**。</p>
+                           <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 請 Gemini 建立一個新的欄位，該欄位將「姓氏」和「名字」欄位合併為一個「全名」欄位，並用逗號分隔。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 統一大型數據集的格式（例如，聯絡人列表、成績單），以確保數據的一致性和準確性。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="use-case-card" data-app="sheets">
+                        <div class="card-header p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-gray-800">試算表：數據總結</h3>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </div>
+                        <div class="card-content px-6">
+                            <p class="prompt-text">**請分析**這份成績單。請幫我找出所有**平均成績低於 70%** 的學生，並將他們的姓名、平均成績和最需要改進的科目（基於最低的單元成績）列在一個新的表格中。</p>
+                           <div class="pro-tip p-4 mt-4 rounded-lg">
+                                <p>✨ **提示：** 詢問 Gemini 如何將這些數據轉換為一個包含「學生成績分佈」的**圓餅圖**，以供視覺化報告使用。</p>
+                            </div>
+                            <div class="best-for p-4 mt-4 rounded-lg">
+                                <p>🔥 **絕佳適用於：** 快速識別需要介入的學生，並將原始數據轉換為行政或教學規劃所需的關鍵見解。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navNotebookLM = document.getElementById('nav-notebooklm');
+            const navWorkspace = document.getElementById('nav-workspace');
+            const contentNotebookLM = document.getElementById('content-notebooklm');
+            const contentWorkspace = document.getElementById('content-workspace');
+            const workspaceFilter = document.getElementById('workspace-filter');
+            const workspaceGrid = document.getElementById('workspace-grid');
+            const allCards = document.querySelectorAll('.use-case-card');
+
+            function showNotebookLM() {
+                navNotebookLM.classList.add('active');
+                navWorkspace.classList.remove('active');
+                contentNotebookLM.classList.remove('hidden');
+                contentWorkspace.classList.add('hidden');
+            }
+
+            function showWorkspace() {
+                navWorkspace.classList.add('active');
+                navNotebookLM.classList.remove('active');
+                contentWorkspace.classList.remove('hidden');
+                contentNotebookLM.classList.add('hidden');
+            }
+
+            navNotebookLM.addEventListener('click', showNotebookLM);
+            navWorkspace.addEventListener('click', showWorkspace);
+
+            workspaceFilter.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    const filter = e.target.dataset.filter;
+                    
+                    workspaceFilter.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+
+                    const cards = workspaceGrid.querySelectorAll('.use-case-card');
+                    cards.forEach(card => {
+                        if (filter === 'all' || card.dataset.app === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                }
+            });
+
+            allCards.forEach(card => {
+                const header = card.querySelector('.card-header');
+                const content = card.querySelector('.card-content');
+                const icon = header.querySelector('span');
+
+                header.addEventListener('click', () => {
+                    const isOpen = content.classList.contains('open');
+                    
+                    allCards.forEach(c => {
+                        c.querySelector('.card-content').classList.remove('open');
+                        c.querySelector('.card-header span').style.transform = 'rotate(0deg)';
+                        c.querySelector('.card-header span').textContent = '+';
+                    });
+                    
+                    if (!isOpen) {
+                        content.classList.add('open');
+                        icon.style.transform = 'rotate(45deg)';
+                        icon.textContent = '×';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
