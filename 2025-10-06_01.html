@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding - Excel 多條件篩選效率神器</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+        }
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 頂部導航欄 (Header) -->
+    <header class="bg-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-indigo-600">
+                Vibe Coding <span class="text-gray-400 text-sm">| 效率神器</span>
+            </div>
+            <a href="#cta" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 shadow-md">
+                立即體驗
+            </a>
+        </div>
+    </header>
+
+    <!-- 英雄區塊 (Hero Section) -->
+    <section class="bg-indigo-700 text-white py-16 sm:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl sm:text-6xl font-extrabold mb-4 text-shadow">
+                🚀 Excel 撈名單不再難！
+            </h1>
+            <p class="text-xl sm:text-2xl mb-8 font-light max-w-3xl mx-auto">
+                告別複雜公式，Vibe Coding 教你「多條件一次搞定」，效率直接翻倍 ⚡
+            </p>
+            <a href="#features" class="inline-block bg-amber-400 hover:bg-amber-500 text-indigo-900 font-bold text-lg py-3 px-8 rounded-xl transition duration-300 transform hover:scale-105 shadow-xl">
+                了解更多神奇功能 →
+            </a>
+        </div>
+    </section>
+
+    <!-- 痛點分析 (Problem Section) -->
+    <section id="problem" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">
+                傳統 Excel 篩選的效率痛點
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- 痛點 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-900">手動篩選：易錯且耗時</h3>
+                    <p class="text-gray-600">只適合一兩個條件。條件一多，需要來回點擊數十次，極易漏掉或重複操作，效率極低。</p>
+                </div>
+                <!-- 痛點 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-900">進階篩選：不夠直覺</h3>
+                    <p class="text-gray-600">功能雖完整，但介面複雜不直覺，需要額外學習時間，新手入門常常卡關。</p>
+                </div>
+                <!-- 痛點 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-900">複雜公式：維護困難</h3>
+                    <p class="text-gray-600">如 <code>=AND(A2>30, B2="台北", ...)</code>。條件疊加後公式又長又難懂，可讀性差，難以維護。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心價值 (Features Section) -->
+    <section id="features" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">
+                Vibe Coding 的亮點：讓 Excel 聽得懂「人話」
+            </h2>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- 左側文字 -->
+                <div>
+                    <h3 class="text-2xl font-semibold text-indigo-600 mb-4">
+                        1. 直覺語法：像說話一樣簡單
+                    </h3>
+                    <p class="text-gray-700 mb-6">
+                        Vibe Coding 擺脫傳統函數語法，讓你直接用直覺的邏輯描述你的篩選需求，極大化提升效率和準確性。
+                    </p>
+
+                    <h3 class="text-2xl font-semibold text-indigo-600 mb-4">
+                        2. 高度可讀：條件再多也不怕
+                    </h3>
+                    <p class="text-gray-700">
+                        無論是三個條件還是五個條件，語法始終清楚易讀。維護性高，交接給同事也能一眼就懂你的篩選邏輯。
+                    </p>
+                </div>
+
+                <!-- 右側代碼範例 -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+                    <p class="text-amber-400 font-mono mb-4 text-sm">// 傳統 Excel 公式 (難以閱讀)</p>
+                    <div class="bg-black p-4 rounded-lg overflow-x-auto mb-6">
+                        <code class="text-white text-base block">
+                            <span class="text-red-400">=AND</span>(A2&gt;=30, B2="台北", C2&gt;10000)
+                        </code>
+                    </div>
+
+                    <p class="text-amber-400 font-mono mb-4 text-sm">
+                        // Vibe Coding 人話語法 (一眼就懂！)
+                    </p>
+                    <div class="bg-black p-4 rounded-lg overflow-x-auto">
+                        <code class="text-green-400 text-base block">
+                            <span class="text-yellow-400">filter</span>(顧客名單, <span class="text-blue-400">年齡 &gt;= 30 AND 城市 == "台北" AND 消費金額 &gt; 10000</span>)
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 應用情境 (Application Scenarios) -->
+    <section id="applications" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">
+                實務應用情境：萬用性是我們的魅力
+            </h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- 情境 1: 行銷團隊 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-b-4 border-red-500">
+                    <div class="text-4xl mb-3">📈</div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">行銷團隊</h3>
+                    <p class="text-gray-600 text-sm">
+                        快速鎖定高價值客群：篩選「近半年有購買紀錄 + 客單價 > 平均值 + 居住在台中」的顧客。
+                    </p>
+                </div>
+                <!-- 情境 2: 人資部門 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-b-4 border-green-500">
+                    <div class="text-4xl mb-3">👥</div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">人資部門 (HR)</h3>
+                    <p class="text-gray-600 text-sm">
+                        晉升/加薪名單秒出：找出「年資 ≥ 5 年 + 考績為 A + 擁有專業證照」的潛力員工。
+                    </p>
+                </div>
+                <!-- 情境 3: 教育單位 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-b-4 border-blue-500">
+                    <div class="text-4xl mb-3">🎓</div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">教育單位</h3>
+                    <p class="text-gray-600 text-sm">
+                        獎學金評選輕鬆：快速篩選「出席率 ≥ 90% + 期末成績 ≥ 80 + 報告及格」的學生。
+                    </p>
+                </div>
+                <!-- 情境 4: 研究分析 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-b-4 border-yellow-500">
+                    <div class="text-4xl mb-3">🔬</div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">研究分析</h3>
+                    <p class="text-gray-600 text-sm">
+                        海量數據處理：研究人員秒完成「同時符合三個變數條件」的樣本篩選，省下龐大人工整理時間。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 效率對比 (Comparison Table) -->
+    <section class="py-16 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">
+                效率對比：Vibe Coding 是多條件篩選的最優解
+            </h2>
+            <div class="overflow-x-auto shadow-xl rounded-xl">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-indigo-600">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                方法
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                操作難度
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                適合情境
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                缺點
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">手動篩選</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">低</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">少量資料、條件少</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">條件多時效率**極低**</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">自訂篩選 / 公式</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">中</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">中等量資料</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">可讀性差，維護麻煩</td>
+                        </tr>
+                        <tr class="bg-indigo-50/50">
+                            <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-indigo-700">Vibe Coding</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-indigo-700">低</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-indigo-700">大量資料、多條件需求</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-green-600">幾乎沒有 (需安裝/熟悉)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- CTA 區塊 (Call to Action) -->
+    <section id="cta" class="bg-indigo-700 py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+                立即讓您的 Excel 變聰明！
+            </h2>
+            <p class="text-xl text-indigo-200 mb-8">
+                下次當您需要「條件 A + B + C」的名單，不要再浪費時間一欄一欄篩了。
+            </p>
+            <a href="#" class="inline-block bg-amber-400 hover:bg-amber-500 text-indigo-900 font-bold text-xl py-4 px-10 rounded-xl transition duration-300 transform hover:scale-110 shadow-2xl">
+                免費試用 Vibe Coding ⚡
+            </a>
+        </div>
+    </section>
+
+    <!-- 頁腳 (Footer) -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            &copy; 2025 Vibe Coding. All rights reserved. | <a href="#" class="text-indigo-400 hover:text-indigo-300">隱私權政策</a>
+        </div>
+    </footer>
+</body>
+</html>
