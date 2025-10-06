@@ -44,3 +44,5 @@
 [校園閱讀打卡牆 - 記錄你的閱讀旅程](https://114000-maker.github.io/study/2025-10-04_01.html)
 # 高鐵到屏東？一個超級任務！
 [>高鐵到屏東？一個超級任務！<](https://114000-maker.github.io/study/2025-10-05_01.html)
+# Vibe Coding - Excel 多條件篩選效率神器
+[Vibe Coding - Excel 多條件篩選效率神器](https://114000-maker.github.io/study/2025-10-06_01.html)
