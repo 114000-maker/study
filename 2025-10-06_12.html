@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google AI 教育賦能資訊圖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: The infographic is structured into four main, scrollable sections: 1. Overview (with a quantitative hook via a Donut Chart showing the 5 NotebookLM vs 8 Workspace use cases). 2. NotebookLM Deep Dive (Organize/Inform using expandable cards for detailed prompts). 3. Gemini in Workspace Feature Summary (Organize/Compare using a feature table). 4. Workspace Use Cases Explorer (Organize/Inform using a dedicated, filterable grid of expandable cards for Docs, Slides, and Sheets). This structure prioritizes user exploration of specific tools and tasks over linear reading. -->
+    <!-- Visualization & Content Choices: 1. Use Case Distribution (Source: Count of use cases in the doc) -> Goal: Inform -> Chosen Viz: Donut Chart (5 NotebookLM / 8 Workspace) -> Justification: Provides immediate visual context of the guide's coverage. Library: Chart.js (Canvas). 2. Use Case Details (Source: All prompts, tips, benefits) -> Goal: Inform/Organize -> Chosen Viz: Expandable Accordion Cards -> Justification: Keeps the busy page clean by hiding detailed prompts until clicked, enhancing interaction and reducing clutter. Method: HTML/JS/Tailwind (No SVG/Mermaid). 3. Feature Comparison (Source: Slide 67 table) -> Goal: Compare/Organize -> Chosen Viz: Styled HTML Table -> Justification: Best format for comparing core capabilities across different apps. Method: HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8; 
+        }
+        .text-primary {
+            color: #118AB2; /* Blue */
+        }
+        .bg-secondary {
+            background-color: #06D6A0; /* Green/Teal */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 320px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .card-header {
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .card-header:hover {
+            background-color: #f8f8f8;
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .card-content.open {
+            max-height: 1000px;
+            padding-top: 1rem;
+            padding-bottom: 1.5rem;
+        }
+        .prompt-box {
+            background-color: #f1f3f4;
+            border-left: 4px solid #118AB2;
+        }
+        .tip-box {
+            background-color: #e8f0fe;
+            border-left: 4px solid #FFD166;
+        }
+        .benefit-box {
+            background-color: #e6f4ea;
+            border-left: 4px solid #06D6A0;
+        }
+        .app-filter.active {
+            background-color: #118AB2;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(17 138 178 / 0.5);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- 標題區塊 -->
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-primary mb-3">Google AI 教育應用地圖</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">本互動指南為教育工作者提供 NotebookLM 與 Gemini 在日常教學、研究和行政中的 13 個實用應用場景。</p>
+        </header>
+
+        <!-- 總覽與數據洞察 -->
+        <section id="overview" class="mb-20">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">應用場景分佈概覽</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-1">
+                        <div class="chart-container">
+                            <canvas id="useCaseChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 space-y-4">
+                        <p class="text-lg text-gray-600">本指南涵蓋的 13 個核心用例清晰地劃分為兩大工具生態系統，分別針對深度研究和日常辦公協作。</p>
+                        <div class="flex flex-col space-y-3">
+                            <div class="p-4 rounded-xl shadow-sm border border-gray-100 flex items-center bg-gray-50">
+                                <span class="w-5 h-5 rounded-full mr-3 bg-[#118AB2]"></span>
+                                <span class="text-xl font-semibold text-gray-700">NotebookLM 應用：<span class="font-extrabold text-primary">5 個</span></span>
+                                <span class="ml-auto text-sm text-gray-500">（深度研究與資料綜合）</span>
+                            </div>
+                            <div class="p-4 rounded-xl shadow-sm border border-gray-100 flex items-center bg-gray-50">
+                                <span class="w-5 h-5 rounded-full mr-3 bg-[#06D6A0]"></span>
+                                <span class="text-xl font-semibold text-gray-700">Workspace 應用：<span class="font-extrabold text-primary">8 個</span></span>
+                                <span class="ml-auto text-sm text-gray-500">（文件、簡報與試算表）</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NotebookLM 專區 -->
+        <section id="notebooklm" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-3">🚀 NotebookLM：進階研究與協作</h2>
+                <p class="text-lg text-gray-600 max-w-4xl mx-auto">NotebookLM 是一個依賴您的特定資料來源（您上傳的文件）運作的 AI 協作夥伴。探索如何利用其強大的綜合能力進行課程規劃和評估設計。</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="notebooklm-cases">
+                <!-- Slide 61: 課程圖譜設計 -->
+                <div class="rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    <div class="card-header p-5 flex justify-between items-center text-xl font-semibold text-gray-700">
+                        課程圖譜設計：行政目標一致性 
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <p class="mb-3 text-gray-600">此用例協助課程領導者將長期策略目標與實際的 PD 內容連接起來。</p>
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 我是一位學區課程協調員。根據我上傳的《五年戰略計劃》和《本年度教師專業發展 (PD) 報告》，繪製一個課程圖譜，說明我們的 PD 內容如何與學區的長期目標保持一致。請為我建立一份重點摘要，指出一致性高的領域和潛在的差距。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 請 Gemini 將輸出結果格式化為一個包含「目標」、「PD 活動」和「一致性評級（高/中/低）」的表格。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 將行政目標與教學實踐連接起來，並為下一年的策略規劃提供資訊。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 62: 生成考試題庫 -->
+                <div class="rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    <div class="card-header p-5 flex justify-between items-center text-xl font-semibold text-gray-700">
+                        生成考試題庫：高階評估設計
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <p class="mb-3 text-gray-600">專注於從大量教材中，生成評估分析能力的測試題，而非簡單記憶。</p>
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 扮演一位大學入學考試設計師。我已上傳一份長達 200 頁的歷史教科書章節（關於冷戰）。請根據這份材料生成 30 個高階的多項選擇題，這些問題必須評估學生分析能力而非記憶力，並附上答案鍵和每個錯誤選項的解釋。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 要求 Gemini 根據布魯姆分類學 (Bloom's Taxonomy) 等框架來校準問題的難度等級。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 在確保準確性的前提下，從特定教材中快速生成高質量、以概念為基礎的評估工具。
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Slide 63: 跨語言資源分析 -->
+                <div class="rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    <div class="card-header p-5 flex justify-between items-center text-xl font-semibold text-gray-700">
+                        跨語言資源分析：多語種研究綜合
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <p class="mb-3 text-gray-600">利用 AI 處理多種語言的研究文獻，並生成附有引用的統一報告。</p>
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 我是一位全球研究教授。我上傳了三份關於全球氣候政策的文件，其中一份是法語，兩份是英語。請綜合這三份文件，並用繁體中文總結其關鍵的政策分歧點。請務必在總結中引用這三份文件。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 強調你需要「內嵌引用」來驗證資訊來源。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 處理多語種文獻回顧、國際研究或協助多語言學習者理解複雜資源。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 65: 學生研究與指導 -->
+                <div class="rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    <div class="card-header p-5 flex justify-between items-center text-xl font-semibold text-gray-700">
+                        學生研究與指導：提供個性化回饋
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <p class="mb-3 text-gray-600">扮演導師角色，根據學生上傳的資料來源，提供有針對性的研究方向和問題縮小建議。</p>
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 扮演一位學生研究導師。這是我學生針對其關於太陽能技術的報告所上傳的五個來源。請為這位學生起草一份回饋信，內容應建議她如何將來源 A 和來源 C 進行綜合比較，並提出一個縮小報告範圍的研究問題。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 請 Gemini 在回饋中建議一個新的 AI 提問，讓學生在筆記本中進行嘗試。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 為學生提供個性化、有針對性的研究指導，並在不親自閱讀所有來源的情況下提供方向。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">NotebookLM 協作與誠信特點 (Slide 64)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b-2 border-gray-200">
+                                <th class="p-4 font-semibold text-primary">功能</th>
+                                <th class="p-4 font-semibold text-primary">描述</th>
+                                <th class="p-4 font-semibold text-primary">對教育者的益處</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">協作筆記本</td>
+                                <td class="p-4">與同事或學生分享整個筆記本，以便他們可以存取來源並提出問題。</td>
+                                <td class="p-4">團隊規劃、集體課程設計、或用於指導學生研究小組。</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">共享引用</td>
+                                <td class="p-4">筆記本的 AI 輸出結果始終包含來源文件的內嵌引用。</td>
+                                <td class="p-4">促進學術誠信、示範研究習慣並讓學生驗證所有見解。</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">專案工作區</td>
+                                <td class="p-4">學生可以為其大型專案（例如畢業論文或學期報告）建立專屬筆記本。</td>
+                                <td class="p-4">幫助學生組織大量的研究文件，並讓教師可以追蹤他們的資料分析過程。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gemini in Workspace 專區 -->
+        <section id="workspace" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-3">🎨 Google Workspace 中的 Gemini</h2>
+                <p class="text-lg text-gray-600 max-w-4xl mx-auto">Gemini 深度整合在 Docs, Slides, 和 Sheets 中，作為您的 AI 助理，隨時隨地從草稿轉變為最終成果。</p>
+            </div>
+            
+            <!-- Slide 67: 核心能力一覽 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10 mb-10">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 text-center">核心能力：在不離開工作流程的情況下完成更多工作</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b-2 border-gray-200">
+                                <th class="p-4 font-semibold text-primary">應用程式</th>
+                                <th class="p-4 font-semibold text-primary">核心能力</th>
+                                <th class="p-4 font-semibold text-primary">範例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">文件</td>
+                                <td class="p-4">起草、重寫、摘要、校對、創建結構。</td>
+                                <td class="p-4">從筆記中生成家長通知信；將簡報逐字稿轉為文件。</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">簡報</td>
+                                <td class="p-4">創建新簡報、從文件生成投影片、圖像生成。</td>
+                                <td class="p-4">根據大綱生成 10 張投影片；為科學課生成一張概念圖。</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4 font-medium">試算表</td>
+                                <td class="p-4">公式創建、數據分析、表格分類、數據清理。</td>
+                                <td class="p-4">自動生成複雜的 VLOOKUP 公式；根據學生成績總結趨勢。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Workspace 用例過濾器 -->
+            <div class="flex justify-center space-x-3 mb-8">
+                <button data-app="all" class="app-filter active py-2 px-5 rounded-full text-sm font-medium transition-colors border border-primary">全部</button>
+                <button data-app="docs" class="app-filter py-2 px-5 rounded-full text-sm font-medium transition-colors border border-primary text-primary">📄 文件</button>
+                <button data-app="slides" class="app-filter py-2 px-5 rounded-full text-sm font-medium transition-colors border border-primary text-primary">🖼️ 簡報</button>
+                <button data-app="sheets" class="app-filter py-2 px-5 rounded-full text-sm font-medium transition-colors border border-primary text-primary">📊 試算表</button>
+            </div>
+
+            <!-- Workspace 用例網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="workspace-cases">
+
+                <!-- Docs 1: 起草與摘要 (Slide 68) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="docs">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Docs:</span> 起草與摘要
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請為我起草一封電子郵件，通知所有教職員本週五下午的專業發展課程已取消。請保持專業且簡潔的語氣。在郵件結尾附上新的會議連結。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 請 Gemini 從我上傳的文件中提取 5 個關鍵要點，並將其重新編寫為一份 150 字的週報摘要。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 從零開始起草內容，或快速將長篇文件濃縮成易於消化的格式。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Docs 2: 調整語氣 (Slide 69) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="docs">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Docs:</span> 調整語氣
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請重寫這段關於新圖書館政策的內容。請將語氣從『正式』調整為『友好且易於理解』，以適用於小學五年級的學生。請確保所有關鍵細節都得到保留。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 突出顯示您想要更改的內容，然後選擇「協助我寫作」並選擇「重寫」選項。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 對同一份通訊稿進行分級，以適應不同的受眾（家長、學生、教育者），同時保持資訊一致性。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Docs 3: 結構化內容 (Slide 70) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="docs">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Docs:</span> 結構化內容
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請幫我創建一份空白的工作表，用於新學期教師進行『學生興趣調查』。工作表應包含『問題』和『回覆空間』的表格，以及一個關於如何將興趣融入課程的『行動計畫』部分。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 請 Gemini 將輸出結果格式化為一個包含三個欄位的 Markdown 表格，例如：`姓名 / 最喜歡的科目 / 學習目標`。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 快速從提示中建立結構化內容，例如會議記錄範本、待辦事項清單或用於收集意見的回饋表單。
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slides 1: 內容創作 (Slide 71) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="slides">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Slides:</span> 內容創作
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請為我創建一份關於『AI 倫理在 K-12 教育中的應用』的簡報。這份簡報應包含 10 張投影片，涵蓋簡介、三個核心倫理原則，以及教師可採取的實際步驟。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 上傳一份文件或貼上一個大綱，然後要求 Gemini 將其轉換為一份包含投影片標題和主要要點的簡報草稿。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 在幾秒鐘內為課程、專業發展或家長之夜活動建立視覺化的簡報基礎。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slides 2: 生成視覺效果 (Slide 72) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="slides">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Slides:</span> 生成視覺效果
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請為我生成一張圖片，內容是一隻正在給樹澆水的機器人，用於我關於永續發展的簡報中。請使用 **水彩畫風格**，並確保它具有鼓舞人心的色調。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 使用詳細的描述來指導 AI 圖像生成器，包括風格（例如，卡通、寫實、水彩）和情緒（例如，嚴肅、有趣）。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 為簡報新增引人入勝、且與內容相關的獨特視覺效果，無需花時間搜索圖庫。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sheets 1: 公式建立 (Slide 73) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="sheets">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Sheets:</span> 公式建立
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請為我建立一個公式：計算 'C' 欄（考試成績）的平均值，但**排除**所有在 'D' 欄（缺考）中標記為「是」的行。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 明確指出你希望公式檢查的欄位名稱和條件。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 快速建立複雜的、基於條件的數據計算公式。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sheets 2: 資料清理 (Slide 74) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="sheets">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Sheets:</span> 資料清理
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請幫我清理這個名單。請檢查『學生姓名』欄位中的所有單元格，並確保所有名稱都使用**首字母大寫**，且**沒有多餘的空格**。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 請 Gemini 建立一個新的欄位，該欄位將「姓氏」和「名字」欄位合併為一個「全名」欄位，並用逗號分隔。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 統一大型數據集的格式（例如，聯絡人列表、成績單），以確保數據的一致性和準確性。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sheets 3: 數據總結 (Slide 75) -->
+                <div class="use-case-card rounded-xl shadow-md border border-gray-200 overflow-hidden" data-app="sheets">
+                    <div class="card-header p-5 flex justify-between items-center font-semibold text-gray-700">
+                        <span class="text-secondary font-bold mr-2">Sheets:</span> 數據總結
+                        <span class="text-3xl text-primary transition-transform duration-300 transform rotate-0">+</span>
+                    </div>
+                    <div class="card-content px-5 bg-white">
+                        <div class="prompt-box p-4 rounded-lg mb-4 text-sm font-mono text-gray-700">
+                            **提示：** 請分析這份成績單。請幫我找出所有**平均成績低於 70%** 的學生，並將他們的姓名、平均成績和最需要改進的科目（基於最低的單元成績）列在一個新的表格中。
+                        </div>
+                        <div class="tip-box p-3 rounded-lg mb-4 text-sm text-gray-700">
+                            ✨ **提示：** 詢問 Gemini 如何將這些數據轉換為一個包含「學生成績分佈」的**圓餅圖**，以供視覺化報告使用。
+                        </div>
+                         <div class="benefit-box p-3 rounded-lg text-sm text-gray-700">
+                            🔥 **絕佳適用於：** 快速識別需要介入的學生，並將原始數據轉換為行政或教學規劃所需的關鍵見解。
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --------------------- CHART.JS (視覺化 1: 應用場景分佈) ---------------------
+            const ctx = document.getElementById('useCaseChart').getContext('2d');
+            const dataNotebookLM = 5;
+            const dataWorkspace = 8;
+            const useCaseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['NotebookLM 應用 (5)', 'Workspace 應用 (8)'],
+                    datasets: [{
+                        label: '應用場景數量',
+                        data: [dataNotebookLM, dataWorkspace],
+                        backgroundColor: [
+                            '#118AB2', // Primary Blue
+                            '#06D6A0'  // Secondary Green/Teal
+                        ],
+                        borderColor: '#f0f4f8',
+                        borderWidth: 8,
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // --------------------- INTERACTION (可展開卡片) ---------------------
+            const allCards = document.querySelectorAll('.rounded-xl.shadow-md');
+
+            allCards.forEach(card => {
+                const header = card.querySelector('.card-header');
+                const content = card.querySelector('.card-content');
+                const icon = header.querySelector('span:last-child');
+                
+                if (header && content && icon) {
+                    header.addEventListener('click', () => {
+                        const isOpen = content.classList.contains('open');
+                        
+                        // 關閉所有其他開啟的卡片
+                        allCards.forEach(c => {
+                            const otherContent = c.querySelector('.card-content');
+                            const otherIcon = c.querySelector('.card-header span:last-child');
+                            if (otherContent && otherContent !== content) {
+                                otherContent.classList.remove('open');
+                                otherIcon.style.transform = 'rotate(0deg)';
+                                otherIcon.textContent = '+';
+                            }
+                        });
+                        
+                        // 開啟或關閉當前卡片
+                        if (!isOpen) {
+                            content.classList.add('open');
+                            icon.style.transform = 'rotate(45deg)';
+                            icon.textContent = '×';
+                        } else {
+                            content.classList.remove('open');
+                            icon.style.transform = 'rotate(0deg)';
+                            icon.textContent = '+';
+                        }
+                    });
+                }
+            });
+
+            // --------------------- INTERACTION (Workspace 篩選器) ---------------------
+            const filterButtons = document.querySelectorAll('.app-filter');
+            const workspaceCasesContainer = document.getElementById('workspace-cases');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-app');
+                    
+                    // 更新按鈕樣式
+                    document.querySelector('.app-filter.active').classList.remove('active', 'bg-primary', 'text-white');
+                    document.querySelector('.app-filter.active').classList.add('text-primary');
+                    this.classList.add('active', 'bg-primary', 'text-white');
+                    this.classList.remove('text-primary');
+
+                    // 隱藏所有卡片
+                    workspaceCasesContainer.querySelectorAll('.use-case-card').forEach(card => {
+                        card.style.display = 'none';
+                        card.classList.remove('open'); // 關閉所有展開的卡片
+                    });
+                    
+                    // 顯示過濾後的卡片
+                    if (filter === 'all') {
+                        workspaceCasesContainer.querySelectorAll('.use-case-card').forEach(card => {
+                            card.style.display = 'block';
+                        });
+                    } else {
+                        workspaceCasesContainer.querySelectorAll(`.use-case-card[data-app="${filter}"]`).forEach(card => {
+                            card.style.display = 'block';
+                        });
+                    }
+                    
+                    // 確保網格佈局重新調整
+                    workspaceCasesContainer.style.display = 'grid';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
