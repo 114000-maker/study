@@ -56,4 +56,5 @@
 [04](https://114000-maker.github.io/study/2025-10-06_08.html)
 
 #Google AI 教育應用指南 (NotebookLM 篇)
-[Google AI 教育應用指南 (NotebookLM 篇)](https://114000-maker.github.io/study/2025-10-06_11.html)
+01.[Google AI 教育應用指南 (NotebookLM 篇)](https://114000-maker.github.io/study/2025-10-06_11.html)
+02.[Google AI 教育賦能資訊圖](https://114000-maker.github.io/study/2025-10-06_12.html)
