@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位效率神器分析</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 設定字體為 Inter 和中文字體 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', "Noto Sans TC", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 sm:p-8">
+    
+    <div class="max-w-6xl mx-auto">
+
+        <!-- 標題區塊 -->
+        <header class="text-center mb-12 py-8 bg-white shadow-xl rounded-xl">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-indigo-700">
+                數位效率神器分析：解放你的工作流程 ⚡
+            </h1>
+            <p class="mt-4 text-xl text-gray-600">
+                面對資料篩選與學術翻譯的痛點，簡化流程是提升競爭力的關鍵。
+            </p>
+        </header>
+
+        <!-- 兩大工具卡片容器 -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Vibe Coding 卡片 -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl hover:shadow-indigo-300 transition-all duration-300 border-t-8 border-indigo-500">
+                <div class="flex items-center space-x-4 mb-4">
+                    <span class="text-4xl text-yellow-600">📊</span>
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        Vibe Coding：Excel 多條件篩選神器
+                    </h2>
+                </div>
+                
+                <hr class="my-4 border-gray-100">
+
+                <h3 class="text-xl font-semibold text-indigo-600 mb-3">核心痛點與解決方案</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                    <li>
+                        **痛點：** 傳統 Excel 篩選器在面對「年齡 $>= 30$ 且 城市 $=$ 台北 且 消費 $ > 10000$」等多條件疊加時，操作笨拙且效率極低。
+                    </li>
+                    <li>
+                        **傳統挑戰：** 手動篩選易漏、進階篩選不直覺、`AND`/`OR` 公式難維護且可讀性差。
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-indigo-600 mt-6 mb-3">關鍵亮點與優勢</h3>
+                <div class="space-y-3">
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-green-600">✅ 直覺語法：</span> 將複雜公式轉換為「**聽得懂人話**」的邏輯描述，如：
+                        <code class="block bg-gray-100 p-2 mt-1 rounded-lg text-sm overflow-x-auto text-indigo-800">
+                            filter(顧客名單, 年齡 >= 30 AND 城市 == "台北" AND 消費金額 > 10000)
+                        </code>
+                    </p>
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-green-600">✅ 效率翻倍：</span> 無論資料量是 10 筆還是 1 萬筆，都能快速輸出符合條件的名單。
+                    </p>
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-green-600">✅ 應用廣泛：</span> 適用於行銷、人資、教育、研究等各種需要多條件精準鎖定名單的情境。
+                    </p>
+                </div>
+            </div>
+
+            <!-- PDFMathTranslate 卡片 -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl hover:shadow-indigo-300 transition-all duration-300 border-t-8 border-purple-500">
+                <div class="flex items-center space-x-4 mb-4">
+                    <span class="text-4xl text-red-600">📜</span>
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        PDFMathTranslate：學術論文翻譯救星
+                    </h2>
+                </div>
+                
+                <hr class="my-4 border-gray-100">
+
+                <h3 class="text-xl font-semibold text-purple-600 mb-3">核心痛點與解決方案</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                    <li>
+                        **痛點：** 翻譯含有複雜數學公式 ($\text{LaTeX}$ 格式)、圖表和批註的學術 $\text{PDF}$ 時，傳統工具會導致**公式跑位、排版崩潰**。
+                    </li>
+                    <li>
+                        **傳統挑戰：** 人工翻譯耗時耗力，且公式、圖表、目錄容易失效或錯位，影響閱讀與引用。
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-purple-600 mt-6 mb-3">關鍵亮點與優勢</h3>
+                <div class="space-y-3">
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-blue-600">✅ 精準排版：</span> $\text{AI}$ 能**精確識別 $\text{LaTeX}$ 公式**，並確保圖表位置固定、目錄可點擊、批註完整保留，翻譯效果如人工精修。
+                    </p>
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-blue-600">✅ 開源免費：</span> 完全開源，無需會員或付費，支持全球學術社群。
+                    </p>
+                    <p class="text-gray-700">
+                        <span class="font-bold text-lg text-blue-600">✅ 多元部署：</span> 提供 $\text{Web}$ 版、$\text{Windows}$ 版、命令行與 $\text{Docker}$ 等多種使用方式，適應不同用戶與科研機構需求。
+                    </p>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- 總結分析區塊 -->
+        <section class="mt-12 p-8 bg-white rounded-2xl shadow-2xl border-l-8 border-green-500">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="mr-3 text-green-500">💡</span> 總結：效率的未來
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed">
+                這兩款工具體現了數位時代效率提升的共同趨勢：**將複雜的技術操作抽象化為直覺的邏輯。** $\text{Vibe Coding}$ 將冗長的 Excel 公式簡化為近似自然語言的指令；而 $\text{PDFMathTranslate}$ 則利用高精準度 $\text{AI}$，消除了學術界對於公式和排版崩潰的恐懼。
+            </p>
+            <p class="text-lg text-gray-700 mt-4 leading-relaxed">
+                它們共同的價值在於：<span class="font-semibold text-indigo-700">讓使用者將精力聚焦於**內容和決策**本身，而非耗時的**工具操作和格式整理**上。</span> 對於追求效率的職場人士和研究人員來說，這類工具幾乎是不可或缺的「效率外掛」。
+            </p>
+        </section>
+
+        <!-- 頁腳 -->
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>分析生成於 2025 年 10 月 6 日 · 由 Gemini 提供支持</p>
+        </footer>
+
+    </div>
+</body>
+</html>
