@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>效率工具分析網頁 | Vibe Coding & PDFMathTranslate</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using Inter or a suitable default for better readability */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #f7fafc; /* Light gray background */
+        }
+        .article-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .code-block {
+            background-color: #1e293b; /* Slate-800 for code blocks */
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-lg py-6 mb-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-extrabold tracking-tight">效率工具深度分析</h1>
+            <p class="mt-1 text-indigo-200">文章來源：Google 文件 | 內容包含 Vibe Coding 與 PDFMathTranslate</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-16">
+
+        <!-- Vibe Coding Article -->
+        <section id="vibe-coding" class="article-card bg-white p-6 md:p-8 rounded-xl border-t-4 border-indigo-500">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                <span class="mr-3 text-indigo-500">🚀</span> Vibe Coding Excel 效率神器
+            </h2>
+
+            <p class="text-lg text-gray-600 mb-6 border-l-4 border-indigo-200 pl-4 py-1 italic">
+                Excel 撈名單不再難！Vibe Coding 教你「多條件一次搞定」，效率直接翻倍 ⚡
+            </p>
+
+            <div class="space-y-6 text-gray-700">
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-indigo-700">一、為什麼 Excel 內建篩選器不夠用？</h3>
+                <p>Excel 當然有強大的功能，但「多條件」一直是它的罩門。讓我們來看看常見的三種方法：</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>
+                        <strong class="font-medium">手動篩選器:</strong> 適合一兩個條件，但條件一多就要來回點好幾次。
+                        <span class="text-red-500 font-medium ml-2">（缺點：容易漏掉、重複操作耗時）</span>
+                    </li>
+                    <li>
+                        <strong class="font-medium">進階篩選 / 自訂篩選:</strong> 功能完整，但介面不夠直覺，新手常常卡關。
+                    </li>
+                    <li>
+                        <strong class="font-medium">公式（AND / OR）:</strong> 例如 `=AND(A2>30, B2="台北", C2>10000)`。優點是可以自動化，但一旦條件增加，公式就變得又長又難維護。
+                    </li>
+                </ul>
+                <p class="font-medium">這些方法的共同痛點是：效率不足、可讀性差。尤其在面對上萬筆資料時，這種手動與公式的方式根本跟不上需求。</p>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-indigo-700">二、Vibe Coding 的亮點在哪裡？</h3>
+                <p>Vibe Coding 的概念就像是：讓 Excel 聽得懂人話。你不用再去記公式的語法，也不用一直切換篩選器，只要用直覺的邏輯描述，就能快速找到你要的名單。</p>
+
+                <div class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p class="font-mono text-sm mb-2">傳統公式：</p>
+                    <div class="code-block text-sm mb-4">=AND(年齡>=30, 城市="台北", 消費金額>10000)</div>
+                    <p class="font-mono text-sm mb-2">Vibe Coding 語法：</p>
+                    <div class="code-block text-sm">filter(顧客名單, 年齡 >= 30 AND 城市 == "台北" AND 消費金額 > 10000)</div>
+                </div>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-indigo-700">三、一步步教你用 Vibe Coding 撈名單</h3>
+                <p>以下用一個「顧客資料表」當範例，表格包含姓名、年齡、城市、消費金額。</p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong class="font-medium">步驟 1：準備好資料表</strong> - 確保每一欄有標題。</li>
+                    <li><strong class="font-medium">步驟 2：啟動 Vibe Coding</strong> - 打開 Vibe Coding 插件或介面。</li>
+                    <li><strong class="font-medium">步驟 3：輸入條件語法</strong> - 輸入如上所示的直覺語法。</li>
+                    <li><strong class="font-medium">步驟 4：一鍵輸出結果</strong> - 符合條件的名單會直接顯示出來。</li>
+                </ol>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-indigo-700">五、效率對比：傳統 vs. Vibe Coding</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                        <thead class="bg-indigo-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">方法</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">操作難度</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">適合情境</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">缺點</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">手動篩選</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">低</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">少量資料、條件少</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-red-600">條件多時效率極低</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">自訂篩選 / 公式</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">中</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">中等量資料</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-red-600">可讀性差，維護麻煩</td>
+                            </tr>
+                            <tr class="bg-indigo-50 font-bold">
+                                <td class="px-6 py-4 whitespace-nowrap text-indigo-800">Vibe Coding</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-indigo-800">低</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-indigo-800">大量資料、多條件需求</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-green-600">幾乎沒有，唯一缺點是需先安裝/熟悉</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PDFMathTranslate Article -->
+        <section id="pdf-math-translate" class="article-card bg-white p-6 md:p-8 rounded-xl border-t-4 border-emerald-500">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                <span class="mr-3 text-emerald-500">📄</span> PDFMathTranslate：解放你的學術翻譯煩惱
+            </h2>
+
+            <p class="text-lg text-gray-600 mb-6 border-l-4 border-emerald-200 pl-4 py-1 italic">
+                讓論文公式排版不再崩潰！高品質開源工具徹底改變學術翻譯方式。
+            </p>
+
+            <div class="space-y-6 text-gray-700">
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-emerald-700">🔹 解決了哪些問題？</h3>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li><strong class="font-medium">繁瑣的手動翻譯:</strong> 可以在 3 分鐘內完成翻譯，大幅節省時間。</li>
+                    <li><strong class="font-medium">公式排版混亂:</strong> 支援精準識別 <span class="font-mono">LaTeX</span> 格式，每個符號都能完整保留，排版一絲不差。</li>
+                    <li><strong class="font-medium">圖表錯位與目錄失效:</strong> 圖表原位不跑偏，目錄可點擊，注釋和批註完整保留。</li>
+                    <li><strong class="font-medium">缺乏多平台支援:</strong> 提供 Web 版、Windows 版、命令行、Docker 等多種使用方式。</li>
+                    <li><strong class="font-medium">翻譯品質不穩定:</strong> 支援 Google、DeepL、GPT 等多種翻譯引擎，可提高翻譯精準度。</li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-emerald-700">🔹 技術特色與優勢</h3>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li><strong class="font-medium">高精準公式識別:</strong> AI 能精確識別論文中的 <span class="font-mono">LaTeX</span> 公式。</li>
+                    <li><strong class="font-medium">圖表位置固定:</strong> 圖表和圖片不會隨翻譯亂跑。</li>
+                    <li><strong class="font-medium">目錄與批註保留:</strong> 翻譯後的 PDF 目錄仍可點擊，批註、註解與原文同步保留。</li>
+                    <li><strong class="font-medium">多引擎翻譯:</strong> 可自由選擇 Google 翻譯、DeepL 或 GPT 等引擎。</li>
+                    <li><strong class="font-medium">完全開源:</strong> 在 GitHub 上公開，無會員、免費、不限次數。</li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-emerald-700">🔹 使用方式 (多平台支援)</h3>
+                <ul class="list-decimal list-inside space-y-2">
+                    <li><strong>Web 版:</strong> 直接打開官網，拖入 PDF 文檔即可在線翻譯。</li>
+                    <li><strong>Windows 版:</strong> 下載安裝客戶端，提供圖形化操作界面。</li>
+                    <li><strong>命令行工具:</strong> 適合高階用戶，支持批量翻譯、腳本自動化。</li>
+                    <li><strong>Docker 部署:</strong> 適合在伺服器上運行，方便大規模處理 PDF。</li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-emerald-700">🔹 優點與限制</h3>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8">
+                    <div class="flex-1 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p class="font-bold text-green-700 mb-2">優點 ✅</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>翻譯快速、公式完整、圖表固定。</li>
+                            <li>支援繁體中文與中英對照。</li>
+                            <li>多平台使用，靈活便捷、開源免費。</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1 p-4 bg-red-50 rounded-lg border border-red-200">
+                        <p class="font-bold text-red-700 mb-2">限制 ⚠️</p>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>某些排版特別複雜或掃描品質差的 PDF 可能會解析不完全。</li>
+                            <li>高階功能需一定的命令行或 Docker 基礎。</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer Conclusion -->
+        <footer class="text-center mt-10 p-6 text-gray-500 text-sm border-t border-gray-200">
+            <p>本網頁內容根據您提供的 Google 文件「2025-10-06」分析整理而成。</p>
+            <p class="mt-2">✨ 祝您使用這些效率神器時工作順利！</p>
+        </footer>
+
+    </main>
+
+</body>
+</html>
