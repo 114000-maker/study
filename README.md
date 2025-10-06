@@ -49,3 +49,8 @@
 02[數位效率神器分析](https://114000-maker.github.io/study/2025-10-06_02.html)
 03[效率工具分析網頁 | Vibe Coding & PDFMathTranslate](https://114000-maker.github.io/study/2025-10-06_03.html)
 04[TRAE AI - 互動式產品介紹](https://114000-maker.github.io/study/2025-10-06_04.html)
+# Google 教育：負責任使用人工智慧教學指南
+[Google 教育：負責任使用人工智慧教學指南](https://114000-maker.github.io/study/2025-10-06_05.html)
+[02](https://114000-maker.github.io/study/2025-10-06_06.html)
+[03](https://114000-maker.github.io/study/2025-10-06_07.html)
+[04](https://114000-maker.github.io/study/2025-10-06_08.html)
