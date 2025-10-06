@@ -45,7 +45,7 @@
 # 高鐵到屏東？一個超級任務！
 [>高鐵到屏東？一個超級任務！<](https://114000-maker.github.io/study/2025-10-05_01.html)
 # Vibe Coding - Excel 多條件篩選效率神器
-[Vibe Coding - Excel 多條件篩選效率神器](https://114000-maker.github.io/study/2025-10-06_01.html)
-[數位效率神器分析](https://114000-maker.github.io/study/2025-10-06_02.html)
-[效率工具分析網頁 | Vibe Coding & PDFMathTranslate](https://114000-maker.github.io/study/2025-10-06_03.html)
-[TRAE AI - 互動式產品介紹](https://114000-maker.github.io/study/2025-10-06_04.html)
+01[Vibe Coding - Excel 多條件篩選效率神器](https://114000-maker.github.io/study/2025-10-06_01.html)
+02[數位效率神器分析](https://114000-maker.github.io/study/2025-10-06_02.html)
+03[效率工具分析網頁 | Vibe Coding & PDFMathTranslate](https://114000-maker.github.io/study/2025-10-06_03.html)
+04[TRAE AI - 互動式產品介紹](https://114000-maker.github.io/study/2025-10-06_04.html)
