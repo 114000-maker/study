@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAE AI - 互動式產品介紹</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Tech Professional -->
+    <!-- Application Structure Plan: The application is designed as a single-page marketing website with a sticky navigation bar for easy access to key sections: Core Features, Value Proposition, Use Cases, and Future Outlook. This thematic structure allows users to explore the product's aspects non-linearly. Key interactions include a tabbed interface for Core Features to break down complex information, and visually distinct cards for value points and use cases. This design was chosen to transform the static report into an engaging, user-friendly, and exploratory experience that clearly communicates TRAE AI's benefits. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core Features -> Goal: Organize/Inform -> Viz: Interactive Tabbed Component -> Interaction: Click to switch content -> Justification: Manages information density and encourages active exploration. -> Method: Vanilla JS + Tailwind.
+        - Report Info: Pain Points Solved -> Goal: Compare/Inform -> Viz: 4-Column Card Grid with Icons -> Interaction: Hover effects -> Justification: More visually appealing and scannable than a table, highlighting key benefits. -> Method: HTML/Tailwind.
+        - Report Info: Application Scenarios -> Goal: Organize/Inform -> Viz: Card Grid with Icons -> Interaction: Hover effects -> Justification: Clearly segments target audiences and their specific benefits. -> Method: HTML/Tailwind.
+        - No quantitative data exists in the report, so no charts (Chart.js/Plotly) are needed. All visuals are created with structured HTML and styled with Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .tab-active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #6b7280;
+        }
+        .content-panel {
+            display: none;
+        }
+        .content-active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">TRAE AI</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#features" class="text-gray-600 hover:text-indigo-600 transition-colors">核心功能</a>
+                <a href="#value" class="text-gray-600 hover:text-indigo-600 transition-colors">解決痛點</a>
+                <a href="#scenarios" class="text-gray-600 hover:text-indigo-600 transition-colors">應用場景</a>
+                <a href="#future" class="text-gray-600 hover:text-indigo-600 transition-colors">未來展望</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="bg-white">
+            <div class="container mx-auto px-6 py-24 text-center">
+                <h2 class="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight">
+                    讓「人人都是產品經理<br class="hidden md:block">與程式設計師」成為可能
+                </h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-slate-600">
+                    在數位轉型的浪潮中，TRAE AI 正引領一場開發流程的革命。我們結合前端、後端、資料庫設計與部署，提供全方位的 AI 開發工具，徹底改變產品開發的樣貌。
+                </p>
+                <div class="mt-8">
+                    <a href="#features" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-105">
+                        探索核心功能
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">核心功能</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+                        TRAE AI 將複雜的開發流程簡化為直觀的操作。您可以透過下方的互動標籤，深入了解我們在前端、後端及全流程開發中的強大功能，看看 AI 如何為您賦能。
+                    </p>
+                </div>
+
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav id="tabs" class="flex flex-col sm:flex-row -mb-px">
+                            <button class="tab-button tab-active py-4 px-1 text-center border-b-2 sm:w-1/3 transition-colors" data-target="frontend">前端開發</button>
+                            <button class="tab-button tab-inactive py-4 px-1 text-center border-b-2 sm:w-1/3 transition-colors" data-target="backend">後端與資料庫</button>
+                            <button class="tab-button tab-inactive py-4 px-1 text-center border-b-2 sm:w-1/3 transition-colors" data-target="fullstack">全流程開發</button>
+                        </nav>
+                    </div>
+
+                    <div id="tab-content">
+                        <div id="frontend" class="content-panel content-active">
+                            <h3 class="text-2xl font-bold mb-2 text-indigo-700">設計到程式碼的無縫轉換</h3>
+                            <p class="text-slate-600 mb-6">傳統前端開發耗時且易出錯。TRAE AI 讓這一切變得簡單，從概念到實現，一步到位。</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>文字描述生成程式碼：</strong>只需輸入需求文字，AI 即可生成對應的前端程式碼。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>圖片轉程式碼：</strong>拍攝頁面照片，AI 可識別並生成相應的程式碼。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>Figma 原型圖轉程式碼：</strong>將 Figma 設計稿直接轉換為可運行的前端程式碼，支援多頁面與元件生成。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>智能錯誤修復：</strong>AI 會自動檢測並修復程式碼中的錯誤，確保最終效果符合預期。</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="backend" class="content-panel">
+                            <h3 class="text-2xl font-bold mb-2 text-indigo-700">一鍵生成完整後端架構</h3>
+                            <p class="text-slate-600 mb-6">後端開發的專業門檻讓許多人望之卻步。TRAE AI 的 SOLO 模式，讓非工程師也能輕鬆駕馭。</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>自動生成後端邏輯：</strong>AI 可根據需求自動生成 API、業務邏輯等後端程式碼。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>資料庫設計：</strong>AI 可自動設計資料庫結構，並生成相應的 SQL 語句。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>一鍵部署：</strong>AI 可自動操作終端、創建檔案、檢查瀏覽器等，實現快速上線。</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="fullstack" class="content-panel">
+                            <h3 class="text-2xl font-bold mb-2 text-indigo-700">從設計到上線的無縫連接</h3>
+                            <p class="text-slate-600 mb-6">TRAE AI 的 SOLO 模式涵蓋整個開發流程，實現真正的端到端自動化開發。</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>自動生成前後端程式碼：</strong>根據需求，AI 可自動生成完整的應用程式碼。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>資料庫設計與部署：</strong>自動化資料庫結構設計與部署，無縫整合。</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-500 mr-3 mt-1">✓</span>
+                                    <span><strong>一鍵上線：</strong>實現快速上線，讓外部使用者立即訪問您的產品。</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="value" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">解決的開發痛點</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+                        傳統開發流程充滿挑戰。TRAE AI 的出現徹底改變了這一現狀，我們專注於解決開發過程中最核心的四大痛點，為您帶來無與倫比的價值。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-slate-50 p-8 rounded-lg text-center transform transition-transform hover:-translate-y-2">
+                        <div class="text-4xl mb-4">🚀</div>
+                        <h3 class="text-xl font-bold mb-2">降低開發門檻</h3>
+                        <p class="text-slate-600">非工程師也能快速生成可用產品，讓創意不再受技術限制。</p>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-lg text-center transform transition-transform hover:-translate-y-2">
+                        <div class="text-4xl mb-4">⚡️</div>
+                        <h3 class="text-xl font-bold mb-2">提高開發效率</h3>
+                        <p class="text-slate-600">自動化程式碼生成，大幅減少手動編寫時間，加速產品迭代。</p>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-lg text-center transform transition-transform hover:-translate-y-2">
+                        <div class="text-4xl mb-4">🛡️</div>
+                        <h3 class="text-xl font-bold mb-2">減少錯誤率</h3>
+                        <p class="text-slate-600">AI 自動檢測與修復程式碼錯誤，保障產品的穩定性與品質。</p>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-lg text-center transform transition-transform hover:-translate-y-2">
+                        <div class="text-4xl mb-4">⏱️</div>
+                        <h3 class="text-xl font-bold mb-2">縮短開發週期</h3>
+                        <p class="text-slate-600">從設計到上線的無縫銜接，讓您的產品更快地推向市場。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="scenarios" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">多元化的應用場景</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+                        TRAE AI 的強大功能使其在多個領域都能發揮巨大作用。無論您是哪個領域的專家，TRAE AI 都能成為您實現創意的最佳夥伴，加速您的成功。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md p-8 flex items-center space-x-6">
+                        <div class="text-4xl">🏢</div>
+                        <div>
+                            <h3 class="text-xl font-bold">創業公司</h3>
+                            <p class="text-slate-600 mt-1">在人力有限的情況下，快速搭建 MVP，以最低成本驗證市場需求。</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-8 flex items-center space-x-6">
+                        <div class="text-4xl">📋</div>
+                        <div>
+                            <h3 class="text-xl font-bold">產品經理</h3>
+                            <p class="text-slate-600 mt-1">無需編程經驗，即可快速生成產品原型，縮短產品開發週期。</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-8 flex items-center space-x-6">
+                        <div class="text-4xl">🎨</div>
+                        <div>
+                            <h3 class="text-xl font-bold">設計師</h3>
+                            <p class="text-slate-600 mt-1">將設計稿直接轉換為可運行的程式碼，實現設計與開發的無縫對接。</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-8 flex items-center space-x-6">
+                        <div class="text-4xl">🎓</div>
+                        <div>
+                            <h3 class="text-xl font-bold">教育機構</h3>
+                            <p class="text-slate-600 mt-1">作為創新的教學工具，幫助學生快速了解全流程開發的真實過程。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">我們的未來展望</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+                        TRAE AI 的旅程才剛開始。隨著人工智慧技術的飛速發展，我們將不斷擴展功能，致力於為全球開發者提供更智能、更高效的開發體驗。
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto grid sm:grid-cols-3 gap-8 text-center">
+                    <div class="p-6">
+                        <div class="text-3xl text-indigo-600 mb-3">🌐</div>
+                        <h3 class="font-bold text-lg">多語言支持</h3>
+                        <p class="text-slate-600 text-sm">未來將支持更多程式語言與自然語言，滿足全球開發者的需求。</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-3xl text-indigo-600 mb-3">🧠</div>
+                        <h3 class="font-bold text-lg">智能優化</h3>
+                        <p class="text-slate-600 text-sm">AI 將根據使用者的需求與習慣，自動優化程式碼，提升應用性能。</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-3xl text-indigo-600 mb-3">☁️</div>
+                        <h3 class="font-bold text-lg">雲端部署</h3>
+                        <p class="text-slate-600 text-sm">未來將支持主流雲端平台一鍵部署，實現真正的跨平台開發。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <h3 class="text-2xl font-bold">加入開發的未來</h3>
+            <p class="mt-2 max-w-lg mx-auto text-slate-300">
+                TRAE AI 正在重新定義產品開發。立即開始，體驗前所未有的創造力與效率。
+            </p>
+            <p class="mt-6 text-sm text-slate-400">&copy; 2025 TRAE AI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.dataset.target;
+
+                    tabs.forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('tab-inactive');
+                    });
+
+                    tab.classList.remove('tab-inactive');
+                    tab.classList.add('tab-active');
+
+                    contentPanels.forEach(panel => {
+                        if (panel.id === targetId) {
+                            panel.classList.remove('content-active');
+                            setTimeout(() => panel.classList.add('content-active'), 0);
+                        } else {
+                            panel.classList.remove('content-active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
