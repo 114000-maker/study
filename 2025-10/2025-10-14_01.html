@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel 函數互動式比較：VLOOKUP vs. XLOOKUP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone, Muted Teal) -->
+    <!-- Application Structure Plan: A thematic, narrative-driven SPA. Starts with an interactive simulation showcasing VLOOKUP's limitations, then presents XLOOKUP as the solution. Follows with a tabbed, detailed feature-by-feature comparison, and concludes with a visual summary chart and practical recommendations. This structure is chosen to actively demonstrate the 'why' behind XLOOKUP's superiority, fostering better understanding and retention than a static report. -->
+    <!-- Visualization & Content Choices: 1. Main Comparison: Interactive HTML/JS simulation (Goal: Compare/Demonstrate). Users select a lookup scenario to see formulas fail or succeed, providing direct feedback. 2. Feature Details: Tabbed content sections (Goal: Organize/Compare). Breaks down complex info into digestible, user-controlled chunks. 3. Overall Summary: Radar Chart (Chart.js) (Goal: Compare/Inform). Visually summarizes the capabilities of both functions across key metrics like flexibility and functionality, providing a quick, impactful takeaway. No SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4;
+            color: #44403c;
+        }
+        .tab-active {
+            border-color: #0d9488;
+            color: #0d9488;
+            background-color: #f0fdfa;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #78716c;
+        }
+        .code-snippet {
+            background-color: #f1f5f9;
+            border-left: 3px solid #0d9488;
+            color: #1e293b;
+            font-family: monospace;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-700 mb-2">Excel 查找大比拼</h1>
+            <p class="text-xl text-stone-600">VLOOKUP vs. XLOOKUP 互動式指南</p>
+        </header>
+
+        <main>
+            <section id="intro" class="mb-16 bg-white p-8 rounded-xl shadow-sm">
+                <h2 class="text-2xl font-bold text-teal-800 mb-4">從資料整理到智慧辦公的技能升級</h2>
+                <p class="text-stone-700 leading-relaxed">
+                    在現代職場中，Excel 是不可或缺的智慧辦公助手。無論您是財務、行銷、人資或行政人員，每天都會面對大量的資料表格。能否快速且精準地找到所需資料，直接決定了您的工作效率。本指南將透過互動方式，深入比較經典的 VLOOKUP 與新世代的 XLOOKUP 函數，幫助您掌握更高效的資料查找技巧。
+                </p>
+            </section>
+
+            <section id="simulation" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-teal-800">情境模擬：挑戰傳統查找的極限</h2>
+                <div class="text-center mb-8">
+                    <p class="mb-4 text-stone-600">這是一份簡化的員工資料表。請選擇一個查找任務，看看 VLOOKUP 和 XLOOKUP 如何應對。</p>
+                     <div class="flex justify-center space-x-2 md:space-x-4">
+                        <button id="task1-btn" class="sim-btn bg-teal-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-teal-700 transition">任務一：向右查找</button>
+                        <button id="task2-btn" class="sim-btn bg-white text-teal-600 border border-teal-600 px-4 py-2 rounded-lg hover:bg-teal-50 transition">任務二：向左查找</button>
+                        <button id="task3-btn" class="sim-btn bg-white text-teal-600 border border-teal-600 px-4 py-2 rounded-lg hover:bg-teal-50 transition">任務三：處理錯誤</button>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-5 gap-8 items-start">
+                    <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="font-semibold text-lg mb-4 text-center text-stone-700">範例資料表</h3>
+                        <table class="w-full text-sm text-left text-stone-600">
+                            <thead class="text-xs text-stone-700 uppercase bg-stone-100">
+                                <tr>
+                                    <th class="px-4 py-2">員工ID</th>
+                                    <th class="px-4 py-2">姓名</th>
+                                    <th class="px-4 py-2">部門</th>
+                                    <th class="px-4 py-2">月薪</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b"><td class="px-4 py-2">101</td><td class="px-4 py-2">小明</td><td class="px-4 py-2">行政</td><td class="px-4 py-2">45,000</td></tr>
+                                <tr class="border-b"><td class="px-4 py-2">102</td><td class="px-4 py-2">小華</td><td class="px-4 py-2">行銷</td><td class="px-4 py-2">52,000</td></tr>
+                                <tr class="border-b"><td class="px-4 py-2">103</td><td class="px-4 py-2">小王</td><td class="px-4 py-2">研發</td><td class="px-4 py-2">68,000</td></tr>
+                                <tr class="border-b"><td class="px-4 py-2">104</td><td class="px-4 py-2">小美</td><td class="px-4 py-2">行政</td><td class="px-4 py-2">48,000</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 id="task-title" class="font-semibold text-lg mb-4 text-center text-teal-700">任務一：查找「小王」的月薪</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-stone-800">VLOOKUP 解法</h4>
+                                <p id="vlookup-desc" class="text-sm text-stone-600 mb-2">查找值「小王」不在最左欄，VLOOKUP 無法使用。但若以「員工ID: 103」查找，則可成功向右找到月薪。</p>
+                                <p class="code-snippet p-3 rounded-md text-sm" id="vlookup-formula">`=VLOOKUP(103, A2:D5, 4, FALSE)`</p>
+                                <div class="mt-2 text-center p-3 rounded-lg bg-emerald-50 text-emerald-800">
+                                    <strong>結果：</strong> <span id="vlookup-result">68,000</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-stone-800">XLOOKUP 解法</h4>
+                                <p id="xlookup-desc" class="text-sm text-stone-600 mb-2">XLOOKUP 可靈活指定查找與回傳欄位，輕鬆完成任務。</p>
+                                <p class="code-snippet p-3 rounded-md text-sm" id="xlookup-formula">`=XLOOKUP("小王", B2:B5, D2:D5)`</p>
+                                <div class="mt-2 text-center p-3 rounded-lg bg-emerald-50 text-emerald-800">
+                                    <strong>結果：</strong> <span id="xlookup-result">68,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="comparison" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-teal-800">核心功能一對一比較</h2>
+                <div class="bg-white rounded-xl shadow-sm p-2 md:p-4">
+                    <div class="flex border-b border-stone-200">
+                        <button data-tab="direction" class="comparison-tab tab-active flex-1 text-center font-medium p-3 md:p-4 transition">查找方向</button>
+                        <button data-tab="error" class="comparison-tab tab-inactive flex-1 text-center font-medium p-3 md:p-4 transition">錯誤處理</button>
+                        <button data-tab="flexibility" class="comparison-tab tab-inactive flex-1 text-center font-medium p-3 md:p-4 transition">欄位彈性</button>
+                         <button data-tab="mode" class="comparison-tab tab-inactive flex-1 text-center font-medium p-3 md:p-4 transition">匹配模式</button>
+                    </div>
+                    <div id="comparison-content" class="p-6 md:p-8">
+                    </div>
+                </div>
+            </section>
+            
+            <section id="radar-chart" class="mb-16">
+                 <h2 class="text-3xl font-bold text-center mb-8 text-teal-800">綜合能力雷達圖</h2>
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <p class="text-center text-stone-600 mb-6">從五個維度評估兩個函數的綜合能力，XLOOKUP 的全面性一目了然。</p>
+                    <div class="chart-container">
+                        <canvas id="lookupRadarChart"></canvas>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="recommendations">
+                <h2 class="text-3xl font-bold text-center mb-8 text-teal-800">職場應用建議</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                        <h3 class="font-bold text-lg text-teal-800 mb-2">新手入門</h3>
+                        <p class="text-stone-600">可先用 VLOOKUP 練習查找邏輯，熟悉後應盡快過渡到 XLOOKUP，以掌握更現代的工具。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                        <h3 class="font-bold text-lg text-teal-800 mb-2">新專案與模板</h3>
+                        <p class="text-stone-600">強烈建議直接使用 XLOOKUP 建立查找模板，其靈活性足以應對未來複雜的報表需求。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                        <h3 class="font-bold text-lg text-teal-800 mb-2">高階數據分析</h3>
+                        <p class="text-stone-600">XLOOKUP 可搭配 FILTER、SUM 等函數，進行高階數據分析和報表自動化，是提升效率的關鍵。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 text-sm text-stone-500">
+            <p>互動式指南由 AI 生成，旨在提供更直觀的學習體驗。</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const simulationData = {
+                task1: {
+                    title: '任務一：查找「小王」的月薪 (向右查找)',
+                    vlookup: {
+                        desc: 'VLOOKUP 要求查找值必須在資料表的最左欄。此處我們改用 ID 103 進行查找，成功向右找到第四欄的月薪。',
+                        formula: '=VLOOKUP(103, A2:D5, 4, FALSE)',
+                        result: '68,000',
+                        success: true,
+                    },
+                    xlookup: {
+                        desc: 'XLOOKUP 可靈活指定查找欄(姓名)與回傳欄(月薪)，輕鬆完成任務。',
+                        formula: '=XLOOKUP("小王", B2:B5, D2:D5)',
+                        result: '68,000',
+                        success: true,
+                    }
+                },
+                task2: {
+                    title: '任務二：查找「小華」的員工ID (向左查找)',
+                     vlookup: {
+                        desc: 'VLOOKUP 只能由左向右查找，無法從「姓名」欄向左查找「員工ID」。這是 VLOOKUP 的主要限制之一。',
+                        formula: '=VLOOKUP("小華", B2:D5, ...)',
+                        result: '無法執行',
+                        success: false,
+                    },
+                    xlookup: {
+                        desc: 'XLOOKUP 沒有方向限制，可以輕鬆地從「姓名」欄向左查找對應的「員工ID」。',
+                        formula: '=XLOOKUP("小華", B2:B5, A2:A5)',
+                        result: '102',
+                        success: true,
+                    }
+                },
+                task3: {
+                    title: '任務三：查找不存在的員工「小李」',
+                    vlookup: {
+                        desc: '當找不到值時，VLOOKUP 會回傳 #N/A 錯誤。需要額外使用 IFERROR 函數來美化結果。',
+                        formula: '=IFERROR(VLOOKUP("小李", B2:D5, 3, FALSE), "查無資料")',
+                        result: '#N/A (需公式包裝)',
+                        success: false,
+                    },
+                    xlookup: {
+                        desc: 'XLOOKUP 內建了「if_not_found」參數，可以直接在公式中定義找不到值時的回傳訊息，更簡潔。',
+                        formula: '=XLOOKUP("小李", B2:B5, D2:D5, "查無資料")',
+                        result: '查無資料',
+                        success: true,
+                    }
+                }
+            };
+            
+            const comparisonContentData = {
+                direction: `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">VLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">只能從資料表的最左欄開始，向右查找。這是其最大的結構性限制，常常需要為了公式而調整表格佈局。</p>
+                            <div class="flex items-center justify-center bg-red-50 text-red-700 p-4 rounded-lg">
+                                <span class="text-2xl mr-4">◄</span>
+                                <span class="font-bold">只能向右 ►</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">XLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">完全沒有方向限制。查找範圍和回傳範圍是獨立的，可以任意向左或向右查找，完美適應各種表格結構。</p>
+                             <div class="flex items-center justify-center bg-green-50 text-green-700 p-4 rounded-lg">
+                                <span class="font-bold">◄ 向左</span>
+                                <span class="text-2xl mx-4">↕</span>
+                                <span class="font-bold">向右 ►</span>
+                            </div>
+                        </div>
+                    </div>`,
+                error: `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">VLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">找不到值時，會回傳 #N/A 錯誤值。若要顯示自訂訊息（如 "查無資料"），必須額外使用 IFERROR 或 IFNA 函數進行包裝，使公式變長。</p>
+                            <p class="code-snippet p-3 rounded-md text-sm">` + '`=IFERROR(VLOOKUP(...), "查無資料")`' + `</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">XLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">內建第四個參數 [if_not_found]，可以直接在公式中指定找不到值時的回傳內容，無需額外函數，公式更簡潔、易讀。</p>
+                            <p class="code-snippet p-3 rounded-md text-sm">` + '`=XLOOKUP(..., "查無資料")`' + `</p>
+                        </div>
+                    </div>`,
+                flexibility: `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">VLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">回傳欄位由欄位索引數字（col_index_num）決定。如果在表格中間插入或刪除欄位，這個數字就需要手動修改，否則會回傳錯誤的資料，維護性較差。</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">XLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">直接指定回傳的儲存格範圍（return_array），而非欄位索引。即使在表格中增刪欄位，公式也能動態適應，不會出錯，穩定性極高。</p>
+                        </div>
+                    </div>`,
+                mode: `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">VLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">只支援精確匹配（FALSE）和近似匹配（TRUE）。使用近似匹配時，查找欄位還必須先進行升序排序，限制較多。</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-stone-800">XLOOKUP</h3>
+                            <p class="text-stone-600 mb-4">提供更豐富的匹配模式，包括精確匹配、近似匹配（找下一個較小/較大值）以及萬用字元模糊匹配，功能強大且無需排序。</p>
+                        </div>
+                    </div>`
+            };
+            
+            const taskTitle = document.getElementById('task-title');
+            const vlookupDesc = document.getElementById('vlookup-desc');
+            const vlookupFormula = document.getElementById('vlookup-formula');
+            const vlookupResult = document.getElementById('vlookup-result');
+            const xlookupDesc = document.getElementById('xlookup-desc');
+            const xlookupFormula = document.getElementById('xlookup-formula');
+            const xlookupResult = document.getElementById('xlookup-result');
+            const simBtns = document.querySelectorAll('.sim-btn');
+
+            function updateSimulation(task) {
+                const data = simulationData[task];
+                taskTitle.textContent = data.title;
+                
+                vlookupDesc.textContent = data.vlookup.desc;
+                vlookupFormula.textContent = data.vlookup.formula;
+                vlookupResult.textContent = data.vlookup.result;
+                const vlookupResultDiv = vlookupResult.parentElement;
+                vlookupResultDiv.className = `mt-2 text-center p-3 rounded-lg ${data.vlookup.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`;
+
+                xlookupDesc.textContent = data.xlookup.desc;
+                xlookupFormula.textContent = data.xlookup.formula;
+                xlookupResult.textContent = data.xlookup.result;
+                 const xlookupResultDiv = xlookupResult.parentElement;
+                xlookupResultDiv.className = `mt-2 text-center p-3 rounded-lg ${data.xlookup.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`;
+
+                simBtns.forEach(btn => {
+                    btn.classList.remove('bg-teal-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-teal-600', 'border', 'border-teal-600');
+                });
+
+                const activeBtnId = task.replace('task', 'task') + '-btn';
+                document.getElementById(activeBtnId).classList.add('bg-teal-600', 'text-white');
+                document.getElementById(activeBtnId).classList.remove('bg-white', 'text-teal-600', 'border', 'border-teal-600');
+            }
+
+            document.getElementById('task1-btn').addEventListener('click', () => updateSimulation('task1'));
+            document.getElementById('task2-btn').addEventListener('click', () => updateSimulation('task2'));
+            document.getElementById('task3-btn').addEventListener('click', () => updateSimulation('task3'));
+
+            updateSimulation('task1');
+
+            const comparisonTabs = document.querySelectorAll('.comparison-tab');
+            const comparisonContent = document.getElementById('comparison-content');
+
+            function updateComparisonContent(tab) {
+                comparisonContent.innerHTML = comparisonContentData[tab];
+                comparisonTabs.forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('tab-inactive');
+                });
+                document.querySelector(`[data-tab="${tab}"]`).classList.add('tab-active');
+                document.querySelector(`[data-tab="${tab}"]`).classList.remove('tab-inactive');
+            }
+
+            comparisonTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    updateComparisonContent(tab.dataset.tab);
+                });
+            });
+
+            updateComparisonContent('direction');
+
+            const ctx = document.getElementById('lookupRadarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['查找彈性', '功能全面性', '錯誤處理', '易用性', '報表穩定性'],
+                    datasets: [{
+                        label: 'XLOOKUP',
+                        data: [5, 5, 5, 4, 5],
+                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                        borderColor: 'rgba(13, 148, 136, 1)',
+                        pointBackgroundColor: 'rgba(13, 148, 136, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(13, 148, 136, 1)'
+                    }, {
+                        label: 'VLOOKUP',
+                        data: [2, 2, 1, 3, 2],
+                        backgroundColor: 'rgba(168, 162, 158, 0.2)',
+                        borderColor: 'rgba(168, 162, 158, 1)',
+                        pointBackgroundColor: 'rgba(168, 162, 158, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(168, 162, 158, 1)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e7e5e4' },
+                            grid: { color: '#e7e5e4' },
+                            pointLabels: {
+                                font: { size: 14, family: "'Noto Sans TC', sans-serif" },
+                                color: '#44403c'
+                            },
+                            ticks: {
+                                backdropColor: '#f8f7f4',
+                                color: '#78716c',
+                                stepSize: 1,
+                                max: 5,
+                                min: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 14, family: "'Noto Sans TC', sans-serif" }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
