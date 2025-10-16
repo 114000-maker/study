@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20 個 ChatGPT 提升生產力提示大全</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Inter 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* 設定自訂字體和背景 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* 深色背景 */
+            color: #c9d1d9; /* 淺色文字 */
+        }
+        .card {
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        /* 自訂顏色用於類別標籤和區塊標題背景 */
+        .category-1 { background-color: #3b82f6; } /* 藍色 - 行動與規劃 */
+        .category-2 { background-color: #10b981; } /* 綠色 - 專注與效率 */
+        .category-3 { background-color: #f97316; } /* 橘色 - 目標與習慣 */
+        .category-4 { background-color: #a855f7; } /* 紫色 - 組織與複盤 */
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- 標題 -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-2">
+                20 個 ChatGPT 提示
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400">
+                🚀 提升您的生產力：基於著名時間管理方法的 AI 提示
+            </p>
+        </header>
+
+        <!-- 提示卡片網格容器 (將包含四個分區的結構) -->
+        <div id="prompts-grid">
+            <!-- 內容將由 JavaScript 渲染成四個分區 -->
+        </div>
+
+        <!-- 複製成功通知訊息 -->
+        <div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+            ✅ 提示已複製到剪貼簿！
+        </div>
+    </div>
+
+    <script>
+        // 數據結構：20 個提示，包含方法、描述和提示內容
+        const promptsData = [
+            // 行動與規劃 (Action & Planning) - 類別 1
+            { id: 1, category: 1, method: "GTD 系統", description: "捕捉、澄清並整理您的事務，將其轉化為可執行的行動。", prompt: "我收到了筆記、電子郵件和任務...[貼上所有內容]。使用 GTD 系統澄清和組織它們，將它們分為『下一步行動』、『專案』或『參考資料』。" },
+            { id: 2, category: 1, method: "番茄工作法", description: "在專注的短時間內工作，中間有短暫休息，以保持持續的衝刺。", prompt: "我需要為一個客戶提案寫初稿。將我的工作分成 25 分鐘的間隔，列出每個間隔的目標，並在每個間隔之間安排 5 分鐘休息。" },
+            { id: 3, category: 1, method: "吃掉那隻青蛙", description: "處理您最艱難、最高價值的工作——首先做！", prompt: "我一直拖延撰寫我的部落格文章。這是我的『青蛙』任務。幫我把它分解成小塊，並制定今天早上完成的日程。" },
+            { id: 4, category: 1, method: "時間區塊法", description: "安排固定的時間處理每小時的工作，以消除分心並提升專注度。", prompt: "規劃我從早上 9 點到下午 5 點的工作日。區分深度工作、會議、行政任務和創意工作的區塊。在區塊之間建立緩衝時間。" },
+            { id: 5, category: 1, method: "帕金森定律", description: "工作會擴展或縮短，以填滿給定的時間。", prompt: "我通常每週花費 2 小時來寫我的電子報。設定一個 45 分鐘的結構，包含具體的寫作、編輯、校對和格式化時間。" },
+            { id: 6, category: 1, method: "80/20 法則", description: "專注於少數能帶來最大成果的關鍵任務。", prompt: "這是我的待辦清單...[貼上清單]。幫我找出本週能帶來 80% 成果的 20% 任務。給我任務的優先順序和實施的建議。" },
+            { id: 7, category: 1, method: "常春藤法則", description: "每天結束時列出最重要的六項任務，按優先順序排序。", prompt: "這是我的任務和目標...[貼上任務]。幫我用常春藤法則來組織它們。我必須等到完成一項任務後才能進行下一項。" },
+            { id: 8, category: 1, method: "MIT 方法", description: "每天以最重要的單一任務開始工作。", prompt: "這是我今天的關鍵事項：[貼上清單]。幫我縮小範圍，並選擇一項最重要的任務（MIT）以及為什麼。" },
+
+            // 專注與效率 (Focus & Efficiency) - 類別 2
+            { id: 9, category: 2, method: "蔡加尼克效應", description: "我們的大腦會專注於未完成的任務。", prompt: "我有幾個半完成的專案...[貼上清單]。使用蔡加尼克效應，將每個專案分解成一個指南和一個自動化檢查清單。幫我確定今天可以完成的一件小事，以消除這個未完成的感覺。" },
+            { id: 10, category: 2, method: "2 分鐘規則", description: "如果一項任務耗時不到 2 分鐘，那就馬上去做。", prompt: "這是一個 15 項小任務的清單...[貼上清單]。使用 2 分鐘規則，找出我可以快速完成的任務，並將它們歸類為『快速贏家』清單。" },
+            { id: 11, category: 2, method: "時間追蹤", description: "知道您實際將時間花在哪裡。", prompt: "我想追蹤我如何使用我的時間。幫我列出 3-5 個類別，例如深度工作、會議、行政管理、分心和休息，並為每個類別建立一個『最高層級』的標籤系統。" },
+            { id: 12, category: 2, method: "每日重點", description: "選擇一個首要任務，讓您對這一天感到成功。", prompt: "我的明天將充滿...[貼上清單]。建議一個有意義的『每日重點』，如果我只完成這件事，我仍然會對這一天感到滿意。" },
+
+            // 目標與習慣 (Goals & Habits) - 類別 3
+            { id: 13, category: 3, method: "SMART 目標", description: "設定具體的、可衡量的、可實現的、相關的和有時限性的目標。", prompt: "我想提高我的 LinkedIn 形象。將這個目標轉化為一個 SMART 目標，包含數字、時間軸和每週行動計劃。" },
+            { id: 14, category: 3, method: "WOOP 方法", description: "願望、結果、障礙、計畫。一種透過心理對比建立專注的策略。", prompt: "我渴望每晚閱讀 30 分鐘。使用 WOOP 方法，幫我確定可能發生的事情以及阻礙我實現目標的計畫，例如感到疲倦或分心。" },
+            { id: 15, category: 3, method: "不要打破鏈條", description: "每天使用連續的行動來建立習慣。", prompt: "我想要每天發布一篇關於我的部落格或專業主題的帖子，持續 30 天。建立一個簡單的習慣追蹤器，給我一個在完成時可以『打勾』的視覺化鏈條。" },
+            { id: 16, category: 3, method: "子彈筆記法", description: "以結構化的格式追蹤任務、想法和目標。", prompt: "幫我為每天的子彈日誌（Bullet Journal）制定一個結構，包含日誌、月份、每日日誌、待辦事項、頁面設定想法和範例。" },
+
+            // 組織與複盤 (Organization & Review) - 類別 4
+            { id: 17, category: 4, method: "例行公事與儀式", description: "將相似的行動堆疊成可重複的系統。", prompt: "幫我建立一個 10 分鐘的早晨例行公事，其中包含寫日誌、澆水、清潔和整理。使用清晰的觸發器和順序。" },
+            { id: 18, category: 4, method: "艾森豪矩陣", description: "根據緊急性和重要性對任務進行分類。", prompt: "這是我本週需要做的 12 件事...[貼上清單]。使用艾森豪矩陣將它們分類為『立即做』、『安排』、『委派』或『刪除』。" },
+            { id: 19, category: 4, method: "任務分批處理", description: "將相似的任務分組，以減少情境轉換的開銷。", prompt: "我有寫作、編輯和外展任務。將這些任務組織成三個『批次』（Batch），每個批次都帶有一個重點，以減少分心。" },
+            { id: 20, category: 4, method: "每週複盤", description: "反思、重置和重新聚焦。", prompt: "指導我進行每週複盤。根據上週的表現、清理進行中的專案以及為下週設定目標。" },
+        ];
+
+        // 類別對映
+        const categoryMap = {
+            1: "行動與規劃",
+            2: "專注與效率",
+            3: "目標與習慣",
+            4: "組織與複盤"
+        };
+        
+        // 類別背景顏色 class
+        const categoryBgColor = {
+            1: "category-1",
+            2: "category-2",
+            3: "category-3",
+            4: "category-4"
+        };
+
+        // 類別卡片邊框顏色 (使用標準 Tailwind 顏色確保解析)
+        const categoryBorderColor = {
+            1: "border-blue-500",
+            2: "border-green-500",
+            3: "border-orange-500",
+            4: "border-purple-500"
+        };
+
+
+        /**
+         * 處理複製提示的邏輯，並顯示通知。
+         * @param {string} promptText 要複製的文字
+         */
+        function copyPrompt(promptText) {
+            // 使用 document.execCommand('copy') 進行複製，以確保在 iFrame 環境中兼容
+            const tempInput = document.createElement('textarea');
+            tempInput.value = promptText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            // 顯示通知
+            const notification = document.getElementById('notification');
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            notification.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        /**
+         * 渲染所有提示卡片到 DOM，並按類別分塊
+         */
+        function renderPrompts() {
+            const gridContainer = document.getElementById('prompts-grid');
+            let htmlContent = '';
+
+            // 1. 按類別分組數據
+            const groupedData = promptsData.reduce((acc, item) => {
+                acc[item.category] = acc[item.category] || [];
+                acc[item.category].push(item);
+                return acc;
+            }, {});
+
+            // 2. 依序渲染四個類別區塊
+            for (let i = 1; i <= 4; i++) {
+                const categoryId = i;
+                const categoryName = categoryMap[categoryId];
+                const categoryBgClass = categoryBgColor[categoryId];
+                const categoryCards = groupedData[categoryId] || [];
+                const borderClass = categoryBorderColor[categoryId];
+
+                // 區塊起始：標題和網格容器
+                htmlContent += `
+                    <div class="mb-16 mt-8">
+                        <!-- 類別標題 -->
+                        <div class="flex items-center mb-8">
+                            <h2 class="text-3xl md:text-4xl font-extrabold text-white p-3 rounded-xl ${categoryBgClass} bg-opacity-90 shadow-2xl tracking-wider">
+                                ${categoryId}. ${categoryName}
+                            </h2>
+                        </div>
+                        
+                        <!-- 類別卡片網格 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                `;
+
+                // 渲染該類別的所有卡片
+                categoryCards.forEach(item => {
+                    // 卡片 HTML 結構
+                    htmlContent += `
+                        <div class="card bg-gray-800 rounded-xl shadow-2xl p-6 flex flex-col justify-between border-t-4 ${borderClass}">
+                            <!-- 頂部區塊：ID, 方法名 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-bold px-3 py-1 rounded-full text-white ${categoryBgClass} shadow-md">
+                                        #${item.id}
+                                    </span>
+                                    <span class="text-xl text-gray-500 font-bold">
+                                        <!-- 象徵圖示 (使用 SVG 佔位) -->
+                                        <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    </span>
+                                </div>
+
+                                <h3 class="text-2xl font-bold text-white mb-2">${item.method}</h3>
+                                <p class="text-sm text-gray-400 mb-4">${item.description}</p>
+                                
+                                <!-- 提示內容區塊 -->
+                                <div class="bg-gray-700 p-4 rounded-lg border-l-4 border-yellow-400 mb-4">
+                                    <p class="text-sm font-medium text-yellow-300 mb-1">提示 (Prompt):</p>
+                                    <pre class="text-xs whitespace-pre-wrap text-gray-300">${item.prompt}</pre>
+                                </div>
+                            </div>
+
+                            <!-- 底部區塊：複製按鈕 -->
+                            <button onclick="copyPrompt(\`${item.prompt.replace(/`/g, '\\`')}\')"
+                                    class="mt-4 w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors duration-200 
+                                           bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                                複製提示
+                            </button>
+                        </div>
+                    `;
+                });
+
+                // 區塊結束：關閉網格
+                htmlContent += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            gridContainer.innerHTML = htmlContent;
+        }
+
+        // 當窗口加載完成後執行渲染
+        window.onload = renderPrompts;
+    </script>
+</body>
+</html>
