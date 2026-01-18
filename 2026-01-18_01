@@ -1,0 +1,855 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { User, BookOpen, Star, Sparkles, Copy, RotateCcw, PenTool, CheckCircle2, Wand2, Users, FileSpreadsheet, Trash2, Plus, GraduationCap, X, Save, HelpCircle, Sun, Moon, Printer, Upload, FileDown, Eraser, AlertTriangle, AlignLeft, Info, DownloadCloud, UploadCloud } from 'lucide-react';
+
+// --- 子元件提取 (解決畫面跳動問題的核心) ---
+
+const GradeInput = ({ label, value, onChange, themeStyles }) => (
+  <div className="flex flex-col gap-1">
+    <label className="text-xs font-bold text-gray-500">{label}</label>
+    <input 
+      type="number" 
+      value={value} 
+      onChange={(e) => onChange(e.target.value)} 
+      placeholder="-" 
+      className={`w-full px-2 py-1.5 border rounded text-sm outline-none focus:ring-1 ${themeStyles.borderPrimary} ${themeStyles.highlight}`} 
+    />
+  </div>
+);
+
+const SelectionSection = ({ title, icon: Icon, defaultItems, customItems, selectedItems, category, colorBorder, hasLevelFilter, hasSubjectFilter, onSelection, onOpenCustom, onDeleteCustom, themeStyles }) => {
+  const [levelFilter, setLevelFilter] = useState('all');
+  const [subjectFilter, setSubjectFilter] = useState('all');
+  const allItems = [...(customItems || []), ...defaultItems];
+  const filteredItems = allItems.filter(item => {
+    let mLevel = !hasLevelFilter || levelFilter === 'all' || item.level === levelFilter;
+    let mSubject = !hasSubjectFilter || subjectFilter === 'all' || (subjectFilter === 'general' ? item.subject === 'general' : item.subject === subjectFilter);
+    return mLevel && mSubject;
+  });
+
+  return (
+    <div className={`mb-4 p-4 rounded-xl border-l-4 shadow-sm bg-white ${colorBorder}`}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className={`w-5 h-5 ${themeStyles.icon}`} />
+          <h3 className={`font-bold text-lg ${themeStyles.textPrimary}`}>{title}</h3>
+          <button onClick={() => onOpenCustom(category)} className="ml-2 flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"><Plus className="w-3 h-3" /> 自訂</button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {hasSubjectFilter && <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="text-sm border border-gray-300 rounded px-2 py-1 bg-gray-50"><option value="all">全科</option><option value="general">一般</option><option value="chinese">國語</option><option value="math">數學</option><option value="science">自然/理化/生物</option><option value="arts">藝健/社會/綜合</option></select>}
+          {hasLevelFilter && <div className="flex bg-gray-100 rounded p-1">{['all','excellent','stable','improve'].map(l => <button key={l} onClick={()=>setLevelFilter(l)} className={`px-2 py-1 text-xs rounded transition-all ${levelFilter===l ? 'bg-white shadow-sm font-medium text-gray-800' : 'text-gray-500'}`}>{l==='all'?'全部':l==='excellent'?'優異':l==='stable'?'平穩':'需努力'}</button>)}</div>}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {filteredItems.length > 0 ? filteredItems.map((item) => {
+          const isSel = selectedItems.some(i => i.id === item.id);
+          const isCust = item.id.toString().startsWith('custom');
+          let borderColor = 'border-gray-200';
+          if (!isSel) { if (item.level === 'excellent') borderColor = 'border-l-4 border-l-green-400'; if (item.level === 'improve') borderColor = 'border-l-4 border-l-orange-300'; }
+          return (
+            <div key={item.id} className="relative group">
+              <button 
+                onClick={() => onSelection(category, item)} 
+                className={`px-3 py-2 text-sm rounded transition-all border shadow-sm text-left flex items-center ${isSel ? `${themeStyles.buttonPrimary} ring-2 ring-offset-1 ${themeStyles.highlight}` : `bg-white text-gray-600 hover:bg-gray-50 ${borderColor}`} ${isCust ? 'pr-8 border-dashed' : ''}`}
+                type="button" 
+              >
+                {item.label}
+              </button>
+              {isCust && <button onClick={(e) => { e.stopPropagation(); onDeleteCustom(category, item.id); }} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"><X className="w-3 h-3" /></button>}
+            </div>
+          );
+        }) : <div className="text-gray-400 text-sm py-2">無選項</div>}
+      </div>
+    </div>
+  );
+};
+
+// --- 主元件 ---
+
+const CommentGenerator = () => {
+  // --- 常數與資料庫 ---
+  const DEFAULT_STUDENT_COUNT = 40; 
+  const STORAGE_KEY = 'comment_generator_data_v8'; 
+  const CUSTOM_DATA_KEY = 'comment_generator_custom_v1';
+  const apiKey = ""; 
+
+  // 主題設定
+  const themes = {
+    blue: {
+      name: '專業藍',
+      bgMain: 'bg-slate-100',
+      bgSidebar: 'bg-white',
+      bgHeader: 'bg-white',
+      textPrimary: 'text-blue-800',
+      textSecondary: 'text-blue-600',
+      borderPrimary: 'border-blue-500',
+      buttonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white',
+      buttonSecondary: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
+      accent: 'bg-blue-100',
+      icon: 'text-blue-600',
+      highlight: 'ring-blue-500',
+      sectionUser: 'border-blue-500',
+      sectionBehavior: 'border-yellow-500',
+      sectionAcademic: 'border-green-500',
+      sectionFuture: 'border-purple-500',
+    },
+    warm: {
+      name: '護眼暖',
+      bgMain: 'bg-stone-100', 
+      bgSidebar: 'bg-[#fdfbf7]', 
+      bgHeader: 'bg-[#fdfbf7]',
+      textPrimary: 'text-amber-900',
+      textSecondary: 'text-amber-700',
+      borderPrimary: 'border-amber-500',
+      buttonPrimary: 'bg-amber-600 hover:bg-amber-700 text-white',
+      buttonSecondary: 'bg-amber-50 text-amber-700 hover:bg-amber-100',
+      accent: 'bg-amber-100',
+      icon: 'text-amber-700',
+      highlight: 'ring-amber-500',
+      sectionUser: 'border-stone-500',
+      sectionBehavior: 'border-orange-400',
+      sectionAcademic: 'border-emerald-600',
+      sectionFuture: 'border-rose-400',
+    }
+  };
+
+  // 預設評語庫
+  const defaultData = {
+    personality: [
+      { id: 'p1', text: '個性溫和有禮', label: '溫和有禮' },
+      { id: 'p2', text: '天性樂觀開朗', label: '樂觀開朗' },
+      { id: 'p3', text: '行事穩重踏實', label: '穩重踏實' },
+      { id: 'p4', text: '心思細膩敏感', label: '心思細膩' },
+      { id: 'p5', text: '活潑大方，人緣極佳', label: '人緣好' },
+      { id: 'p6', text: '個性恬靜，喜愛閱讀', label: '文靜愛閱讀' },
+      { id: 'p7', text: '具有領導特質', label: '具領導力' },
+      { id: 'p8', text: '熱心助人，富同情心', label: '熱心助人' },
+      { id: 'p9', text: '個性直率，勇於表達', label: '直率敢言' },
+      { id: 'p10', text: '富有創造力，鬼點子多', label: '富有創意' },
+    ],
+    behavior: [
+      { id: 'b_ex1', text: '擔任幹部負責盡職，是老師的好幫手', label: '幹部負責', level: 'excellent' },
+      { id: 'b_ex2', text: '與同學相處融洽，懂得分享與合作', label: '相處融洽', level: 'excellent' },
+      { id: 'b_ex3', text: '做事條理分明，座位隨時保持整潔', label: '愛整潔', level: 'excellent' },
+      { id: 'b_ex4', text: '主動協助同學，展現服務熱忱', label: '服務熱忱', level: 'excellent' },
+      { id: 'b_st1', text: '能遵守班級規範，安分守己', label: '守規矩', level: 'stable' },
+      { id: 'b_st2', text: '打掃工作能按部就班完成', label: '打掃盡責', level: 'stable' },
+      { id: 'b_st3', text: '對於交辦事項能努力完成', label: '使命必達', level: 'stable' },
+      { id: 'b_st4', text: '雖然話不多，但能默默完成份內工作', label: '默默做事', level: 'stable' },
+      { id: 'b_im1', text: '活潑健談，若能學習配合場合發言會更棒', label: '愛講話(需看場合)', level: 'improve' },
+      { id: 'b_im2', text: '與同儕互動時肢體動作較大，建議學習合宜的社交距離', label: '肢體界線(需引導)', level: 'improve' },
+      { id: 'b_im3', text: '注意力較容易發散，需老師適時提醒回歸課堂', label: '易分心(需提醒)', level: 'improve' },
+      { id: 'b_im4', text: '遇到挫折時情緒起伏較明顯，正學習合宜的抒發方式', label: '情緒起伏(學習中)', level: 'improve' },
+      { id: 'b_im5', text: '需加強時間觀念，若能準時完成任務會更出色', label: '加強守時', level: 'improve' },
+      { id: 'b_im6', text: '物品保管能力有進步空間，建議養成整理好習慣', label: '整理習慣', level: 'improve' },
+    ],
+    academic: [
+      { id: 'a_chi1', text: '國語文理解能力佳，能流暢表達想法', label: '國語優異', subject: 'chinese', level: 'excellent' },
+      { id: 'a_chi2', text: '作文內容充實，情感真摯，用詞豐富', label: '寫作佳', subject: 'chinese', level: 'excellent' },
+      { id: 'a_chi3', text: '字體工整美觀，作業書寫相當用心', label: '字體美', subject: 'chinese', level: 'excellent' },
+      { id: 'a_chi4', text: '閱讀理解能力尚有進步空間，建議多閱讀短篇文章', label: '加強閱讀', subject: 'chinese', level: 'improve' },
+      { id: 'a_chi5', text: '字音字形較易混淆，建議多做辨字練習', label: '加強字音字形', subject: 'chinese', level: 'improve' },
+      { id: 'a_math1', text: '數理邏輯觀念清晰，解題能力強', label: '數學優異', subject: 'math', level: 'excellent' },
+      { id: 'a_math2', text: '計算速度快且正確率高', label: '計算精準', subject: 'math', level: 'excellent' },
+      { id: 'a_math3', text: '數學基礎運算平穩，能完成指定習題', label: '數學平穩', subject: 'math', level: 'stable' },
+      { id: 'a_math4', text: '應用題意理解較慢，建議多練習題目分析', label: '加強應用題', subject: 'math', level: 'improve' },
+      { id: 'a_math5', text: '計算過程稍顯急躁，若能細心檢查會更好', label: '需細心', subject: 'math', level: 'improve' },
+      { id: 'a_sci1', text: '具備科學探究精神，喜愛動手操作實驗', label: '科學探究', subject: 'science', level: 'excellent' },
+      { id: 'a_soc1', text: '對於社會議題有獨到見解，樂於分享', label: '社會常識佳', subject: 'science', level: 'excellent' },
+      { id: 'a_art1', text: '具備藝術天分，繪畫作品充滿童趣與創意', label: '繪畫創意', subject: 'arts', level: 'excellent' },
+      { id: 'a_pe1', text: '體能表現優異，熱愛運動且具團隊精神', label: '體能佳', subject: 'arts', level: 'excellent' },
+      { id: 'a_gen1', text: '學習態度積極主動', label: '態度積極', subject: 'general', level: 'excellent' },
+      { id: 'a_gen2', text: '上課專注力集中，能掌握學習重點', label: '上課專注', subject: 'general', level: 'excellent' },
+      { id: 'a_gen3', text: '對於不懂的問題能主動提問', label: '主動發問', subject: 'general', level: 'excellent' },
+      { id: 'a_gen4', text: '作業繳交情形良好，學習狀況穩定', label: '按時交作業', subject: 'general', level: 'stable' },
+    ],
+    future: [
+      { id: 'f1', text: '期許下學期能保持優點，繼續發光發熱。', label: '保持優點' },
+      { id: 'f2', text: '老師相信你只要多一份細心，表現會更出色。', label: '多份細心' },
+      { id: 'f3', text: '期待未來能看到你展現更多的自信。', label: '展現自信' },
+      { id: 'f4', text: '願你持續保有閱讀的好習慣，開拓更寬廣的視野。', label: '持續閱讀' },
+      { id: 'f5', text: '期盼你在新的學期能設定目標，勇往直前。', label: '設定目標' },
+      { id: 'f6', text: '希望你能學習控制情緒，讓自己成為情緒的主人。', label: '情緒管理(期許)' },
+      { id: 'f7', text: '只要願意付出努力，老師相信你一定會進步。', label: '鼓勵進步' },
+    ]
+  };
+
+  // --- 初始化狀態 ---
+  const createDefaultStudents = () => {
+    return Array.from({ length: DEFAULT_STUDENT_COUNT }, (_, i) => ({
+      id: i + 1,
+      name: '',
+      personality: [],
+      behavior: [],
+      academic: [],
+      future: [],
+      generatedComment: '',
+      isPolished: false,
+      // Updated grades structure to include physics, biology, history, geography, integrated
+      grades: { 
+        chinese: '', math: '', science: '', social: '', arts: '', dailyAvg: '', examAvg: '',
+        physics: '', biology: '', history: '', geography: '', integrated: ''
+      }
+    }));
+  };
+
+  const [students, setStudents] = useState(createDefaultStudents());
+  const [customData, setCustomData] = useState({ personality: [], behavior: [], academic: [], future: [] });
+  const [currentStudentId, setCurrentStudentId] = useState(1);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState('warm'); 
+  const [aiTone, setAiTone] = useState('warm'); 
+  
+  // Modals & Confirmation
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  const [newCustomLabel, setNewCustomLabel] = useState('');
+  const [newCustomText, setNewCustomText] = useState('');
+  const fileInputRef = useRef(null);
+  const configInputRef = useRef(null); 
+
+  const [confirmConfig, setConfirmConfig] = useState({ show: false, title: '', message: '', onConfirm: null });
+
+  const t = themes[currentTheme]; 
+
+  const currentStudent = students.find(s => s.id === currentStudentId) || students[0];
+
+  // --- 生命週期與儲存 ---
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    const savedCustom = localStorage.getItem(CUSTOM_DATA_KEY);
+    const savedTheme = localStorage.getItem('comment_generator_theme');
+    
+    if (savedData) {
+      try { 
+        const parsed = JSON.parse(savedData); 
+        if (Array.isArray(parsed)) {
+          // Merge with default structure to ensure new fields exist for old data
+          const migrated = parsed.map(s => ({
+            ...s,
+            grades: {
+              chinese: '', math: '', science: '', social: '', arts: '', dailyAvg: '', examAvg: '',
+              physics: '', biology: '', history: '', geography: '', integrated: '',
+              ...s.grades // overwrite with saved data
+            }
+          }));
+          setStudents(migrated); 
+        }
+      } catch (e) { console.error("Failed to load students", e); }
+    }
+    if (savedCustom) {
+      try { const parsed = JSON.parse(savedCustom); if (parsed && typeof parsed === 'object') setCustomData(parsed); } 
+      catch (e) { console.error("Failed to load custom data", e); }
+    }
+    if (savedTheme && themes[savedTheme]) {
+      setCurrentTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(students)), [students]);
+  useEffect(() => localStorage.setItem(CUSTOM_DATA_KEY, JSON.stringify(customData)), [customData]);
+  useEffect(() => localStorage.setItem('comment_generator_theme', currentTheme), [currentTheme]);
+
+  // --- Helper: Confirmation Dialog Trigger ---
+  const triggerConfirm = (title, message, onConfirm) => {
+    setConfirmConfig({ show: true, title, message, onConfirm });
+  };
+  
+  const handleConfirmAction = () => {
+    if (confirmConfig.onConfirm) confirmConfig.onConfirm();
+    setConfirmConfig({ ...confirmConfig, show: false });
+  };
+
+  // --- 邏輯處理 ---
+  const updateStudent = (id, field, value) => {
+    setStudents(prev => prev.map(s => s.id === id ? { ...s, [field]: value, isPolished: field === 'generatedComment' ? s.isPolished : false } : s));
+  };
+  
+  const updateGrade = (id, subject, value) => {
+    setStudents(prev => prev.map(s => {
+      if (s.id === id) {
+        return { ...s, grades: { ...s.grades, [subject]: value }, isPolished: false };
+      }
+      return s;
+    }));
+  };
+
+  const handleSelection = (category, item) => {
+    const currentList = currentStudent[category];
+    let newList = currentList.some(i => i.id === item.id) ? currentList.filter(i => i.id !== item.id) : [...currentList, item];
+    
+    setStudents(prev => prev.map(s => {
+      if (s.id === currentStudentId) {
+        const updatedStudent = { ...s, [category]: newList };
+        const newComment = generateCommentText(updatedStudent);
+        return { ...updatedStudent, generatedComment: newComment, isPolished: false };
+      }
+      return s;
+    }));
+  };
+
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+    setStudents(prev => prev.map(s => {
+      if (s.id === currentStudentId) {
+        const updatedStudent = { ...s, name: newName };
+        const newComment = generateCommentText(updatedStudent);
+        return { ...updatedStudent, generatedComment: newComment, isPolished: false };
+      }
+      return s;
+    }));
+  };
+
+  const generateCommentText = (student) => {
+    const name = student.name.trim() || '該生';
+    let parts = [];
+    parts.push(`${name}在校期間`);
+    if (student.personality.length > 0) parts.push(student.personality.map(i => i.text).join('，') + '。');
+    if (student.behavior.length > 0) parts.push('在日常生活方面，' + student.behavior.map(i => i.text).join('；') + '。');
+    if (student.academic.length > 0) parts.push('學習表現上，' + student.academic.map(i => i.text).join('，') + '。');
+    if (student.future.length > 0) parts.push(student.future.map(i => i.text).join(''));
+    return parts.join('');
+  };
+
+  // --- CSV 匯入與範本下載 ---
+  const handleDownloadTemplate = () => {
+    const BOM = "\uFEFF";
+    const content = "座號,姓名,國語,數學,自然,社會,英文,藝文,健體,綜合,理化,生物,歷史,地理\n1,王小明,90,85,88,92,80,89,88,85,85,90,88,92\n2,李小華,85,90,82,88,95,88,89,90,80,85,90,85";
+    const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "學生名單匯入範本_V1.0.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+      
+      triggerConfirm(
+        '確認匯入資料',
+        `即將匯入 ${rows.length > 0 ? rows.length - 1 : 0} 筆資料。\n請確認 CSV 格式包含：姓名,國語,數學,自然,社會,英文,藝文,健體,綜合,理化,生物,歷史,地理。\n注意：這將覆蓋現有的同座號學生資料。`,
+        () => {
+          const newStudents = [...students];
+          for (let i = 1; i < rows.length; i++) {
+            if (i > DEFAULT_STUDENT_COUNT) break; 
+            const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+            const targetIndex = i - 1; 
+            if (targetIndex < newStudents.length) {
+              let nameIdx = 0;
+              if (!isNaN(parseInt(cols[0]))) nameIdx = 1;
+              if (cols[nameIdx]) newStudents[targetIndex].name = cols[nameIdx];
+              // Mapping based on new template order
+              if (cols[nameIdx+1]) newStudents[targetIndex].grades.chinese = cols[nameIdx+1];
+              if (cols[nameIdx+2]) newStudents[targetIndex].grades.math = cols[nameIdx+2];
+              if (cols[nameIdx+3]) newStudents[targetIndex].grades.science = cols[nameIdx+3];
+              if (cols[nameIdx+4]) newStudents[targetIndex].grades.social = cols[nameIdx+4];
+              if (cols[nameIdx+5]) newStudents[targetIndex].grades.arts = cols[nameIdx+5]; // 英文
+              if (cols[nameIdx+6]) newStudents[targetIndex].grades.dailyAvg = cols[nameIdx+6]; // 藝文
+              if (cols[nameIdx+7]) newStudents[targetIndex].grades.examAvg = cols[nameIdx+7]; // 健體
+              if (cols[nameIdx+8]) newStudents[targetIndex].grades.integrated = cols[nameIdx+8]; // 綜合
+              if (cols[nameIdx+9]) newStudents[targetIndex].grades.physics = cols[nameIdx+9]; // 理化
+              if (cols[nameIdx+10]) newStudents[targetIndex].grades.biology = cols[nameIdx+10]; // 生物
+              if (cols[nameIdx+11]) newStudents[targetIndex].grades.history = cols[nameIdx+11]; // 歷史
+              if (cols[nameIdx+12]) newStudents[targetIndex].grades.geography = cols[nameIdx+12]; // 地理
+
+              newStudents[targetIndex].generatedComment = generateCommentText(newStudents[targetIndex]);
+              newStudents[targetIndex].isPolished = false;
+            }
+          }
+          setStudents(newStudents);
+          alert('匯入完成！請檢查左側名單。');
+        }
+      );
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleExportConfig = () => {
+    const config = {
+      version: 'v1.0',
+      timestamp: new Date().toISOString(),
+      students: students,
+      customData: customData
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `評語生成器_備份_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportConfig = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.students && Array.isArray(parsed.students) && parsed.customData) {
+           triggerConfirm(
+             '確認還原備份',
+             '即將匯入備份檔。這將會覆蓋目前的學生資料與自訂金句。確定要執行嗎？',
+             () => {
+               setStudents(parsed.students);
+               setCustomData(parsed.customData);
+               alert('設定檔還原成功！');
+             }
+           );
+        } else {
+          alert('檔案格式錯誤，請確認是否為正確的備份檔 (.json)。');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('讀取檔案失敗');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const toggleTheme = () => {
+    setCurrentTheme(prev => prev === 'blue' ? 'warm' : 'blue');
+  };
+
+  const handleAiPolish = async () => {
+    if (!currentStudent.generatedComment || currentStudent.generatedComment.length < 5) { alert("請先產生或輸入一些評語內容後再進行潤飾。"); return; }
+    setIsAiLoading(true);
+    try {
+      const g = currentStudent.grades;
+      const gradesInfo = [
+        g.chinese && `國語:${g.chinese}`, 
+        g.math && `數學:${g.math}`, 
+        g.science && `自然:${g.science}`, 
+        g.social && `社會:${g.social}`, 
+        g.arts && `英文:${g.arts}`,
+        g.physics && `理化:${g.physics}`,
+        g.biology && `生物:${g.biology}`,
+        g.history && `歷史:${g.history}`,
+        g.geography && `地理:${g.geography}`,
+        g.dailyAvg && `藝文:${g.dailyAvg}`,
+        g.examAvg && `健體:${g.examAvg}`,
+        g.integrated && `綜合:${g.integrated}`
+      ].filter(Boolean).join(', ');
+      
+      let toneInstruction = "";
+      if (aiTone === 'warm') {
+        toneInstruction = "語氣風格要求：溫柔親切、充滿正向鼓勵、多用愛心與期許的口吻，讓家長和學生感到溫暖與被支持。";
+      } else {
+        toneInstruction = "語氣風格要求：嚴謹客觀、專業簡潔、具體陳述事實與建議，展現教育專業度，避免過多情緒修飾。";
+      }
+
+      const prompt = `你是一位國民小學/國中老師。請協助潤飾以下期末評語。
+      
+      **學生資訊**：
+      學生姓名：${currentStudent.name || '該生'}
+      成績參考：${gradesInfo} (若成績優異請適度讚美，若落後請委婉建議)
+      
+      **原始評語草稿**：
+      "${currentStudent.generatedComment}"
+      
+      **潤飾要求**：
+      1. ${toneInstruction}
+      2. 保持原意，整合學業成績與日常行為表現。
+      3. 消除機械拼接感，讓文章流暢自然。
+      4. 直接輸出潤飾後的內容即可，不要有開場白。`;
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const result = await response.json();
+      const polishedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (polishedText) { updateStudent(currentStudentId, 'generatedComment', polishedText); updateStudent(currentStudentId, 'isPolished', true); }
+    } catch (error) { console.error(error); alert("AI 連線錯誤"); } finally { setIsAiLoading(false); }
+  };
+
+  const handleExportCSV = () => {
+    const BOM = "\uFEFF"; 
+    const headers = "座號,姓名,國語,數學,自然,社會,英文,藝文,健體,綜合,理化,生物,歷史,地理,評語\n";
+    const rows = students.map(s => { 
+      const g = s.grades; 
+      const c = (s.generatedComment || '').replace(/"/g, '""'); 
+      return `${s.id},"${s.name}",${g.chinese},${g.math},${g.science},${g.social},${g.arts},${g.dailyAvg},${g.examAvg},${g.integrated},${g.physics},${g.biology},${g.history},${g.geography},"${c}"`; 
+    }).join("\n");
+    const blob = new Blob([BOM + headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `評語表.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  };
+
+  const handleClearAllData = () => { 
+    triggerConfirm(
+      '確認清空所有資料', 
+      '確定要清空全班 40 位學生的所有資料（含成績與評語）嗎？此動作無法復原。', 
+      () => {
+        setStudents(createDefaultStudents()); 
+        localStorage.removeItem(STORAGE_KEY); 
+      }
+    );
+  };
+  
+  const handleClearCurrentStudent = () => {
+    triggerConfirm(
+      '確認清除本生資料',
+      `確定要清空 ${currentStudent.name || '這位學生'} (座號 ${currentStudent.id}) 的所有資料嗎？\n此動作將清除姓名、成績、選項與評語。`,
+      () => {
+        setStudents(prev => prev.map(s => {
+          if (s.id === currentStudentId) {
+            return {
+              id: s.id, 
+              name: '',
+              personality: [],
+              behavior: [],
+              academic: [],
+              future: [],
+              generatedComment: '',
+              isPolished: false,
+              grades: { chinese: '', math: '', science: '', social: '', arts: '', dailyAvg: '', examAvg: '', physics: '', biology: '', history: '', geography: '', integrated: '' }
+            };
+          }
+          return s;
+        }));
+      }
+    );
+  };
+
+  const copyToClipboard = () => {
+    const textArea = document.createElement("textarea"); textArea.value = currentStudent.generatedComment; document.body.appendChild(textArea); textArea.select();
+    try { if (document.execCommand('copy')) { setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); } } catch (err) {}
+    document.body.removeChild(textArea);
+  };
+
+  const openCustomModal = (category) => { setCustomCategory(category); setNewCustomLabel(''); setNewCustomText(''); setShowCustomModal(true); };
+  const saveCustomOption = () => { if (!newCustomLabel || !newCustomText) return; setCustomData(prev => ({...prev, [customCategory]: [...(prev[customCategory]||[]), {id:`custom_${Date.now()}`, text:newCustomText, label:newCustomLabel, level:'stable', subject:'general'}]})); setShowCustomModal(false); };
+  const deleteCustomOption = (cat, id) => { 
+    triggerConfirm("刪除自訂選項", "確定要刪除這個自訂語句嗎？", () => {
+      setCustomData(prev => ({...prev, [cat]: prev[cat].filter(i => i.id !== id)})); 
+    });
+  };
+
+  return (
+    <div className={`flex h-screen ${t.bgMain} font-sans ${t.textPrimary} overflow-hidden transition-colors duration-300`}>
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          .print-area { width: 100% !important; height: auto !important; border: none !important; box-shadow: none !important; }
+          textarea { border: none !important; resize: none !important; height: auto !important; overflow: visible !important; }
+          body { background: white !important; }
+        }
+      `}</style>
+
+      {/* 隱藏的檔案輸入 */}
+      <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
+      <input type="file" ref={configInputRef} onChange={handleImportConfig} accept=".json" className="hidden" />
+
+      {/* 左側邊欄 */}
+      <div className={`${showSidebar ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-64 lg:translate-x-0'} absolute lg:static z-30 h-full ${t.bgSidebar} border-r border-gray-200 flex flex-col transition-all duration-300 shadow-2xl lg:shadow-none no-print`}>
+        <div className={`p-4 border-b border-gray-200 flex items-center justify-between ${t.accent}`}>
+          <h2 className={`font-bold ${t.textPrimary} flex items-center gap-2`}><Users className="w-5 h-5" /> 班級名單</h2>
+          <button onClick={() => setShowSidebar(false)} className="lg:hidden text-gray-500 p-2"><RotateCcw className="w-4 h-4" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {students.map((s) => (
+            <button key={s.id} onClick={() => { setCurrentStudentId(s.id); if(window.innerWidth < 1024) setShowSidebar(false); }} className={`w-full flex items-center p-3 rounded-lg text-left transition-all ${currentStudentId === s.id ? `${t.buttonPrimary} shadow-md` : `hover:bg-gray-100 ${t.textSecondary}`}`}>
+              <div className={`w-2 h-full absolute left-0 top-0 rounded-l-lg ${s.generatedComment ? 'bg-green-400' : 'bg-transparent'}`}></div>
+              <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs mr-3 flex-shrink-0 ${currentStudentId === s.id ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}>{s.id}</span>
+              <div className="flex flex-col overflow-hidden"><span className="font-medium truncate">{s.name || `座號 ${s.id}`}</span></div>
+            </button>
+          ))}
+        </div>
+        <div className="p-3 border-t border-gray-200 space-y-2 bg-gray-50/50">
+          <div className="flex gap-2">
+             <button onClick={() => fileInputRef.current.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs"><Upload className="w-3 h-3" /> 匯入 CSV</button>
+             <button onClick={handleDownloadTemplate} className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs"><FileDown className="w-3 h-3" /> 下載範本</button>
+          </div>
+          <button onClick={handleExportCSV} className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-xs font-bold"><FileSpreadsheet className="w-4 h-4" /> 匯出評語 CSV</button>
+          
+          {/* 跨機同步區塊 */}
+          <div className="pt-2 mt-2 border-t border-gray-200">
+            <div className="text-[10px] text-gray-400 text-center mb-1">跨機同步 / 備份</div>
+            <div className="flex gap-2">
+              <button onClick={handleExportConfig} className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 text-xs" title="匯出設定檔(.json)"><DownloadCloud className="w-3 h-3" /> 匯出備份</button>
+              <button onClick={() => configInputRef.current.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-slate-500 text-white rounded hover:bg-slate-600 text-xs" title="匯入設定檔(.json)"><UploadCloud className="w-3 h-3" /> 匯入備份</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 主內容區 */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        {showSidebar && <div className="fixed inset-0 bg-black/20 z-20 lg:hidden no-print" onClick={() => setShowSidebar(false)}></div>}
+
+        {/* Header */}
+        <header className={`${t.bgHeader} border-b border-gray-200 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between flex-shrink-0 no-print`}>
+          <div className="flex items-center gap-4">
+             <button onClick={() => setShowSidebar(!showSidebar)} className="lg:hidden p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-600"><Users className="w-6 h-6" /></button>
+             <PenTool className={`w-8 h-8 ${t.icon} hidden md:block`} />
+             <div>
+               <h1 className={`text-2xl md:text-3xl font-bold ${t.textPrimary} flex items-center flex-wrap gap-2`}>
+                 學生期末評語撰寫~AI神助教 <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full align-middle font-normal">V1.0版</span>
+               </h1>
+               <div className={`text-sm md:text-base ${t.textSecondary} font-medium mt-1`}>臺中市國教輔導團資訊教育議題輔導員 昌和老師</div>
+             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 text-gray-500" title={currentTheme === 'blue' ? '切換暖色模式' : '切換專業模式'}>
+              {currentTheme === 'blue' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button onClick={() => setShowHelpModal(true)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500" title="使用說明"><HelpCircle className="w-6 h-6" /></button>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+          
+          {/* 選項區 */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 lg:pb-6 scroll-smooth no-print">
+            <div className="max-w-3xl mx-auto space-y-4">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <label className="font-bold text-gray-700 whitespace-nowrap">學生姓名：</label>
+                  <input type="text" value={currentStudent.name} onChange={handleNameChange} placeholder="請輸入" className="flex-1 px-4 py-2 border rounded focus:ring-2 outline-none" />
+                  <button 
+                    onClick={handleClearCurrentStudent}
+                    className="flex items-center gap-1 px-3 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors text-sm whitespace-nowrap font-medium"
+                    title="清空這位學生的所有資料"
+                  >
+                    <Eraser className="w-4 h-4" /> 清除重置
+                  </button>
+                </div>
+                <div className="border-t border-gray-100 pt-4">
+                  <h3 className="text-sm font-bold text-gray-600 mb-3 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> 學科總成績 (選填，供AI參考撰寫評語)</h3>
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <GradeInput label="國語" value={currentStudent.grades.chinese} onChange={v => updateGrade(currentStudentId, 'chinese', v)} themeStyles={t} />
+                    <GradeInput label="數學" value={currentStudent.grades.math} onChange={v => updateGrade(currentStudentId, 'math', v)} themeStyles={t} />
+                    <GradeInput label="自然" value={currentStudent.grades.science} onChange={v => updateGrade(currentStudentId, 'science', v)} themeStyles={t} />
+                    <GradeInput label="社會" value={currentStudent.grades.social} onChange={v => updateGrade(currentStudentId, 'social', v)} themeStyles={t} />
+                    <GradeInput label="英文" value={currentStudent.grades.arts} onChange={v => updateGrade(currentStudentId, 'arts', v)} themeStyles={t} />
+                    <GradeInput label="藝文" value={currentStudent.grades.dailyAvg} onChange={v => updateGrade(currentStudentId, 'dailyAvg', v)} themeStyles={t} />
+                    <GradeInput label="健體" value={currentStudent.grades.examAvg} onChange={v => updateGrade(currentStudentId, 'examAvg', v)} themeStyles={t} />
+                    <GradeInput label="綜合" value={currentStudent.grades.integrated} onChange={v => updateGrade(currentStudentId, 'integrated', v)} themeStyles={t} />
+                    <GradeInput label="理化" value={currentStudent.grades.physics} onChange={v => updateGrade(currentStudentId, 'physics', v)} themeStyles={t} />
+                    <GradeInput label="生物" value={currentStudent.grades.biology} onChange={v => updateGrade(currentStudentId, 'biology', v)} themeStyles={t} />
+                    <GradeInput label="歷史" value={currentStudent.grades.history} onChange={v => updateGrade(currentStudentId, 'history', v)} themeStyles={t} />
+                    <GradeInput label="地理" value={currentStudent.grades.geography} onChange={v => updateGrade(currentStudentId, 'geography', v)} themeStyles={t} />
+                  </div>
+                </div>
+              </div>
+              <SelectionSection title="人格特質" icon={User} defaultItems={defaultData.personality} customItems={customData.personality} selectedItems={currentStudent.personality} category="personality" colorBorder={t.sectionUser} onSelection={handleSelection} onOpenCustom={openCustomModal} onDeleteCustom={deleteCustomOption} themeStyles={t} />
+              <SelectionSection title="生活表現" icon={Star} defaultItems={defaultData.behavior} customItems={customData.behavior} selectedItems={currentStudent.behavior} category="behavior" colorBorder={t.sectionBehavior} hasLevelFilter={true} onSelection={handleSelection} onOpenCustom={openCustomModal} onDeleteCustom={deleteCustomOption} themeStyles={t} />
+              <SelectionSection title="學科能力" icon={BookOpen} defaultItems={defaultData.academic} customItems={customData.academic} selectedItems={currentStudent.academic} category="academic" colorBorder={t.sectionAcademic} hasLevelFilter={true} hasSubjectFilter={true} onSelection={handleSelection} onOpenCustom={openCustomModal} onDeleteCustom={deleteCustomOption} themeStyles={t} />
+              <SelectionSection title="老師期許" icon={Sparkles} defaultItems={defaultData.future} customItems={customData.future} selectedItems={currentStudent.future} category="future" colorBorder={t.sectionFuture} onSelection={handleSelection} onOpenCustom={openCustomModal} onDeleteCustom={deleteCustomOption} themeStyles={t} />
+            </div>
+          </div>
+
+          {/* 預覽區 */}
+          <div className={`lg:w-1/3 ${t.bgSidebar} border-t lg:border-t-0 lg:border-l border-gray-200 flex flex-col h-[40vh] lg:h-full shadow-2xl lg:shadow-xl z-20 print-area relative`}>
+            <div className="p-3 md:p-4 bg-white border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center no-print gap-2">
+               <h2 className="font-bold text-gray-800 flex items-center gap-2"><CheckCircle2 className={`w-5 h-5 ${t.icon}`} /> 評語預覽</h2>
+               <div className="flex items-center gap-2">
+                 <select 
+                   value={aiTone} 
+                   onChange={(e) => setAiTone(e.target.value)}
+                   className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 text-gray-600 cursor-pointer hover:bg-gray-50"
+                   title="選擇 AI 潤飾的語氣風格"
+                 >
+                   <option value="warm">❤️ 溫柔鼓勵</option>
+                   <option value="professional">🎓 嚴謹專業</option>
+                 </select>
+
+                 <button onClick={handleAiPolish} disabled={isAiLoading} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${isAiLoading ? 'bg-gray-100 text-gray-400' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}>
+                   <Wand2 className={`w-3 h-3 ${isAiLoading ? 'animate-spin' : ''}`} /> {isAiLoading ? 'AI 撰寫中...' : 'AI 潤飾'}
+                 </button>
+               </div>
+            </div>
+            
+            <div className="flex-1 p-4 overflow-y-auto print-area relative">
+               <textarea
+                value={currentStudent.generatedComment}
+                onChange={(e) => updateStudent(currentStudentId, 'generatedComment', e.target.value)}
+                className={`w-full h-full min-h-[150px] p-4 pb-8 border rounded-xl bg-white focus:ring-2 transition-all resize-none text-base md:text-lg leading-relaxed text-gray-700 outline-none ${currentStudent.isPolished ? 'border-purple-300 ring-2 ring-purple-100' : 'border-gray-200'} ${t.highlight}`}
+                placeholder="評語將顯示於此..."
+              ></textarea>
+              
+              <div className="absolute bottom-4 right-6 text-xs text-gray-400 font-medium pointer-events-none bg-white/80 px-2 py-1 rounded backdrop-blur-sm no-print">
+                 <span className="flex items-center gap-1"><AlignLeft className="w-3 h-3" /> 字數: {currentStudent.generatedComment ? currentStudent.generatedComment.length : 0}</span>
+              </div>
+            </div>
+
+            <div className="p-3 md:p-4 bg-white border-t border-gray-200 space-y-2 pb-6 md:pb-4 safe-area-bottom no-print">
+               <button onClick={copyToClipboard} className={`w-full py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${isCopied ? 'bg-green-600 text-white' : t.buttonPrimary} shadow-lg`}>
+                  {isCopied ? <><CheckCircle2 className="w-5 h-5" /> 已複製成功</> : <><Copy className="w-5 h-5" /> 複製評語</>}
+               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {confirmConfig.show && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 no-print" onClick={() => setConfirmConfig({...confirmConfig, show: false})}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-100 flex items-center gap-2 bg-yellow-50 text-yellow-800">
+              <AlertTriangle className="w-5 h-5" />
+              <h3 className="font-bold">{confirmConfig.title || '確認動作'}</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{confirmConfig.message}</p>
+            </div>
+            <div className="p-4 bg-gray-50 flex justify-end gap-3">
+              <button 
+                onClick={() => setConfirmConfig({...confirmConfig, show: false})} 
+                className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+              >
+                取消
+              </button>
+              <button 
+                onClick={handleConfirmAction} 
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-md transition-colors font-bold"
+              >
+                確定執行
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Other Modals (Custom, Help, Share) */}
+      {showCustomModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 no-print">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h3 className="font-bold">新增自訂語句</h3><button onClick={()=>setShowCustomModal(false)}><X className="w-5 h-5 text-gray-400" /></button></div>
+            <div className="p-6 space-y-4">
+              <input type="text" value={newCustomLabel} onChange={e=>setNewCustomLabel(e.target.value)} placeholder="標籤 (如: 熱愛體育)" className="w-full border rounded p-2" />
+              <textarea value={newCustomText} onChange={e=>setNewCustomText(e.target.value)} placeholder="完整語句..." className="w-full border rounded p-2 h-24" />
+            </div>
+            <div className="p-4 flex justify-end gap-2 bg-gray-50"><button onClick={()=>setShowCustomModal(false)} className="px-4 py-2 text-gray-600">取消</button><button onClick={saveCustomOption} className="px-4 py-2 bg-blue-600 text-white rounded">儲存</button></div>
+          </div>
+        </div>
+      )}
+
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 no-print" onClick={()=>setShowHelpModal(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in h-[85vh] flex flex-col" onClick={e=>e.stopPropagation()}>
+            <div className="p-4 border-b flex justify-between items-center bg-blue-50">
+              <h3 className="font-bold text-blue-800 flex items-center gap-2"><HelpCircle className="w-5 h-5"/> 詳細使用說明</h3>
+              <button onClick={()=>setShowHelpModal(false)}><X className="w-5 h-5 text-gray-500" /></button>
+            </div>
+            
+            <div className="flex-1 p-6 overflow-y-auto text-gray-700">
+              <div className="space-y-8">
+                
+                {/* 1. 快速入門 */}
+                <section>
+                  <h4 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2 pb-2 border-b border-blue-100">
+                    <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-base">1</span>
+                    快速入門指南
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h5 className="font-bold text-gray-800 mb-2">Step 1: 選擇學生</h5>
+                      <p className="text-sm text-gray-600">從左側名單點選座號。預設提供 1-40 號。</p>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h5 className="font-bold text-gray-800 mb-2">Step 2: 輸入資料</h5>
+                      <p className="text-sm text-gray-600">輸入姓名、成績（選填），並勾選下方的特質標籤。</p>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h5 className="font-bold text-gray-800 mb-2">Step 3: 產生評語</h5>
+                      <p className="text-sm text-gray-600">右側會即時預覽。點擊「AI 智能潤飾」讓語句更通順。</p>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h5 className="font-bold text-gray-800 mb-2">Step 4: 完成</h5>
+                      <p className="text-sm text-gray-600">確認無誤後，點擊「複製評語」貼到校務系統。</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* 2. 必備技巧 */}
+                <section>
+                  <h4 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2 pb-2 border-b border-purple-100">
+                    <span className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-base">2</span>
+                    必備技巧 (省時秘訣)
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex gap-4 items-start">
+                      <div className="bg-indigo-50 p-2 rounded text-indigo-600"><FileSpreadsheet className="w-5 h-5" /></div>
+                      <div>
+                        <h5 className="font-bold text-gray-800">批次匯入成績 (推薦)</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          不想一筆一筆輸入？請先點擊左下角「<span className="font-bold text-indigo-600">下載範本</span>」，用 Excel 填好全班名單與成績後，再按「匯入 CSV」，瞬間完成全班資料建檔！
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="bg-green-50 p-2 rounded text-green-600"><Plus className="w-5 h-5" /></div>
+                      <div>
+                        <h5 className="font-bold text-gray-800">建立自訂金句</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          覺得預設選項不夠用？點擊各分類標題旁的「<span className="font-bold text-gray-600">+ 自訂</span>」，輸入您的專屬評語。系統會自動儲存，以後都能重複使用。
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="bg-orange-50 p-2 rounded text-orange-600"><Wand2 className="w-5 h-5" /></div>
+                      <div>
+                        <h5 className="font-bold text-gray-800">AI 與成績連動</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          如果您有輸入成績，AI 潤飾時會自動判斷。例如數學 95 分，AI 會自動加入「數理邏輯優異」；若需努力，則會寫出委婉的鼓勵語句。
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="bg-amber-50 p-2 rounded text-amber-600"><DownloadCloud className="w-5 h-5" /></div>
+                      <div>
+                        <h5 className="font-bold text-gray-800">跨機同步 / 設定備份</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          在學校做完想帶回家繼續？點擊左下角的「<span className="font-bold text-amber-600">匯出備份</span>」下載檔案，回家後再按「匯入備份」，所有資料與自訂金句完美同步！
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* 3. 資料安全與其他 */}
+                <section>
+                  <h4 className="text-xl font-bold text-green-700 mb-4 flex items-center gap-2 pb-2 border-b border-green-100">
+                    <span className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-base">3</span>
+                    常見問題 & 資料安全
+                  </h4>
+                  <div className="bg-gray-50 rounded-xl p-5 space-y-4 text-sm">
+                    <div>
+                      <strong className="block text-gray-800 mb-1 flex items-center gap-2"><Save className="w-4 h-4"/> 資料會不見嗎？</strong>
+                      <p>系統會自動將資料存在您的瀏覽器中 (localStorage)。即使關閉網頁，下次打開資料通常都還在。但為了保險起見，期末完成後強烈建議點擊「<span className="font-bold text-green-600">匯出備份</span>」將資料備份到電腦中。</p>
+                    </div>
+                    <div>
+                      <strong className="block text-gray-800 mb-1 flex items-center gap-2"><Eraser className="w-4 h-4"/> 如何刪除資料？</strong>
+                      <p>若要刪除單一位學生，請按姓名旁的紅色「清除重置」按鈕。若要清空全班重來，請按左下角的「清空重置」。</p>
+                    </div>
+                  </div>
+                </section>
+
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gray-50 border-t text-center">
+              <button onClick={()=>setShowHelpModal(false)} className="px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold shadow-md">我瞭解了，開始使用</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CommentGenerator;
